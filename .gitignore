@@ -1,0 +1,4 @@
+.venv
+Tensorflow/models
+Tensorflow/protoc
+Tensorflow/workspace/*
