@@ -1,8 +1,8 @@
 import PySimpleGUI as sg
-import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
-from object_detection.utils import label_map_util
-from object_detection.utils import visualization_utils as viz_utils
+# from object_detection.utils import label_map_util
+# from object_detection.utils import visualization_utils as viz_utils
 import cv2
 import os
 
@@ -93,7 +93,7 @@ def gui():
 
     layout = [
         [sg.Text("Webcam Feed With Detections", justification="center")],
-        [sg.Image(key="-VIDEO-", size=(WIDTH_WEBCAM, HEIGHT_WEBCAM), pad=(((w - WIDTH_WEBCAM)
+        [sg.Image(key="-VIDEO-", enable_events=True, size=(WIDTH_WEBCAM, HEIGHT_WEBCAM), pad=(((w - WIDTH_WEBCAM)
                   * 0.5, (h - HEIGHT_WEBCAM) * 0.5, (0, 0))))],
         [sg.VSeparator()]
     ]
@@ -105,11 +105,11 @@ def gui():
     while True:
         ret, frame = cap.read()
         event, value = window.read()
-
-        window["-VIDEO-"].update(data=(cv2.imencode(".png", frame)[1].tobytes()))
-
         if event == sg.WIN_CLOSED:
             break
+        
+        frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+        window["-VIDEO-"].update(data=frame_bytes)
 
     cap.release()
     window.close()
