@@ -3,6 +3,7 @@ import PySimpleGUI as sg
 import numpy as np
 # from object_detection.utils import label_map_util
 # from object_detection.utils import visualization_utils as viz_utils
+from PIL import Image, ImageTk
 import cv2
 import os
 
@@ -108,8 +109,11 @@ def gui():
         if event == sg.WIN_CLOSED:
             break
         
-        frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
-        window["-VIDEO-"].update(data=frame_bytes)
+        # frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+        frame = Image.fromarray(frame).convert('RGB')
+        frame = ImageTk.PhotoImage(frame)
+        window["-VIDEO-"].update(frame)
+        # window["-VIDEO-"].update(data=frame)
 
     cap.release()
     window.close()
