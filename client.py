@@ -51,8 +51,6 @@ def initialize_model():
         files['LABEL_MAP'])
     detect_fn = model.signatures['serving_default']
 
-    _      _            _   _
-
 
 #   _____  ______ _______ ______ _____ _______ _____ ____  _   _
 #  |  __ \|  ____|__   __|  ____/ ____|__   __|_   _/ __ \| \ | |
