@@ -18,12 +18,14 @@ MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
 
 
+#    _____ ____  __  __ __  __
+#   / ____/ __ \|  \/  |  \/  |
+#  | |   | |  | | \  / | \  / |
+#  | |   | |  | | |\/| | |\/| |
+#  | |___| |__| | |  | | |  | |
+#   \_____\____/|_|  |_|_|  |_|
 def communication():
     pass
-
-###############################################################################
-
-####################DETECTION PROCCEDURE####################
 
 
 def initialize_model():
@@ -49,7 +51,15 @@ def initialize_model():
         files['LABEL_MAP'])
     detect_fn = model.signatures['serving_default']
 
+    _      _            _   _
 
+
+#   _____  ______ _______ ______ _____ _______ _____ ____  _   _
+#  |  __ \|  ____|__   __|  ____/ ____|__   __|_   _/ __ \| \ | |
+#  | |  | | |__     | |  | |__ | |       | |    | || |  | |  \| |
+#  | |  | |  __|    | |  |  __|| |       | |    | || |  | | . ` |
+#  | |__| | |____   | |  | |___| |____   | |   _| || |__| | |\  |
+#  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
 def detection_interface(frame):
     global model, category_index, detect_fn
 
@@ -82,7 +92,13 @@ def detection_interface(frame):
         agnostic_mode=False)
     return detections, frame_np_with_detections
 
-####################GUI####################
+
+#    _____   _    _   _____
+#   / ____| | |  | | |_   _|
+#  | |  __  | |  | |   | |
+#  | | |_ | | |  | |   | |
+#  | |__| | | |__| |  _| |_
+#   \_____|  \____/  |_____|
 
 
 def gui(detection_mode=True):
@@ -93,10 +109,12 @@ def gui(detection_mode=True):
     cap.release()
 
     w, h = int(WIDTH_WEBCAM * 1.3), int(HEIGHT_WEBCAM * 1.3)
-    
+
     layout = [
-        [sg.Text("Webcam Feed With Detections", justification="center", font=(*sg.DEFAULT_FONT, "bold underline"), key="-TITLE-")],
-        [sg.Text("Weapon Not Found", justification="left", key="-FOUND-INDICATOR-")],
+        [sg.Text("Webcam Feed With Detections", justification="center",
+                 font=(*sg.DEFAULT_FONT, "bold underline"), key="-TITLE-")],
+        [sg.Text("Weapon Not Found", justification="left",
+                 key="-FOUND-INDICATOR-")],
         [sg.Image(filename='', key="-VIDEO-", enable_events=True, size=(WIDTH_WEBCAM, HEIGHT_WEBCAM), pad=(((w - WIDTH_WEBCAM)
                   * 0.5, (h - HEIGHT_WEBCAM) * 0.5, (0, 0))), background_color="black")],
         [sg.VSeparator()],
@@ -115,22 +133,26 @@ def gui(detection_mode=True):
 
         if detection_mode:
             detections, frame = detection_interface(frame)
-            if window["-FOUND-INDICATOR-"].get() == "Weapon Not Found" and len(detections["detection_scores"][detections["detection_scores"] >=  MIN_SCORE_THRESH]) > 0:
+            if window["-FOUND-INDICATOR-"].get() == "Weapon Not Found" and len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
                 window["-FOUND-INDICATOR-"].update("Weapon Found")
                 pass
             else:
                 window["-FOUND-INDICATOR-"].update("Weapon Not Found")
                 pass
-        
+
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
         window["-VIDEO-"].update(data=frame_bytes)
 
     cap.release()
     window.close()
 
-###############################################################################
 
-
+#   __  __          _____ _   _
+#  |  \/  |   /\   |_   _| \ | |
+#  | \  / |  /  \    | | |  \| |
+#  | |\/| | / /\ \   | | | . ` |
+#  | |  | |/ ____ \ _| |_| |\  |
+#  |_|  |_/_/    \_\_____|_| \_|
 def main():
     detection_mode = True
     if detection_mode:
