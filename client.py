@@ -5,6 +5,7 @@ from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as viz_utils
 import cv2
 import os
+import time
 
 
 model = None
@@ -18,12 +19,39 @@ MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
 
 
+#   _______ _____ __  __ ______ _____     _____ _                _____ _____
+#  |__   __|_   _|  \/  |  ____|  __ \   / ____| |        /\    / ____/ ____|
+#     | |    | | | \  / | |__  | |__) | | |    | |       /  \  | (___| (___
+#     | |    | | | |\/| |  __| |  _  /  | |    | |      / /\ \  \___ \\___ \
+#     | |   _| |_| |  | | |____| | \ \  | |____| |____ / ____ \ ____) |___) |
+#     |_|  |_____|_|  |_|______|_|  \_\  \_____|______/_/    \_\_____/_____/
+
+
+class Timer:
+    def __init__(self, t0=None, t1=None) -> None:
+        self._t = time.time()
+
+    def diff(self, other) -> float:
+        """
+        returns the time delta between two Timer objects
+        (other - self)
+
+        :param other: Timer object - initial timestamp
+        :type other: Timer
+        """
+        return self._t - other._t
+
+    def __str__(self) -> str:
+        return str(self._t)
+
 #    _____ ____  __  __ __  __
 #   / ____/ __ \|  \/  |  \/  |
 #  | |   | |  | | \  / | \  / |
 #  | |   | |  | | |\/| | |\/| |
 #  | |___| |__| | |  | | |  | |
 #   \_____\____/|_|  |_|_|  |_|
+
+
 def communication():
     pass
 
@@ -91,16 +119,33 @@ def detection_interface(frame):
     return detections, frame_np_with_detections
 
 
-#    _____   _    _   _____
-#   / ____| | |  | | |_   _|
-#  | |  __  | |  | |   | |
-#  | | |_ | | |  | |   | |
-#  | |__| | | |__| |  _| |_
-#   \_____|  \____/  |_____|
+#    _____ _    _ _   _   _____ _   _ _____ _____ _____       _______ ____  _____
+#   / ____| |  | | \ | | |_   _| \ | |  __ \_   _/ ____|   /\|__   __/ __ \|  __ \
+#  | |  __| |  | |  \| |   | | |  \| | |  | || || |       /  \  | | | |  | | |__) |
+#  | | |_ | |  | | . ` |   | | | . ` | |  | || || |      / /\ \ | | | |  | |  _  /
+#  | |__| | |__| | |\  |  _| |_| |\  | |__| || || |____ / ____ \| | | |__| | | \ \
+#   \_____|\____/|_| \_| |_____|_| \_|_____/_____\_____/_/    \_\_|  \____/|_|  \_\
+
+
+def gui_weapon_indicator(window, detections):
+    global MIN_SCORE_THRESH
+    if window["-FOUND-INDICATOR-"].get() == "Weapon Not Found" and len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
+        window["-FOUND-INDICATOR-"].update("Potential Weapon Found")
+    else:
+        window["-FOUND-INDICATOR-"].update("Weapon Not Found")
+
+
+#    _____ _    _ _____       __  __          _____ _   _
+#   / ____| |  | |_   _|     |  \/  |   /\   |_   _| \ | |
+#  | |  __| |  | | | |       | \  / |  /  \    | | |  \| |
+#  | | |_ | |  | | | |       | |\/| | / /\ \   | | | . ` |
+#  | |__| | |__| |_| |_      | |  | |/ ____ \ _| |_| |\  |
+#   \_____|\____/|_____|     |_|  |_/_/    \_\_____|_| \_|
 
 
 def gui(detection_mode=True):
-    # GUI INITIALIZATION
+    global WIDTH_WEBCAM, HEIGHT_WEBCAM
+
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -123,6 +168,10 @@ def gui(detection_mode=True):
     window = sg.Window('SmartSec Client', layout, size=(w, h))
 
     # EVENT LOOP
+
+    t0 = Timer()
+    positive_detection_counter = 0
+
     while True:
         ret, frame = cap.read()
         event, value = window.read(timeout=5)
@@ -131,12 +180,7 @@ def gui(detection_mode=True):
 
         if detection_mode:
             detections, frame = detection_interface(frame)
-            if window["-FOUND-INDICATOR-"].get() == "Weapon Not Found" and len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
-                window["-FOUND-INDICATOR-"].update("Weapon Found")
-                pass
-            else:
-                window["-FOUND-INDICATOR-"].update("Weapon Not Found")
-                pass
+            gui_weapon_indicator(window, detections)
 
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
         window["-VIDEO-"].update(data=frame_bytes)
