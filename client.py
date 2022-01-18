@@ -46,9 +46,16 @@ class Timer:
         :type other: Timer
         """
         return self._t - other._t
+    
+    @staticmethod
+    def n_sec_timer(n):
+        time.sleep(n)
 
     def __str__(self) -> str:
         return str(self._t)
+
+
+
 
 #    _____ ____  __  __ __  __
 #   / ____/ __ \|  \/  |  \/  |
@@ -178,7 +185,7 @@ def gui(detection_mode=True):
     :param detection_mode: True if the detection mode is enabled, False otherwise.
     :type detection_mode: bool
     """
-    global WIDTH_WEBCAM, HEIGHT_WEBCAM
+    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH
 
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -204,7 +211,7 @@ def gui(detection_mode=True):
     # EVENT LOOP
 
     t0 = Timer()
-    positive_detection_counter = 0
+    # positive_detection_counter = 0
 
     while True:
         ret, frame = cap.read()
@@ -214,6 +221,8 @@ def gui(detection_mode=True):
 
         if detection_mode:
             detections, frame = detection_interface(frame)
+            # if len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
+
             gui_weapon_indicator(window, detections)
 
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
