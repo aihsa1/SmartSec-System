@@ -31,6 +31,12 @@ class Timer:
     def __init__(self, t0=None, t1=None) -> None:
         self._t = time.time()
 
+    def update_time(self) -> None:
+        """
+        updates the time to the current time
+        """
+        self._t = time.time()
+
     def diff(self, other) -> float:
         """
         returns the time delta between two Timer objects
@@ -57,6 +63,9 @@ def communication():
 
 
 def initialize_model():
+    """
+    this function initializes the model and necassary paths
+    """
     global model, category_index, detect_fn, paths, files, labels
     paths = {
         'TENSORFLOW': os.path.join('Tensorflow'),
@@ -87,6 +96,14 @@ def initialize_model():
 #  | |__| | |____   | |  | |___| |____   | |   _| || |__| | |\  |
 #  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
 def detection_interface(frame):
+    """
+    This function is responsible for detecting the weapon on the screen - the interface for the deep learning model.
+    :param frame: the frame captured from the camera
+    :type frame: numpy.ndarray
+
+    :return: the detections dictionary-like object and the frame with the detections drawn on it (detections, frame)
+    :rtype: tuple(OrderedDict, numpy.ndarray)
+    """
     global model, category_index, detect_fn
 
     frame_np = np.array(frame)
@@ -127,12 +144,24 @@ def detection_interface(frame):
 #   \_____|\____/|_| \_| |_____|_| \_|_____/_____\_____/_/    \_\_|  \____/|_|  \_\
 
 
-def gui_weapon_indicator(window, detections):
+def gui_weapon_indicator(window, detections) -> bool:
+    """
+    This function is responsible for displaying the weapon indicator on the screen.
+    :param window: the window object
+    :type window: PySimpleGUI.Window
+    :param detections: the detections dictionary-like object
+    :type detections: OrderedDict
+
+    :return: True if the weapon is detected, False otherwise
+    :rtype: bool
+    """
     global MIN_SCORE_THRESH
     if window["-FOUND-INDICATOR-"].get() == "Weapon Not Found" and len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
         window["-FOUND-INDICATOR-"].update("Potential Weapon Found")
+        return True
     else:
         window["-FOUND-INDICATOR-"].update("Weapon Not Found")
+        return False
 
 
 #    _____ _    _ _____       __  __          _____ _   _
@@ -144,6 +173,11 @@ def gui_weapon_indicator(window, detections):
 
 
 def gui(detection_mode=True):
+    """
+    this function is responsible for the GUI of the program.
+    :param detection_mode: True if the detection mode is enabled, False otherwise.
+    :type detection_mode: bool
+    """
     global WIDTH_WEBCAM, HEIGHT_WEBCAM
 
     cap = cv2.VideoCapture(0)
@@ -196,6 +230,9 @@ def gui(detection_mode=True):
 #  | |  | |/ ____ \ _| |_| |\  |
 #  |_|  |_/_/    \_\_____|_| \_|
 def main():
+    """
+    this function is responsible for the main execution of the program - integrating between all of the necassary functions.
+    """
     detection_mode = True
     if detection_mode:
         initialize_model()
