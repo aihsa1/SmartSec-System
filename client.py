@@ -78,6 +78,9 @@ def communication():
 
 
 def show_welcome_window():
+    """
+    This function is responsible for displaying the welcome window.
+    """
     w, h = sg.Window.get_screen_size()
     w, h = int(w // 1.8), int(h // 1.8)
     layout = [
@@ -116,7 +119,21 @@ def show_welcome_window():
     window.close()
 
 
+#   _      ____          _____ _____ _   _  _____
+#  | |    / __ \   /\   |  __ \_   _| \ | |/ ____|
+#  | |   | |  | | /  \  | |  | || | |  \| | |  __
+#  | |   | |  | |/ /\ \ | |  | || | | . ` | | |_ |
+#  | |___| |__| / ____ \| |__| || |_| |\  | |__| |_ _ _
+#  |______\____/_/    \_\_____/_____|_| \_|\_____(_|_|_)
+
+
 def show_loading_screen(message):
+    """
+    This function is responsible for displaying the loading screen.
+    
+    :param message: the message to be displayed on the loading screen
+    :type message: str
+    """
     w, h = sg.Window.get_screen_size()
     w, h = int(w // 1.8), int(h // 1.8)
     layout = [
@@ -136,6 +153,14 @@ def show_loading_screen(message):
         if event == sg.WIN_CLOSED:
             break
     window.close()
+
+
+#   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
+#  |_   _| \ | |_   _|__   __|/\   | |    |_   _|___  /  ____| |  \/  |/ __ \|  __ \|  ____| |
+#    | | |  \| | | |    | |  /  \  | |      | |    / /| |__    | \  / | |  | | |  | | |__  | |
+#    | | | . ` | | |    | | / /\ \ | |      | |   / / |  __|   | |\/| | |  | | |  | |  __| | |
+#   _| |_| |\  |_| |_   | |/ ____ \| |____ _| |_ / /__| |____  | |  | | |__| | |__| | |____| |____
+#  |_____|_| \_|_____|  |_/_/    \_\______|_____/_____|______| |_|  |_|\____/|_____/|______|______|
 
 
 def initialize_model():
@@ -171,6 +196,8 @@ def initialize_model():
 #  | |  | |  __|    | |  |  __|| |       | |    | || |  | | . ` |
 #  | |__| | |____   | |  | |___| |____   | |   _| || |__| | |\  |
 #  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
+
+
 def detection_interface(frame):
     """
     This function is responsible for detecting the weapon on the screen - the interface for the deep learning model.
