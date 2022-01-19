@@ -4,6 +4,7 @@ import cv2
 import os
 import time
 import threading
+import socket
 
 
 model = None
@@ -12,6 +13,8 @@ detect_fn = None
 paths = None
 files = None
 labels = None
+
+SERVER_ADDRESS = ("127.0.0.1", 14_000)
 
 MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
@@ -64,7 +67,10 @@ class Timer:
 
 
 def communication():
-    pass
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.sendto("hi server".endcode(), SERVER_ADDRESS)
+    data , address = s.recvfrom(1024)
+    print(data.decode)
 
 
 #  __          ________ _      _____ ____  __  __ ______    _____  _____ _____  ______ ______ _   _
@@ -380,12 +386,14 @@ def main(detection_mode=True):
     if event is not None and detection_mode:
         # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
         done_loading_flag = [False, ]
-        t = threading.Thread(target=initialize_model,
+        loading_thread = threading.Thread(target=initialize_model,
                              args=(done_loading_flag,), daemon=True)
-        t.start()
+        loading_thread.start()
         show_loading_screen("Loading...", done_loading_flag)
-        t.join()
+        loading_thread.join()
 
+        # run the main gui with detection + server connection
+        #todo: make a thread for the comm and run it
         gui(detection_mode)
 
 
