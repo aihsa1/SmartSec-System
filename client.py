@@ -1,3 +1,5 @@
+from tkinter import CENTER
+from tkinter.messagebox import showerror
 from webbrowser import get
 import PySimpleGUI as sg
 import tensorflow as tf
@@ -18,7 +20,7 @@ labels = None
 
 MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
-MIN_TEST_TIME = 2# the time take to detect the weapon
+MIN_TEST_TIME = 2  # the time take to detect the weapon
 
 INDICAOR_MESSAGES = {
     "confident_found": "Weapon Found!",
@@ -68,6 +70,43 @@ class Timer:
 
 def communication():
     pass
+
+
+#  __          ________ _      _____ ____  __  __ ______    _____  _____ _____  ______ ______ _   _
+#  \ \        / /  ____| |    / ____/ __ \|  \/  |  ____|  / ____|/ ____|  __ \|  ____|  ____| \ | |
+#   \ \  /\  / /| |__  | |   | |   | |  | | \  / | |__    | (___ | |    | |__) | |__  | |__  |  \| |
+#    \ \/  \/ / |  __| | |   | |   | |  | | |\/| |  __|    \___ \| |    |  _  /|  __| |  __| | . ` |
+#     \  /\  /  | |____| |___| |___| |__| | |  | | |____   ____) | |____| | \ \| |____| |____| |\  |
+#      \/  \/   |______|______\_____\____/|_|  |_|______| |_____/ \_____|_|  \_\______|______|_| \_|
+
+
+def show_welcome_window():
+    w, h = sg.Window.get_screen_size()
+    w, h = int(w // 1.8), int(h // 1.8)
+    layout = [
+        [
+            sg.Column(
+                [
+                    [sg.Text("Welcome to SmartSec - the Pistol Detection App", font=("Helvetica", 25))],
+                    [sg.Text("This app will detect pistols in your surroundings", font=("Helvetica", 15))],
+                    [
+                        sg.Text("Server Connection Status: ", font=("Helvetica", 10)), sg.Text("Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
+                    ],
+                    [sg.Button(button_text="Connect Server & Detect", key="-CONNECT-SERVER-BUTTON-", tooltip="Connect to the server and detect pistols")],
+                ], element_justification="center"
+            )
+        ]
+    ]
+    window = sg.Window("Welcome to SmartSec", layout, size=(w, h))
+    
+    #EVENT LOOP
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+        if event == "-CONNECT-SERVER-BUTTON-":
+            pass
+    window.close()
 
 
 def initialize_model():
@@ -168,14 +207,13 @@ def gui_weapon_indicator(window, detections, confident=False) -> None:
     global MIN_SCORE_THRESH, INDICAOR_MESSAGES
     if len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
         if confident:
-            window["-FOUND-INDICATOR-"].Update(INDICAOR_MESSAGES["confident_found"])
+            window["-FOUND-INDICATOR-"].Update(
+                INDICAOR_MESSAGES["confident_found"])
         else:
-            window["-FOUND-INDICATOR-"].Update(INDICAOR_MESSAGES["potential_found"])
+            window["-FOUND-INDICATOR-"].Update(
+                INDICAOR_MESSAGES["potential_found"])
     elif window["-FOUND-INDICATOR-"].get() != INDICAOR_MESSAGES["not_found"]:
         window["-FOUND-INDICATOR-"].Update(INDICAOR_MESSAGES["not_found"])
-
-        
-
 
 
 #    _____ _    _ _____       __  __          _____ _   _
@@ -215,11 +253,10 @@ def gui(detection_mode=True):
     cap = cv2.VideoCapture(0)
     window = sg.Window('SmartSec Client', layout, size=(w, h))
 
-    # EVENT LOOP    
-
     t0_exists = False
     confident = False
 
+    # EVENT LOOP
     while True:
         ret, frame = cap.read()
         event, value = window.read(timeout=5)
@@ -242,10 +279,6 @@ def gui(detection_mode=True):
                 t0_exists = False
             gui_weapon_indicator(window, detections, confident)
 
-            
-            
-
-
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
         window["-VIDEO-"].update(data=frame_bytes)
 
@@ -263,10 +296,11 @@ def main():
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
-    detection_mode = True
-    if detection_mode:
-        initialize_model()
-    gui(detection_mode)
+    show_welcome_window()
+    # detection_mode = True
+    # if detection_mode:
+    #     initialize_model()
+    # gui(detection_mode)
 
 
 if __name__ == "__main__":
