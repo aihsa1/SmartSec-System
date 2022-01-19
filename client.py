@@ -1,3 +1,4 @@
+from webbrowser import get
 import PySimpleGUI as sg
 import tensorflow as tf
 import numpy as np
@@ -17,6 +18,13 @@ labels = None
 
 MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
+MIN_TEST_TIME = 2# the time take to detect the weapon
+
+INDICAOR_MESSAGES = {
+    "confident_found": "Weapon Found!",
+    "potential_found": "Potential Weapon Found!",
+    "not_found": "No Weapon Found!",
+}
 
 
 #   _______ _____ __  __ ______ _____     _____ _                _____ _____
@@ -37,24 +45,17 @@ class Timer:
         """
         self._t = time.time()
 
-    def diff(self, other) -> float:
+    def elapsed_time(self) -> float:
         """
-        returns the time delta between two Timer objects
-        (other - self)
+        returns the time elapsed since the last update
 
-        :param other: Timer object - initial timestamp
-        :type other: Timer
+        :return: time elapsed since the self._t timestamp (t0)
+        :rtype: float
         """
-        return self._t - other._t
-    
-    @staticmethod
-    def n_sec_timer(n):
-        time.sleep(n)
+        return time.time() - self._t
 
     def __str__(self) -> str:
         return str(self._t)
-
-
 
 
 #    _____ ____  __  __ __  __
@@ -151,24 +152,30 @@ def detection_interface(frame):
 #   \_____|\____/|_| \_| |_____|_| \_|_____/_____\_____/_/    \_\_|  \____/|_|  \_\
 
 
-def gui_weapon_indicator(window, detections) -> bool:
+def gui_weapon_indicator(window, detections, confident=False) -> None:
     """
     This function is responsible for displaying the weapon indicator on the screen.
     :param window: the window object
     :type window: PySimpleGUI.Window
     :param detections: the detections dictionary-like object
     :type detections: OrderedDict
+    :confident: whether the detection is confident or not - checked multiple times frame and detected a gun
+    :type confident: bool
 
     :return: True if the weapon is detected, False otherwise
     :rtype: bool
     """
-    global MIN_SCORE_THRESH
-    if window["-FOUND-INDICATOR-"].get() == "Weapon Not Found" and len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
-        window["-FOUND-INDICATOR-"].update("Potential Weapon Found")
-        return True
-    else:
-        window["-FOUND-INDICATOR-"].update("Weapon Not Found")
-        return False
+    global MIN_SCORE_THRESH, INDICAOR_MESSAGES
+    if len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
+        if confident:
+            window["-FOUND-INDICATOR-"].Update(INDICAOR_MESSAGES["confident_found"])
+        else:
+            window["-FOUND-INDICATOR-"].Update(INDICAOR_MESSAGES["potential_found"])
+    elif window["-FOUND-INDICATOR-"].get() != INDICAOR_MESSAGES["not_found"]:
+        window["-FOUND-INDICATOR-"].Update(INDICAOR_MESSAGES["not_found"])
+
+        
+
 
 
 #    _____ _    _ _____       __  __          _____ _   _
@@ -185,7 +192,7 @@ def gui(detection_mode=True):
     :param detection_mode: True if the detection mode is enabled, False otherwise.
     :type detection_mode: bool
     """
-    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH
+    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME
 
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -208,10 +215,10 @@ def gui(detection_mode=True):
     cap = cv2.VideoCapture(0)
     window = sg.Window('SmartSec Client', layout, size=(w, h))
 
-    # EVENT LOOP
+    # EVENT LOOP    
 
-    t0 = Timer()
-    # positive_detection_counter = 0
+    t0_exists = False
+    confident = False
 
     while True:
         ret, frame = cap.read()
@@ -221,9 +228,23 @@ def gui(detection_mode=True):
 
         if detection_mode:
             detections, frame = detection_interface(frame)
-            # if len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
+            # engage indicator if there are any detections
+            if len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
+                t0_exists = "t0" in locals()
+                if not t0_exists:
+                    t0 = Timer()
+                    confident = False
+                else:
+                    if t0.elapsed_time() > MIN_TEST_TIME:
+                        confident = True
+            elif t0_exists:
+                del t0
+                t0_exists = False
+            gui_weapon_indicator(window, detections, confident)
 
-            gui_weapon_indicator(window, detections)
+            
+            
+
 
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
         window["-VIDEO-"].update(data=frame_bytes)
