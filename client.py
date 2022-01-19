@@ -1,6 +1,3 @@
-from tkinter import CENTER
-from tkinter.messagebox import showerror
-from webbrowser import get
 import PySimpleGUI as sg
 import tensorflow as tf
 import numpy as np
@@ -87,25 +84,35 @@ def show_welcome_window():
         [
             sg.Column(
                 [
-                    [sg.Text("Welcome to SmartSec - the Pistol Detection App", font=("Helvetica", 25))],
-                    [sg.Text("This app will detect pistols in your surroundings", font=("Helvetica", 15))],
+                    [sg.Text(
+                        "Welcome to SmartSec - the Pistol Detection App", font=("Helvetica", 25))],
+                    [sg.Text("This app will detect pistols in your surroundings", font=(
+                        "Helvetica", 15))],
                     [
-                        sg.Text("Server Connection Status: ", font=("Helvetica", 10)), sg.Text("Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
+                        sg.Text("Server Connection Status: ", font=("Helvetica", 10)), sg.Text(
+                            "Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
                     ],
-                    [sg.Button(button_text="Connect Server & Detect", key="-CONNECT-SERVER-BUTTON-", tooltip="Connect to the server and detect pistols")],
+                    [
+                        sg.Button(button_text="Connect Server & Detect", key="-CONNECT-SERVER-BUTTON-",
+                                  tooltip="Connect to the server and detect pistols", focus=False, enable_events=True),
+                        sg.Button(button_text="Detect Locally", key="-DETECT-LOCALLY-BUTTON-",
+                                  tooltip="Detect pistols locally, without reporting to the server", focus=False, enable_events=True)
+                    ],
                 ], element_justification="center"
             )
         ]
     ]
     window = sg.Window("Welcome to SmartSec", layout, size=(w, h))
-    
-    #EVENT LOOP
+
+    # EVENT LOOP
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
             break
         if event == "-CONNECT-SERVER-BUTTON-":
             pass
+        if event == "-DETECT-LOCALLY-BUTTON-":
+            break
     window.close()
 
 
