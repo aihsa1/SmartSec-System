@@ -116,6 +116,28 @@ def show_welcome_window():
     window.close()
 
 
+def show_loading_screen(message):
+    w, h = sg.Window.get_screen_size()
+    w, h = int(w // 1.8), int(h // 1.8)
+    layout = [
+        [
+            sg.Column(
+                [
+                    [sg.Text(message, font=("Helvetica", 25))]
+                ], element_justification="center"
+            )
+        ]
+    ]
+    window = sg.Window("Loading", layout, size=(w, h))
+
+    # EVENT LOOP
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+    window.close()
+
+
 def initialize_model():
     """
     this function initializes the model and necassary paths
@@ -303,7 +325,8 @@ def main():
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
-    show_welcome_window()
+    # show_welcome_window()
+    show_loading_screen("Loading...")
     # detection_mode = True
     # if detection_mode:
     #     initialize_model()
