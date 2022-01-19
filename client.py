@@ -1,11 +1,9 @@
 import PySimpleGUI as sg
-import tensorflow as tf
 import numpy as np
-from object_detection.utils import label_map_util
-from object_detection.utils import visualization_utils as viz_utils
 import cv2
 import os
 import time
+import threading
 
 
 model = None
@@ -108,15 +106,16 @@ def show_welcome_window():
     window = sg.Window("Welcome to SmartSec", layout, size=(w, h))
 
     # EVENT LOOP
+    ret = None
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
             break
-        if event == "-CONNECT-SERVER-BUTTON-":
-            pass
-        if event == "-DETECT-LOCALLY-BUTTON-":
+        if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-BUTTON-"]:
+            ret = event
             break
     window.close()
+    return ret
 
 
 #   _      ____          _____ _____ _   _  _____
@@ -127,10 +126,10 @@ def show_welcome_window():
 #  |______\____/_/    \_\_____/_____|_| \_|\_____(_|_|_)
 
 
-def show_loading_screen(message):
+def show_loading_screen(message, done_loading_flag):
     """
     This function is responsible for displaying the loading screen.
-    
+
     :param message: the message to be displayed on the loading screen
     :type message: str
     """
@@ -149,10 +148,21 @@ def show_loading_screen(message):
 
     # EVENT LOOP
     while True:
-        event, values = window.read()
+        event, values = window.read(timeout=200)
+        # print(done_loading_flag, flush=True)
+        mutex = threading.Lock()
+        mutex.acquire()
+        if done_loading_flag[0]:
+            break
+        mutex.release()
+        del mutex
+        
         if event == sg.WIN_CLOSED:
             break
+    if "mutex" in locals():
+        mutex.release()
     window.close()
+    
 
 
 #   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
@@ -163,11 +173,17 @@ def show_loading_screen(message):
 #  |_____|_| \_|_____|  |_/_/    \_\______|_____/_____|______| |_|  |_|\____/|_____/|______|______|
 
 
-def initialize_model():
+def initialize_model(done_loading_flag):
     """
     this function initializes the model and necassary paths
     """
     global model, category_index, detect_fn, paths, files, labels
+    global tf, label_map_util, viz_utils
+
+    import tensorflow as tf
+    from object_detection.utils import label_map_util
+    from object_detection.utils import visualization_utils as viz_utils
+
     paths = {
         'TENSORFLOW': os.path.join('Tensorflow'),
         'WORKSPACE_PATH': os.path.join('Tensorflow', 'workspace'),
@@ -188,6 +204,12 @@ def initialize_model():
     category_index = label_map_util.create_category_index_from_labelmap(
         files['LABEL_MAP'])
     detect_fn = model.signatures['serving_default']
+
+    # update the done_loading_flag
+    mutex = threading.Lock()
+    mutex.acquire()
+    done_loading_flag[0] = True
+    mutex.release()
 
 
 #   _____  ______ _______ ______ _____ _______ _____ ____  _   _
@@ -348,16 +370,23 @@ def gui(detection_mode=True):
 #  | |\/| | / /\ \   | | | . ` |
 #  | |  | |/ ____ \ _| |_| |\  |
 #  |_|  |_/_/    \_\_____|_| \_|
-def main():
+def main(detection_mode=True):
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
-    # show_welcome_window()
-    show_loading_screen("Loading...")
-    # detection_mode = True
-    # if detection_mode:
-    #     initialize_model()
-    # gui(detection_mode)
+    event = show_welcome_window()
+
+    # import necassary module if doing detection
+    if event is not None and detection_mode:
+        # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
+        done_loading_flag = [False, ]
+        t = threading.Thread(target=initialize_model,
+                             args=(done_loading_flag,), daemon=True)
+        t.start()
+        show_loading_screen("Loading...", done_loading_flag)
+        t.join()
+
+        gui(detection_mode)
 
 
 if __name__ == "__main__":
