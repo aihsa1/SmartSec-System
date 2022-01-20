@@ -48,6 +48,102 @@ def communication():
     print(data.decode())
 
 
+#   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
+#  |_   _| \ | |_   _|__   __|/\   | |    |_   _|___  /  ____| |  \/  |/ __ \|  __ \|  ____| |
+#    | | |  \| | | |    | |  /  \  | |      | |    / /| |__    | \  / | |  | | |  | | |__  | |
+#    | | | . ` | | |    | | / /\ \ | |      | |   / / |  __|   | |\/| | |  | | |  | |  __| | |
+#   _| |_| |\  |_| |_   | |/ ____ \| |____ _| |_ / /__| |____  | |  | | |__| | |__| | |____| |____
+#  |_____|_| \_|_____|  |_/_/    \_\______|_____/_____|______| |_|  |_|\____/|_____/|______|______|
+
+
+def initialize_model(done_loading_flag):
+    """
+    this function initializes the model and necassary paths
+    """
+    global model, category_index, detect_fn, paths, files, labels
+    global tf, label_map_util, viz_utils
+
+    import tensorflow as tf
+    from object_detection.utils import label_map_util
+    from object_detection.utils import visualization_utils as viz_utils
+
+    paths = {
+        'TENSORFLOW': os.path.join('Tensorflow'),
+        'WORKSPACE_PATH': os.path.join('Tensorflow', 'workspace'),
+        'APIMODEL_PATH': os.path.join('Tensorflow', 'models'),
+        'EXPORTED_MODEL_PATH': os.path.join('Tensorflow', 'workspace', 'exported-model'),
+        'ANNOTATION_PATH': os.path.join('Tensorflow', 'workspace', 'annotations'),
+        'PROTOC_PATH': os.path.join('Tensorflow', 'protoc')
+    }
+    files = {
+        'LABEL_MAP': os.path.join(paths['ANNOTATION_PATH'], "label_map.pbtxt"),
+        "EXPORTED_MODEL_PIPELINE": os.path.join(paths["EXPORTED_MODEL_PATH"], "pipeline.config")
+    }
+    # labels = ["phone", "pistol", "hand"]
+    labels = ["pistol"]
+
+    model = tf.saved_model.load(os.path.join(
+        paths["EXPORTED_MODEL_PATH"], "saved_model"))
+    category_index = label_map_util.create_category_index_from_labelmap(
+        files['LABEL_MAP'])
+    detect_fn = model.signatures['serving_default']
+
+    # update the done_loading_flag
+    mutex = threading.Lock()
+    mutex.acquire()
+    done_loading_flag[0] = True
+    mutex.release()
+
+
+#   _____  ______ _______ ______ _____ _______ _____ ____  _   _
+#  |  __ \|  ____|__   __|  ____/ ____|__   __|_   _/ __ \| \ | |
+#  | |  | | |__     | |  | |__ | |       | |    | || |  | |  \| |
+#  | |  | |  __|    | |  |  __|| |       | |    | || |  | | . ` |
+#  | |__| | |____   | |  | |___| |____   | |   _| || |__| | |\  |
+#  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
+
+
+def detection_interface(frame):
+    """
+    This function is responsible for detecting the weapon on the screen - the interface for the deep learning model.
+    :param frame: the frame captured from the camera
+    :type frame: numpy.ndarray
+
+    :return: the detections dictionary-like object and the frame with the detections drawn on it (detections, frame)
+    :rtype: tuple(OrderedDict, numpy.ndarray)
+    """
+    global model, category_index, detect_fn
+
+    frame_np = np.array(frame)
+    input_tensor = tf.convert_to_tensor(frame_np)
+    # The model expects a batch of images, so add an axis with `tf.newaxis`
+    input_tensor = input_tensor[tf.newaxis, ...]
+    detections = detect_fn(input_tensor)
+
+    num_detections = int(detections.pop('num_detections'))
+    detections = {key: value[0, :num_detections].numpy()
+                  for key, value in detections.items()}
+    detections['num_detections'] = num_detections
+
+    # detection_classes should be ints.
+    detections['detection_classes'] = detections['detection_classes'].astype(
+        np.int64)
+    label_id_offset = 0
+    frame_np_with_detections = frame_np.copy()
+
+    viz_utils.visualize_boxes_and_labels_on_image_array(
+        frame_np_with_detections,
+        detections['detection_boxes'],
+        detections['detection_classes']+label_id_offset,
+        detections['detection_scores'],
+        category_index,
+        use_normalized_coordinates=True,
+        max_boxes_to_draw=MAX_BOXES_TO_DRAW,
+        min_score_thresh=MIN_SCORE_THRESH,
+        agnostic_mode=False)
+    return detections, frame_np_with_detections
+
+
 #  __          ________ _      _____ ____  __  __ ______    _____  _____ _____  ______ ______ _   _
 #  \ \        / /  ____| |    / ____/ __ \|  \/  |  ____|  / ____|/ ____|  __ \|  ____|  ____| \ | |
 #   \ \  /\  / /| |__  | |   | |   | |  | | \  / | |__    | (___ | |    | |__) | |__  | |__  |  \| |
@@ -143,102 +239,6 @@ def show_loading_screen(message, done_loading_flag):
     if "mutex" in locals():
         mutex.release()
     window.close()
-
-
-#   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
-#  |_   _| \ | |_   _|__   __|/\   | |    |_   _|___  /  ____| |  \/  |/ __ \|  __ \|  ____| |
-#    | | |  \| | | |    | |  /  \  | |      | |    / /| |__    | \  / | |  | | |  | | |__  | |
-#    | | | . ` | | |    | | / /\ \ | |      | |   / / |  __|   | |\/| | |  | | |  | |  __| | |
-#   _| |_| |\  |_| |_   | |/ ____ \| |____ _| |_ / /__| |____  | |  | | |__| | |__| | |____| |____
-#  |_____|_| \_|_____|  |_/_/    \_\______|_____/_____|______| |_|  |_|\____/|_____/|______|______|
-
-
-def initialize_model(done_loading_flag):
-    """
-    this function initializes the model and necassary paths
-    """
-    global model, category_index, detect_fn, paths, files, labels
-    global tf, label_map_util, viz_utils
-
-    import tensorflow as tf
-    from object_detection.utils import label_map_util
-    from object_detection.utils import visualization_utils as viz_utils
-
-    paths = {
-        'TENSORFLOW': os.path.join('Tensorflow'),
-        'WORKSPACE_PATH': os.path.join('Tensorflow', 'workspace'),
-        'APIMODEL_PATH': os.path.join('Tensorflow', 'models'),
-        'EXPORTED_MODEL_PATH': os.path.join('Tensorflow', 'workspace', 'exported-model'),
-        'ANNOTATION_PATH': os.path.join('Tensorflow', 'workspace', 'annotations'),
-        'PROTOC_PATH': os.path.join('Tensorflow', 'protoc')
-    }
-    files = {
-        'LABEL_MAP': os.path.join(paths['ANNOTATION_PATH'], "label_map.pbtxt"),
-        "EXPORTED_MODEL_PIPELINE": os.path.join(paths["EXPORTED_MODEL_PATH"], "pipeline.config")
-    }
-    # labels = ["phone", "pistol", "hand"]
-    labels = ["pistol"]
-
-    model = tf.saved_model.load(os.path.join(
-        paths["EXPORTED_MODEL_PATH"], "saved_model"))
-    category_index = label_map_util.create_category_index_from_labelmap(
-        files['LABEL_MAP'])
-    detect_fn = model.signatures['serving_default']
-
-    # update the done_loading_flag
-    mutex = threading.Lock()
-    mutex.acquire()
-    done_loading_flag[0] = True
-    mutex.release()
-
-
-#   _____  ______ _______ ______ _____ _______ _____ ____  _   _
-#  |  __ \|  ____|__   __|  ____/ ____|__   __|_   _/ __ \| \ | |
-#  | |  | | |__     | |  | |__ | |       | |    | || |  | |  \| |
-#  | |  | |  __|    | |  |  __|| |       | |    | || |  | | . ` |
-#  | |__| | |____   | |  | |___| |____   | |   _| || |__| | |\  |
-#  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
-
-
-def detection_interface(frame):
-    """
-    This function is responsible for detecting the weapon on the screen - the interface for the deep learning model.
-    :param frame: the frame captured from the camera
-    :type frame: numpy.ndarray
-
-    :return: the detections dictionary-like object and the frame with the detections drawn on it (detections, frame)
-    :rtype: tuple(OrderedDict, numpy.ndarray)
-    """
-    global model, category_index, detect_fn
-
-    frame_np = np.array(frame)
-    input_tensor = tf.convert_to_tensor(frame_np)
-    # The model expects a batch of images, so add an axis with `tf.newaxis`
-    input_tensor = input_tensor[tf.newaxis, ...]
-    detections = detect_fn(input_tensor)
-
-    num_detections = int(detections.pop('num_detections'))
-    detections = {key: value[0, :num_detections].numpy()
-                  for key, value in detections.items()}
-    detections['num_detections'] = num_detections
-
-    # detection_classes should be ints.
-    detections['detection_classes'] = detections['detection_classes'].astype(
-        np.int64)
-    label_id_offset = 0
-    frame_np_with_detections = frame_np.copy()
-
-    viz_utils.visualize_boxes_and_labels_on_image_array(
-        frame_np_with_detections,
-        detections['detection_boxes'],
-        detections['detection_classes']+label_id_offset,
-        detections['detection_scores'],
-        category_index,
-        use_normalized_coordinates=True,
-        max_boxes_to_draw=MAX_BOXES_TO_DRAW,
-        min_score_thresh=MIN_SCORE_THRESH,
-        agnostic_mode=False)
-    return detections, frame_np_with_detections
 
 
 #    _____ _    _ _   _   _____ _   _ _____ _____ _____       _______ ____  _____
@@ -366,11 +366,12 @@ def main(detection_mode=True):
         show_loading_screen("Loading...", done_loading_flag)
         loading_thread.join()
 
-        # run the main gui with detection + server connection
-        comm_thread = threading.Thread(target=communication, daemon=True)
-        comm_thread.start()
-        gui(detection_mode)
-        comm_thread.join()
+        if event == "":
+            # run the main gui with detection + server connection
+            comm_thread = threading.Thread(target=communication, daemon=True)
+            comm_thread.start()
+            gui(detection_mode)
+            comm_thread.join()
 
 
 if __name__ == "__main__":
