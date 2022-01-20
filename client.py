@@ -1,9 +1,9 @@
 import PySimpleGUI as sg
 import numpy as np
-import cv2
-import os
 import threading
 import socket
+import cv2
+import os
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Screens.welcome import show_welcome_client
