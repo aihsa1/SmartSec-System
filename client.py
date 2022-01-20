@@ -5,6 +5,7 @@ import os
 import time
 import threading
 import socket
+from Classes.Timer import Timer
 
 
 model = None
@@ -27,37 +28,6 @@ INDICAOR_MESSAGES = {
 }
 
 
-#   _______ _____ __  __ ______ _____     _____ _                _____ _____
-#  |__   __|_   _|  \/  |  ____|  __ \   / ____| |        /\    / ____/ ____|
-#     | |    | | | \  / | |__  | |__) | | |    | |       /  \  | (___| (___
-#     | |    | | | |\/| |  __| |  _  /  | |    | |      / /\ \  \___ \\___ \
-#     | |   _| |_| |  | | |____| | \ \  | |____| |____ / ____ \ ____) |___) |
-#     |_|  |_____|_|  |_|______|_|  \_\  \_____|______/_/    \_\_____/_____/
-
-
-class Timer:
-    def __init__(self, t0=None, t1=None) -> None:
-        self._t = time.time()
-
-    def update_time(self) -> None:
-        """
-        updates the time to the current time
-        """
-        self._t = time.time()
-
-    def elapsed_time(self) -> float:
-        """
-        returns the time elapsed since the last update
-
-        :return: time elapsed since the self._t timestamp (t0)
-        :rtype: float
-        """
-        return time.time() - self._t
-
-    def __str__(self) -> str:
-        return str(self._t)
-
-
 #    _____ ____  __  __ __  __
 #   / ____/ __ \|  \/  |  \/  |
 #  | |   | |  | | \  / | \  / |
@@ -69,7 +39,7 @@ class Timer:
 def communication():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.sendto("hi server".encode(), SERVER_ADDRESS)
-    data , address = s.recvfrom(1024)
+    data, address = s.recvfrom(1024)
     print(data.decode())
 
 
@@ -162,13 +132,12 @@ def show_loading_screen(message, done_loading_flag):
             break
         mutex.release()
         del mutex
-        
+
         if event == sg.WIN_CLOSED:
             break
     if "mutex" in locals():
         mutex.release()
     window.close()
-    
 
 
 #   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
@@ -387,7 +356,7 @@ def main(detection_mode=True):
         # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
         done_loading_flag = [False, ]
         loading_thread = threading.Thread(target=initialize_model,
-                             args=(done_loading_flag,), daemon=True)
+                                          args=(done_loading_flag,), daemon=True)
         loading_thread.start()
         show_loading_screen("Loading...", done_loading_flag)
         loading_thread.join()
