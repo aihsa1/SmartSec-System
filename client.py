@@ -6,6 +6,8 @@ import threading
 import socket
 from Classes.Timer import Timer
 from Classes.Message import Message
+from Screens.welcome import show_welcome_client
+from Screens.loading import show_loading_screen
 
 
 model = None
@@ -144,103 +146,6 @@ def detection_interface(frame):
     return detections, frame_np_with_detections
 
 
-#  __          ________ _      _____ ____  __  __ ______    _____  _____ _____  ______ ______ _   _
-#  \ \        / /  ____| |    / ____/ __ \|  \/  |  ____|  / ____|/ ____|  __ \|  ____|  ____| \ | |
-#   \ \  /\  / /| |__  | |   | |   | |  | | \  / | |__    | (___ | |    | |__) | |__  | |__  |  \| |
-#    \ \/  \/ / |  __| | |   | |   | |  | | |\/| |  __|    \___ \| |    |  _  /|  __| |  __| | . ` |
-#     \  /\  /  | |____| |___| |___| |__| | |  | | |____   ____) | |____| | \ \| |____| |____| |\  |
-#      \/  \/   |______|______\_____\____/|_|  |_|______| |_____/ \_____|_|  \_\______|______|_| \_|
-
-
-def show_welcome_window():
-    """
-    This function is responsible for displaying the welcome window.
-    """
-    w, h = sg.Window.get_screen_size()
-    w, h = int(w // 1.8), int(h // 1.8)
-    layout = [
-        [
-            sg.Column(
-                [
-                    [sg.Text(
-                        "Welcome to SmartSec - the Pistol Detection App", font=("Helvetica", 25))],
-                    [sg.Text("This app will detect pistols in your surroundings", font=(
-                        "Helvetica", 15))],
-                    [
-                        sg.Text("Server Connection Status: ", font=("Helvetica", 10)), sg.Text(
-                            "Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
-                    ],
-                    [
-                        sg.Button(button_text="Connect Server & Detect", key="-CONNECT-SERVER-BUTTON-",
-                                  tooltip="Connect to the server and detect pistols", focus=False, enable_events=True),
-                        sg.Button(button_text="Detect Locally", key="-DETECT-LOCALLY-BUTTON-",
-                                  tooltip="Detect pistols locally, without reporting to the server", focus=False, enable_events=True)
-                    ],
-                ], element_justification="center"
-            )
-        ]
-    ]
-    window = sg.Window("Welcome to SmartSec", layout, size=(w, h))
-
-    # EVENT LOOP
-    ret = None
-    while True:
-        event, values = window.read()
-        if event == sg.WIN_CLOSED:
-            break
-        if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-BUTTON-"]:
-            ret = event
-            break
-    window.close()
-    return ret
-
-
-#   _      ____          _____ _____ _   _  _____
-#  | |    / __ \   /\   |  __ \_   _| \ | |/ ____|
-#  | |   | |  | | /  \  | |  | || | |  \| | |  __
-#  | |   | |  | |/ /\ \ | |  | || | | . ` | | |_ |
-#  | |___| |__| / ____ \| |__| || |_| |\  | |__| |_ _ _
-#  |______\____/_/    \_\_____/_____|_| \_|\_____(_|_|_)
-
-
-def show_loading_screen(message, done_loading_flag):
-    """
-    This function is responsible for displaying the loading screen.
-
-    :param message: the message to be displayed on the loading screen
-    :type message: str
-    """
-    w, h = sg.Window.get_screen_size()
-    w, h = int(w // 1.8), int(h // 1.8)
-    layout = [
-        [
-            sg.Column(
-                [
-                    [sg.Text(message, font=("Helvetica", 25))]
-                ], element_justification="center"
-            )
-        ]
-    ]
-    window = sg.Window("Loading", layout, size=(w, h))
-
-    # EVENT LOOP
-    while True:
-        event, values = window.read(timeout=200)
-        # print(done_loading_flag, flush=True)
-        mutex = threading.Lock()
-        mutex.acquire()
-        if done_loading_flag[0]:
-            break
-        mutex.release()
-        del mutex
-
-        if event == sg.WIN_CLOSED:
-            break
-    if "mutex" in locals():
-        mutex.release()
-    window.close()
-
-
 #    _____ _    _ _   _   _____ _   _ _____ _____ _____       _______ ____  _____
 #   / ____| |  | | \ | | |_   _| \ | |  __ \_   _/ ____|   /\|__   __/ __ \|  __ \
 #  | |  __| |  | |  \| |   | | |  \| | |  | || || |       /  \  | | | |  | | |__) |
@@ -354,7 +259,7 @@ def main(detection_mode=True):
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
-    event = show_welcome_window()
+    event = show_welcome_client()
 
     # import necassary module if doing detection
     if event is not None and detection_mode:
@@ -366,12 +271,11 @@ def main(detection_mode=True):
         show_loading_screen("Loading...", done_loading_flag)
         loading_thread.join()
 
-        if event == "":
-            # run the main gui with detection + server connection
-            comm_thread = threading.Thread(target=communication, daemon=True)
-            comm_thread.start()
-            gui(detection_mode)
-            comm_thread.join()
+        # run the main gui with detection + server connection
+        comm_thread = threading.Thread(target=communication, daemon=True)
+        comm_thread.start()
+        gui(detection_mode)
+        comm_thread.join()
 
 
 if __name__ == "__main__":
