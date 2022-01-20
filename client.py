@@ -68,9 +68,9 @@ class Timer:
 
 def communication():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.sendto("hi server".endcode(), SERVER_ADDRESS)
+    s.sendto("hi server".encode(), SERVER_ADDRESS)
     data , address = s.recvfrom(1024)
-    print(data.decode)
+    print(data.decode())
 
 
 #  __          ________ _      _____ ____  __  __ ______    _____  _____ _____  ______ ______ _   _
@@ -393,8 +393,10 @@ def main(detection_mode=True):
         loading_thread.join()
 
         # run the main gui with detection + server connection
-        #todo: make a thread for the comm and run it
+        comm_thread = threading.Thread(target=communication, daemon=True)
+        comm_thread.start()
         gui(detection_mode)
+        comm_thread.join()
 
 
 if __name__ == "__main__":
