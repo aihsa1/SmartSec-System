@@ -4,9 +4,10 @@ from Classes.Message import Message
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.bind(("127.0.0.1", 14_000))
+
 new_msg = True
 while True:
-    data , address = s.recvfrom(1024)
+    data, address = s.recvfrom(1024)
     if new_msg:
         m = Message.create_message_from_plain_data(data, HEADER_SIZE)
         new_msg = False
@@ -14,6 +15,7 @@ while True:
         m += data
     if m.is_complete:
         break
+
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
 s.sendto("Hello!".encode(), address)
