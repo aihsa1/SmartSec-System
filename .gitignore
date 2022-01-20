@@ -1,6 +1,6 @@
 .venv
-Tensorflow/models
 Tensorflow/protoc
-Tensorflow/workspace/*
+Tensorflow/models
+Tensorflow/worlspace/annotations
 *__pycache__
 img*.jpg
