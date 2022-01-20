@@ -2,10 +2,10 @@ import PySimpleGUI as sg
 import numpy as np
 import cv2
 import os
-import time
 import threading
 import socket
 from Classes.Timer import Timer
+from Classes.Message import Message
 
 
 model = None
