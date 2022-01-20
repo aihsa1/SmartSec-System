@@ -1,6 +1,5 @@
 .venv
 Tensorflow/protoc
 Tensorflow/models
-Tensorflow/worlspace/annotations
 *__pycache__
 img*.jpg
