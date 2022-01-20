@@ -46,9 +46,9 @@ class Message:
         :rtype: Message
         """
         msg = plain_data[header_size:]
-        if int(plain_data[:plain_data.find(" ")]) == len(msg):
+        if int(plain_data[:plain_data.find(b" ")]) == len(msg):
             return cls(msg, header_size)
-        return cls(msg, header_size, int(plain_data[:plain_data.find(" ")]))
+        return cls(msg, header_size, int(plain_data[:plain_data.find(b" ")]))   
 
     def __iadd__(self, string):
         """
@@ -68,12 +68,25 @@ class Message:
         self.message += string
         self.is_complete = len(self.get_plain_msg()) == self.message_size
         return self
+    def splitted_data_generator(self, batch_size):
+        """
+        This function is used to generate the splitted data indicies from the message
+        :param batch_size: The size of the batch
+        :type batch_size: int
+        :return: yields the splitted data indicies
+        :rtype: generator
+        """
+        for i in range(len(self.message) // batch_size):
+            start_index = i*batch_size
+            yield [start_index, start_index + batch_size]
+        yield [(i + 1) * batch_size, (start_index + batch_size) + len(self.message) % batch_size]
+        
 
     def __str__(self):
         """
         This function is used to return the header + message
         :return: The header + message
-        :rtype: str/bytes
+        :rtype: str
         """
         return self.message.__str__()# takes str and bytes into account
 
@@ -102,10 +115,10 @@ def main():
     # print(m.message_size)
     # print(m)
 
-    m = Message("123".encode(), 8, 6)
-    print(m.message_size)
-    m += "4567".encode()
-    print(m)
+    m = Message(" ".join([str(i) for i in range(100)]), 12)
+    print(len(m.message))
+    print(list(m.splitted_data_generator(11)))
+    
 
 if __name__ == "__main__":
     main()

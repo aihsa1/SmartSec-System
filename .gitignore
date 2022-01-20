@@ -2,5 +2,5 @@
 Tensorflow/models
 Tensorflow/protoc
 Tensorflow/workspace/*
-Classes/__pycache__
-img107.jpg
+*__pycache__
+img*.jpg
