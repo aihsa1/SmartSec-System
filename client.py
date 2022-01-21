@@ -22,7 +22,7 @@ HEADER_SIZE = 12
 
 MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
-MIN_TEST_TIME = 2  # the time take to detect the weapon
+MIN_TEST_TIME = 2  # the time take to detect the weapon in seconds
 
 INDICAOR_MESSAGES = {
     "confident_found": "Weapon Found!",
@@ -58,7 +58,7 @@ def communication():
 #  |_____|_| \_|_____|  |_/_/    \_\______|_____/_____|______| |_|  |_|\____/|_____/|______|______|
 
 
-def initialize_model(done_loading_flag):
+def initialize_model(done_loading_flag) -> None:
     """
     this function initializes the model and necassary paths
     """
@@ -105,7 +105,7 @@ def initialize_model(done_loading_flag):
 #  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
 
 
-def detection_interface(frame):
+def detection_interface(frame) -> tuple:
     """
     This function is responsible for detecting the weapon on the screen - the interface for the deep learning model.
     :param frame: the frame captured from the camera
@@ -187,7 +187,7 @@ def gui_weapon_indicator(window, detections, confident=False) -> None:
 #   \_____|\____/|_____|     |_|  |_/_/    \_\_____|_| \_|
 
 
-def gui(detection_mode=True):
+def gui(detection_mode=True) -> None:
     """
     this function is responsible for the GUI of the program.
     :param detection_mode: True if the detection mode is enabled, False otherwise.
@@ -255,7 +255,7 @@ def gui(detection_mode=True):
 #  | |\/| | / /\ \   | | | . ` |
 #  | |  | |/ ____ \ _| |_| |\  |
 #  |_|  |_/_/    \_\_____|_| \_|
-def main(detection_mode=True):
+def main(detection_mode=True) -> None:
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
