@@ -1,5 +1,6 @@
 class Message:
-    def __init__(self, message, header_size, message_size=None):
+    DEFAULT_HEADER_SIZE = 12
+    def __init__(self, message, header_size=DEFAULT_HEADER_SIZE, message_size=None):
         """
         Ths function is used to initialize the message object.
         :param message: The message to be sent
@@ -35,7 +36,7 @@ class Message:
         return self.message[self.header_size:]  # takes str and bytes into account
 
     @classmethod
-    def create_message_from_plain_data(cls, plain_data, header_size):
+    def create_message_from_plain_data(cls, plain_data, header_size=DEFAULT_HEADER_SIZE):
         """
         This function is used to create a message from the plain data.
         :param plain_data: The plain data to be sent

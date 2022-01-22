@@ -1,5 +1,4 @@
 import socket
-from client import HEADER_SIZE
 from Classes.Message import Message
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -9,13 +8,13 @@ new_msg = True
 while True:
     data, address = s.recvfrom(1024)
     if new_msg:
-        m = Message.create_message_from_plain_data(data, HEADER_SIZE)
+        m = Message.create_message_from_plain_data(data)
         new_msg = False
     else:
         m += data
     if m.is_complete:
         break
-
+print(m.get_plain_msg())
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
 s.sendto("Hello!".encode(), address)

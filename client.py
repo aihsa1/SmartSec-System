@@ -18,7 +18,6 @@ files = None
 labels = None
 
 SERVER_ADDRESS = ("127.0.0.1", 14_000)
-HEADER_SIZE = 12
 
 MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
@@ -43,7 +42,7 @@ def communication():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     with open("img107.jpg", "rb") as image_file:
         image_bytes = image_file.read()
-    m = Message(image_bytes, HEADER_SIZE)
+    m = Message(image_bytes)
     for start, end in m.splitted_data_generator(100):
         s.sendto(m.message[start: end], SERVER_ADDRESS)
     data, address = s.recvfrom(1024)
