@@ -10,35 +10,40 @@ class ClientSocket:
     NOTE: This class is not responsible for the connection between the client and the server, it only creates the socket and makes it ready to be used. Also, this class is a base class for the ServerSocket class.
     """
 
-    def __init__(self, addr: tuple = None, protocol: str = "UDP") -> None:
+    def __init__(self, protocol: str = "UDP", existing_socket=None) -> None:
         """
         This function is responsible for creating a client socket.
-        :param addr: The address of the server to connect. USE ONLY FOR TCP
-        :type addr: tuple(ip, port)
         :param protocol: The protocol to use.
         :type protocol: str("TCP", "UDP")
         """
-        if addr is not None:
-            if protocol == "TCP":
-                self.addr = addr
-            else:
-                raise ValueError("UDP communication does not require address.")
-
-        self.socket = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_DGRAM if protocol == "UDP" else socket.SOCK_STREAM
+        if existing_socket is None:
+            self.socket = socket.socket(
+                socket.AF_INET,
+                socket.SOCK_DGRAM if protocol == "UDP" else socket.SOCK_STREAM
         )
+        else:
+            self.socket = existing_socket
         self.protocol = protocol
+
+    @classmethod
+    def create_client_socket(cls, client_socket) -> "ClientSocket":
+        """
+        This function is a factory method for ClientSocket from existing socket object.
+        :return: The client socket object.
+        :rtype: ClientSocket
+        """
+        return cls("TCP", client_socket)
 
     def connect(self, addr) -> None:
         """
-        This function is responsible for connecting to the server. USE ONLY FOR TCP4
+        This function is responsible for connecting to the server. USE ONLY FOR TCP
         :param addr: The address of the server to connect.
         :type addr: tuple(ip, port)
         """
         if self.protocol == "UDP":
             raise ValueError("UDP communication does not require connection.")
-        self.socket.connect(addr)
+        else:
+            self.socket.connect(addr)
 
     def send(self, m: Message, addr: tuple = None) -> None:
         """
@@ -49,12 +54,17 @@ class ClientSocket:
         :type addr: tuple(ip, port)
         """
         if self.protocol == "UDP":
-            if addr is None:
-                raise ValueError(
-                    "No address specified. It is required for UDP communication.")
-            self.socket.sendto(m.__str__().encode(), addr)
+            send_cmd = lambda x: self.socket.sendto(x, addr)
         else:
-            self.socket.send(m.__str__().encode())
+            if addr is None:
+                send_cmd = lambda x: self.socket.send(x)
+            else:
+                raise ValueError(
+                    "No need to specify address. It is required for UDP communication, not TCP.")
+        if isinstance(m.message, str):
+            send_cmd(m.message.encode())
+        else:
+            send_cmd(m.message)
 
     def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = 1000) -> None:
         """
@@ -67,20 +77,20 @@ class ClientSocket:
         :type batch_size: int
         """
         if self.protocol == "UDP":
-            send_cmd = self.socket.sendto
+            send_cmd = lambda x: self.socket.sendto(x, addr)
         else:
-            if addr is not None:
-                send_cmd = self.socket.send
+            if addr is None:
+                send_cmd = lambda x: self.socket.send(x)
             else:
                 raise ValueError(
-                    "No address specified. It is required for UDP communication.")
+                    "No need to specify address. It is required for UDP communication, not TCP.")
         
         if isinstance(m.message, str):
             for start, end in m.splitted_data_generator(batch_size):
-                send_cmd(m.message[start: end].encode(), addr)
+                send_cmd(m.message[start: end].encode())
         else:
             for start, end in m.splitted_data_generator(batch_size):
-                send_cmd(m.message[start: end], addr)
+                send_cmd(m.message[start: end])
 
     def recv(self, buffer_size: int = 1024) -> Message:
         """
@@ -131,6 +141,12 @@ class ServerSocket(ClientSocket):
         """
         self.socket.bind(addr)
         self.socket.listen() if self.protocol == "TCP" else None
+    
+    def accept(self):
+        if self.protocol == "UDP":
+            raise ValueError("UDP communication does not require connection.")
+        else:
+            return self.socket.accept()
 
     def getpeername(self):
         """
@@ -145,12 +161,23 @@ def main():
 
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
     s = ClientSocket()
+
     m = Message(b"Hello World!")
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
     s.send_buffered(m, SERVER_ADDRESS)
     m, addr = s.recv()
     print(m)
+
+    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    # s = ClientSocket("TCP")
+    # s.connect(SERVER_ADDRESS)
+    # # m = Message(b"Hello World!")
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    #     m = Message(f.read())
+    # s.send_buffered(m)
+    # m, addr = s.recv()
+    # print(m)
 
 
 if __name__ == "__main__":
