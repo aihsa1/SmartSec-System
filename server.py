@@ -23,23 +23,23 @@ sys.path.remove(CLASSES_FOLDER_PATH)
 #         break
 # print(m.get_plain_msg())
 ####################################################################################
-s = ServerSocket()
-s.bind_and_listen(("127.0.0.1", 14_000))
-m, addr = s.recv()
-with open("img.jpg", "wb") as f:
-    f.write(m.get_plain_msg())
-
-new_m = Message("Hello Client")
-s.send(new_m, addr)
-###############################################################
-# server_socket = ServerSocket("TCP")
-# server_socket.bind_and_listen(("127.0.0.1", 14_000))
-# client, client_addr = server_socket.accept()
-# client = ClientSocket.create_client_socket(client)
-
-# m, addr = client.recv()
+# s = ServerSocket()
+# s.bind_and_listen(("127.0.0.1", 14_000))
+# m, addr = s.recv()
 # with open("img.jpg", "wb") as f:
 #     f.write(m.get_plain_msg())
+
 # new_m = Message("Hello Client")
-# client.send(new_m)
+# s.send(new_m, addr)
+###############################################################
+server_socket = ServerSocket("TCP")
+server_socket.bind_and_listen(("127.0.0.1", 14_000))
+client, client_addr = server_socket.accept()
+client = ClientSocket.create_client_socket(client)
+
+m = client.recv()
+with open("img.jpg", "wb") as f:
+    f.write(m.get_plain_msg())
+new_m = Message("Hello Client")
+client.send(new_m)
 

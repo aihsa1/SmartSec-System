@@ -101,17 +101,29 @@ class ClientSocket:
         :rtype: tuple(Message, tuple(ip, port))
         """
         new_msg = True
-        recv_cmd = self.socket.recvfrom if self.protocol == "UDP" else self.socket.recv
-        while True:
-            data, address = recv_cmd(buffer_size)
-            if new_msg:
-                m = Message.create_message_from_plain_data(data)
-                new_msg = False
-            else:
-                m += data
-            if m.is_complete:
-                break
-        return m, address
+        if self.protocol == "UDP":
+            recv_cmd = self.socket.recvfrom
+            while True:
+                data, address = recv_cmd(buffer_size)
+                if new_msg:
+                    m = Message.create_message_from_plain_data(data)
+                    new_msg = False
+                else:
+                    m += data
+                if m.is_complete:
+                    return m, address
+        else:
+           recv_cmd = self.socket.recv
+           while True:
+                data = recv_cmd(buffer_size)
+                if new_msg:
+                    m = Message.create_message_from_plain_data(data)
+                    new_msg = False
+                else:
+                    m += data
+                if m.is_complete:
+                    return m
+        
 
     def close(self) -> None:
         self.socket.close() if self.protocol == "TCP" else None
@@ -159,25 +171,25 @@ class ServerSocket(ClientSocket):
 
 def main():
 
-    SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    s = ClientSocket()
-
-    m = Message(b"Hello World!")
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-        m = Message(f.read())
-    s.send_buffered(m, SERVER_ADDRESS)
-    m, addr = s.recv()
-    print(m)
-
     # SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    # s = ClientSocket("TCP")
-    # s.connect(SERVER_ADDRESS)
-    # # m = Message(b"Hello World!")
+    # s = ClientSocket()
+
+    # m = Message(b"Hello World!")
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
     #     m = Message(f.read())
-    # s.send_buffered(m)
+    # s.send_buffered(m, SERVER_ADDRESS)
     # m, addr = s.recv()
     # print(m)
+
+    SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    s = ClientSocket("TCP")
+    s.connect(SERVER_ADDRESS)
+    # m = Message(b"Hello World!")
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+        m = Message(f.read())
+    s.send_buffered(m)
+    m = s.recv()
+    print(m)
 
 
 if __name__ == "__main__":
