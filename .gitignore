@@ -3,3 +3,4 @@ Tensorflow/protoc
 Tensorflow/models
 *__pycache__
 img*.jpg
+*.pem
