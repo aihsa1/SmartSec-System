@@ -84,7 +84,7 @@ class Message:
         for i in range(len(self.message) // batch_size):
             start_index = i*batch_size
             yield [start_index, start_index + batch_size]
-        yield [(i + 1) * batch_size, (start_index + batch_size) + len(self.message) % batch_size]
+        yield [len(self.message) // batch_size * batch_size, len(self.message) // batch_size * batch_size + len(self.message) % batch_size]
 
     def __str__(self):
         """
@@ -119,16 +119,16 @@ def main():
     # print(m.message_size)
     # print(m)
 
-    m = Message.create_message_from_plain_data(b"5         01", 12)
-    print(m)
-    m += "123"
-    print(m)
-    m += "123"
-
-    # m = Message(" ".join([str(i) for i in range(100)]), 12)
+    # m = Message.create_message_from_plain_data(b"5         01", 12)
     # print(m)
-    # print(len(m.message))
-    # print(list(m.splitted_data_generator(11)))
+    # m += "123"
+    # print(m)
+    # m += "123"
+
+    m = Message(" ".join([str(i) for i in range(15)]), 12)
+    print(m)
+    print(len(m.message))
+    print(list(m.splitted_data_generator(11)))
 
 
 if __name__ == "__main__":

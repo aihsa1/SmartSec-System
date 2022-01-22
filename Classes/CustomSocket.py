@@ -1,3 +1,4 @@
+
 import socket
 from Message import Message
 
@@ -12,49 +13,82 @@ class ClientSocket:
     def __init__(self, addr: tuple = None, protocol: str = "UDP") -> None:
         """
         This function is responsible for creating a client socket.
-        :param addr: The address of the server to connect.
+        :param addr: The address of the server to connect. USE ONLY FOR TCP
         :type addr: tuple(ip, port)
         :param protocol: The protocol to use.
         :type protocol: str("TCP", "UDP")
         """
-        self.addr = addr
+        if addr is not None:
+            if protocol == "TCP":
+                self.addr = addr
+            else:
+                raise ValueError("UDP communication does not require address.")
+
         self.socket = socket.socket(
-            socket.AF_INET, socket.SOCK_DGRAM if protocol == "UDP" else socket.SOCK_STREAM)
+            socket.AF_INET,
+            socket.SOCK_DGRAM if protocol == "UDP" else socket.SOCK_STREAM
+        )
         self.protocol = protocol
 
-    def send(self, m: Message) -> None:
+    def connect(self, addr) -> None:
+        """
+        This function is responsible for connecting to the server. USE ONLY FOR TCP4
+        :param addr: The address of the server to connect.
+        :type addr: tuple(ip, port)
+        """
+        if self.protocol == "UDP":
+            raise ValueError("UDP communication does not require connection.")
+        self.socket.connect(addr)
+
+    def send(self, m: Message, addr: tuple = None) -> None:
         """
         This function is responsible for sending a message to the server. It should be NOTED that this function is not responsible for sending data buffered - the data is sent as one chunk. Use send_buffered method in order to do that.
         :param m: The message to send.
         :type m: Message
+        :param addr: The address of the server to connect.
+        :type addr: tuple(ip, port)
         """
-        if self.addr is None:
-            raise Exception("No address specified")
-        self.socket.sendto(m.__str__().encode(
-        ), self.addr) if self.protocol == "UDP" else self.socket.send(m.__str__().encode())
+        if self.protocol == "UDP":
+            if addr is None:
+                raise ValueError(
+                    "No address specified. It is required for UDP communication.")
+            self.socket.sendto(m.__str__().encode(), addr)
+        else:
+            self.socket.send(m.__str__().encode())
 
-    def send_buffered(self, m: Message, batch_size: int = 1000) -> None:
+    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = 1000) -> None:
         """
         This function is responsible for BUFFERING AND SENDING message to the server.
         :param m: The message to send.
         :type m: Message
+        :param addr: The address of the server to connect. This param will be ignored for TCP communication.
+        :type addr: tuple(ip, port)
+        :param batch_size: The size of the batch.
+        :type batch_size: int
         """
-        if self.addr is None:
-            raise Exception("No address specified")
         if self.protocol == "UDP":
+            send_cmd = self.socket.sendto
+        else:
+            if addr is not None:
+                send_cmd = self.socket.send
+            else:
+                raise ValueError(
+                    "No address specified. It is required for UDP communication.")
+        
+        if isinstance(m.message, str):
             for start, end in m.splitted_data_generator(batch_size):
-                self.socket.sendto(m.message[start: end], self.addr)
+                send_cmd(m.message[start: end].encode(), addr)
         else:
             for start, end in m.splitted_data_generator(batch_size):
-                self.socket.send(m.message[start: end])
+                send_cmd(m.message[start: end], addr)
 
     def recv(self, buffer_size: int = 1024) -> Message:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer.
         :type buffer_size: int
-        :return: The message received from the server.
-        :rtype: Message
+        :return: The message received and the origin.
+        :rtype: tuple(Message, tuple(ip, port))
         """
         new_msg = True
         recv_cmd = self.socket.recvfrom if self.protocol == "UDP" else self.socket.recv
@@ -67,7 +101,7 @@ class ClientSocket:
                 m += data
             if m.is_complete:
                 break
-        return m
+        return m, address
 
     def close(self) -> None:
         self.socket.close() if self.protocol == "TCP" else None
@@ -82,39 +116,41 @@ class ServerSocket(ClientSocket):
 
     def __init__(self, protocol: str = "UDP") -> None:
         """
-        This function is responsible for creating a server socket. It should be NOTED that this function is not responsible for binding the socket, only for creating the socket object -  use the bind method should be used in order to do the binding.
+        This function is responsible for creating a server socket. It should be NOTED that this function is not responsible for binding the socket, only for creating the socket object -  use the bind_and_listen method should be used in order to do the binding.
         :param protocol: The protocol to use.
         :type protocol: str("TCP", "UDP")
         """
         super().__init__(protocol=protocol)
         self.is_bound = False
 
-    def bind(self, addr: tuple):
+    def bind_and_listen(self, addr: tuple):
         """
-        This function is responsible for binding the server socket to a certain address and port.
+        This function is responsible for binding the server socket to a certain address and port and listen (if this is a TCP socket).
         :param addr: The address to bind to.
         :type addr: tuple(ip, port)
         """
         self.socket.bind(addr)
-        self.is_bound = True
+        self.socket.listen() if self.protocol == "TCP" else None
 
     def getpeername(self):
         """
-        This function is responsible for getting the address of the client that is connected to the server.
+        This function is responsible for getting the address of the client that is connected to the server (ONLY ON TCP).
         :return: The address of the client that is connected to the server.
         :rtype: tuple(ip, port)
         """
-        return self.socket.getpeername()
+        return self.socket.getpeername() if self.protocol == "TCP" else None
 
 
 def main():
-    s = ClientSocket(("127.0.0.1", 14_000))
-    m = Message("Hello World!")
+
+    SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    s = ClientSocket()
+    m = Message(b"Hello World!")
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
-        s.send_buffered(m)
-        m = s.recv()
-        print(m)
+    s.send_buffered(m, SERVER_ADDRESS)
+    m, addr = s.recv()
+    print(m)
 
 
 if __name__ == "__main__":
