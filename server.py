@@ -17,4 +17,5 @@ while True:
 print(m.get_plain_msg())
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
-s.sendto("Hello!".encode(), address)
+new_m = Message("Hello Client")
+s.sendto(new_m.__str__().encode(), address)

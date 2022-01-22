@@ -7,7 +7,7 @@ class Message:
         :type message: str/bytesr
         :param header_size: The size of the header of the communication protocol
         :type header_size: int
-        :param message_size: The size of the message to be sent. If not specified, the message size is assumed to be the size of the message. otherwise, the message size is assumed to be the specified size. It should be noted that specifiying the message size is optional, and it is used only to create a message and acummulate buffered data to it.
+        :param message_size: The size of the message to be sent. If not specified, the message param size is assumed to be the size of the message. otherwise, the message size is assumed to be the specified size. It should be noted that specifiying the message size is optional, and it is used only to create a message and acummulate buffered data to it.
         :type message_size: int/None
         """
         # set is_compelete and message_size according to the params
@@ -119,8 +119,11 @@ def main():
     # print(m.message_size)
     # print(m)
 
-    m = Message.create_message_from_plain_data(b"289         0 1", 12)
+    m = Message.create_message_from_plain_data(b"5         01", 12)
     print(m)
+    m += "123"
+    print(m)
+    m += "123"
 
     # m = Message(" ".join([str(i) for i in range(100)]), 12)
     # print(m)
