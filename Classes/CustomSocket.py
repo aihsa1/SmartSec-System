@@ -12,20 +12,23 @@ class ClientSocket:
     def send(self, m: Message) -> None:
         if self.addr is None:
             raise Exception("No address specified")
-
-        self.socket.sendto(m.__str__().encode(), self.addr)
+        self.socket.sendto(m.__str__().encode(), self.addr) if self.protocol == "UDP" else self.socket.send(m.__str__().encode())
 
     def send_buffered(self, m: Message) -> None:
         if self.addr is None:
             raise Exception("No address specified")
-
-        for start, end in m.splitted_data_generator(100):
-            self.socket.sendto(m.message[start: end], self.addr)
+        if self.protocol == "UDP":
+            for start, end in m.splitted_data_generator(100):
+                self.socket.sendto(m.message[start: end], self.addr)
+        else:
+            for start, end in m.splitted_data_generator(100):
+                self.socket.send(m.message[start: end])
 
     def recv(self, buffer_size: int = 1024) -> Message:
         new_msg = True
+        recv_cmd = self.socket.recvfrom if self.protocol == "UDP" else self.socket.recv
         while True:
-            data, address = self.socket.recvfrom(buffer_size)
+            data, address = recv_cmd(buffer_size)
             if new_msg:
                 m = Message.create_message_from_plain_data(data)
                 new_msg = False
