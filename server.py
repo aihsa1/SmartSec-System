@@ -29,7 +29,15 @@ s.bind_and_listen(("127.0.0.1", 14_000))
 server_encryption = RSAEncyption()
 server_encryption.generate_keys()
 
-# m, addr = s.recv()
+m, addr = s.recv()
+server_encryption.load_others_pubkey(m.get_plain_msg())
+s.send_buffered(Message(server_encryption.export_my_pubkey()), addr)
+
+# print(f"client's pubkey: {server_encryption.other_pubkey.save_pkcs1()}")
+# print(f"server's pubkey: {server_encryption.export_my_pubkey()}")
+
+m, addr = s.recv()
+# m = server_encryption.decrypt(m)
 # with open("img.jpg", "wb") as f:
 #     f.write(m.get_plain_msg())
 
