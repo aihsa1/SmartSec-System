@@ -28,17 +28,13 @@ s = ServerSocket()
 s.bind_and_listen(("127.0.0.1", 14_000))
 server_encryption = RSAEncyption()
 server_encryption.generate_keys()
-###########key exchange###############
-client_pubkey = s.recv(); server_encryption.other_pubkey = client_pubkey
-print(f"my pubkey: {server_encryption.my_pubkey}")
-print(f"other's pubkey {server_encryption.other_pubkey}")
-###########end key exchange###############
-m, addr = s.recv()
-with open("img.jpg", "wb") as f:
-    f.write(m.get_plain_msg())
 
-new_m = Message("Hello Client")
-s.send(new_m, addr)
+# m, addr = s.recv()
+# with open("img.jpg", "wb") as f:
+#     f.write(m.get_plain_msg())
+
+# new_m = Message("Hello Client")
+# s.send(new_m, addr)
 ############################TCP###################################
 # server_socket = ServerSocket("TCP")
 # server_socket.bind_and_listen(("127.0.0.1", 14_000))

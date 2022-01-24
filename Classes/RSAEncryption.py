@@ -15,6 +15,10 @@ class RSAEncyption:
         This method generates a public and private key pair.
         """
         self.my_pubkey, self.my_privkey = rsa.newkeys(1024)
+    def export_my_pubkey(self):
+        return self.my_pubkey.save_pkcs1()
+    def load_others_pubkey(self, pubkey_pkcs1):
+        return rsa.PublicKey.load_pkcs1(pubkey_pkcs1)
     
     def encrypt(self, msg):
         """
