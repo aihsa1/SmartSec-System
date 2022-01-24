@@ -191,36 +191,51 @@ class ServerSocket(ClientSocket):
 
 def main():
 
+    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    # s = ClientSocket()
+    # client_encryption = RSAEncyption()
+    # client_encryption.generate_keys()
+
+    # ##########key exchange#############
+    # s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
+    # m, _ = s.recv()
+    # client_encryption.load_others_pubkey(m.get_plain_msg())
+    #############################
+
+    
+    
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    #     m = Message(f.read())
+    # s.send_buffered(m, SERVER_ADDRESS, e=client_encryption)
+    # sig = Message(client_encryption.generate_signature(m.message))
+    # s.send_buffered(sig, SERVER_ADDRESS, e=client_encryption)
+
+    # m, addr = s.recv(e=client_encryption)
+    # print(m.get_plain_msg())
+
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    s = ClientSocket()
+    s = ClientSocket("TCP")
+    s.connect(SERVER_ADDRESS)
+
+
+    ##########key exchange#############
     client_encryption = RSAEncyption()
     client_encryption.generate_keys()
 
-    #key exchange
-    s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
-    m, _ = s.recv()
+    s.send_buffered(Message(client_encryption.export_my_pubkey()))
+    m = s.recv()
     client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    
-    
+    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
+    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
+    #############################
+
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
-    s.send_buffered(m, SERVER_ADDRESS, e=client_encryption)
-    sig = Message(client_encryption.generate_signature(m.message))
-    s.send_buffered(sig, SERVER_ADDRESS, e=client_encryption)
-
-    m, addr = s.recv(e=client_encryption)
-    print(m.get_plain_msg())
-
-    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    # s = ClientSocket("TCP")
-    # s.connect(SERVER_ADDRESS)
-    # # m = Message(b"Hello World!")
-    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-    #     m = Message(f.read())
-    # s.send_buffered(m)
-    # m = s.recv()
-    # print(m)
+    s.send_buffered(m, e=client_encryption)
+    # s.send_buffered(Message(client_encryption.generate_signature(m.message)), e=client_encryption)
+    m = s.recv(e=client_encryption)
+    print(m)
 
 
 if __name__ == "__main__":
