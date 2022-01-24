@@ -44,11 +44,11 @@ class RSAEncyption:
         :type ciphertext: bytes
         :return: The decrypted message. If something went wrong, False is returned
         """
-        try:
-            return rsa.decrypt(ciphertext, self.my_privkey)
-        except Exception as e:
-            print(e)
-            return False
+        # try:
+        return rsa.decrypt(ciphertext, self.my_privkey)
+        # except Exception as e:
+        #     print(e)
+        #     return False
 
     def generate_signature(self, msg):
         """
@@ -67,7 +67,7 @@ class RSAEncyption:
         try:
             return rsa.verify(msg.encode() if isinstance(msg, str) else msg, signature, self.other_pubkey) == RSAEncyption.HASH_METHOD
         except Exception as e:
-            raise e
+            print(e)
             return False
 
 

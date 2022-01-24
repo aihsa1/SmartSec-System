@@ -45,8 +45,11 @@ m = client.recv()
 server_encryption.load_others_pubkey(m.get_plain_msg())
 client.send_buffered(Message(server_encryption.export_my_pubkey()))
 
-print(f"client pubkey: {hashlib.sha256(server_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
-print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hexdigest()}")
+# print(f"client pubkey: {hashlib.sha256(server_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
+# print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hexdigest()}")
+
+# print(server_encryption.my_pubkey)
+# print(server_encryption.other_pubkey)
 ##############################
 
 m = client.recv(e=server_encryption)

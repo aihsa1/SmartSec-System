@@ -107,7 +107,7 @@ class ClientSocket:
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end]))
 
-    def recv(self, buffer_size: int = 1024, e: RSAEncyption = None) -> Message:
+    def recv(self, buffer_size: int = 100, e: RSAEncyption = None) -> Message:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer.
@@ -126,6 +126,7 @@ class ClientSocket:
             while True:
                 data, address = recv_cmd(buffer_size)
                 if new_msg:
+                    print(data)
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
                 else:
@@ -201,8 +202,6 @@ def main():
     # m, _ = s.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
     #############################
-
-    
     
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
     #     m = Message(f.read())
@@ -226,8 +225,11 @@ def main():
     m = s.recv()
     client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
-    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
+    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
+    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
+
+    # print(client_encryption.my_pubkey)
+    # print(client_encryption.other_pubkey)
     #############################
 
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
