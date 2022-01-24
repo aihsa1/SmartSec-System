@@ -75,7 +75,7 @@ class ClientSocket:
         else:
             send_cmd(encrypt_cmd(m.message))
 
-    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = 1000, e: RSAEncyption = None) -> None:
+    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = 100, e: RSAEncyption = None) -> None:
         """
         This function is responsible for BUFFERING AND SENDING message to the server.
         :param m: The message to send.
@@ -204,7 +204,7 @@ def main():
     
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
-    s.send_buffered(m, SERVER_ADDRESS, e=client_encryption, batch_size=100)
+    s.send_buffered(m, SERVER_ADDRESS, e=client_encryption)
     m, addr = s.recv(e=client_encryption)
     print(m.get_plain_msg())
 
