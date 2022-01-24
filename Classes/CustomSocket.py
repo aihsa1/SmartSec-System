@@ -107,7 +107,7 @@ class ClientSocket:
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end]))
 
-    def recv(self, buffer_size: int = 100, e: RSAEncyption = None) -> Message:
+    def recv(self, buffer_size: int = 1024, e: RSAEncyption = None) -> Message:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer.
@@ -201,7 +201,7 @@ def main():
     # s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
     # m, _ = s.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
-    #############################
+    # ############################
     
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
     #     m = Message(f.read())
