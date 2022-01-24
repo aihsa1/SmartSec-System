@@ -18,7 +18,7 @@ class RSAEncyption:
     def export_my_pubkey(self):
         return self.my_pubkey.save_pkcs1()
     def load_others_pubkey(self, pubkey_pkcs1):
-        return rsa.PublicKey.load_pkcs1(pubkey_pkcs1)
+        self.other_pubkey = rsa.PublicKey.load_pkcs1(pubkey_pkcs1)
     
     def encrypt(self, msg):
         """
