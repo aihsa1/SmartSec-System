@@ -1,6 +1,9 @@
 
 import socket
+
+from grpc import server
 from Message import Message
+from RSAEncryption import RSAEncyption
 
 
 class ClientSocket:
@@ -171,25 +174,33 @@ class ServerSocket(ClientSocket):
 
 def main():
 
-    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    # s = ClientSocket()
-
-    # m = Message(b"Hello World!")
-    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-    #     m = Message(f.read())
-    # s.send_buffered(m, SERVER_ADDRESS)
-    # m, addr = s.recv()
-    # print(m)
-
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    s = ClientSocket("TCP")
-    s.connect(SERVER_ADDRESS)
-    # m = Message(b"Hello World!")
+    s = ClientSocket()
+    client_encryption = RSAEncyption()
+    client_encryption.generate_keys()
+    ##########key exchange##########
+    s.send_buffered(Message(client_encryption.my_pubkey))
+    server_pubkey = s.recv(); client_encryption.other_pubkey = server_pubkey
+    print(f"my pubkey: {client_encryption.my_pubkey}")
+    print(f"other's pubkey: {client_encryption.other_pubkey}")
+    ##########end exchange##########
+
+    m = Message(b"Hello World!")
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
-    s.send_buffered(m)
-    m = s.recv()
+    s.send_buffered(m, SERVER_ADDRESS)
+    m, addr = s.recv()
     print(m)
+
+    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    # s = ClientSocket("TCP")
+    # s.connect(SERVER_ADDRESS)
+    # # m = Message(b"Hello World!")
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    #     m = Message(f.read())
+    # s.send_buffered(m)
+    # m = s.recv()
+    # print(m)
 
 
 if __name__ == "__main__":
