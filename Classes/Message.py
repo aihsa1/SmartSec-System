@@ -46,6 +46,7 @@ class Message:
         :return: The message object
         :rtype: Message
         """
+        #TODO: fix issue with this method when encrypting
         space = b" " if isinstance(plain_data, bytes) else " "
         msg = plain_data[header_size:]
         if int(plain_data[:plain_data.find(space)]) == len(msg):

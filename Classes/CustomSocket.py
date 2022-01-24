@@ -1,7 +1,5 @@
 
 import socket
-
-from grpc import server
 from Message import Message
 from RSAEncryption import RSAEncyption
 
@@ -48,13 +46,15 @@ class ClientSocket:
         else:
             self.socket.connect(addr)
 
-    def send(self, m: Message, addr: tuple = None) -> None:
+    def send(self, m: Message, addr: tuple = None, e: RSAEncyption = None) -> None:
         """
         This function is responsible for sending a message to the server. It should be NOTED that this function is not responsible for sending data buffered - the data is sent as one chunk. Use send_buffered method in order to do that.
         :param m: The message to send.
         :type m: Message
         :param addr: The address of the server to connect.
         :type addr: tuple(ip, port)
+        :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
+        :type e: RSAEncyption
         """
         if self.protocol == "UDP":
             send_cmd = lambda x: self.socket.sendto(x, addr)
@@ -64,12 +64,17 @@ class ClientSocket:
             else:
                 raise ValueError(
                     "No need to specify address. It is required for UDP communication, not TCP.")
-        if isinstance(m.message, str):
-            send_cmd(m.message.encode())
+        if e is not None:
+            encrypt_cmd = lambda x: e.encrypt(x)
         else:
-            send_cmd(m.message)
+            encrypt_cmd = lambda x: x
+        
+        if isinstance(m.message, str):
+            send_cmd(encrypt_cmd(m.message.encode()))
+        else:
+            send_cmd(encrypt_cmd(m.message))
 
-    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = 1000) -> None:
+    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = 1000, e: RSAEncyption = None) -> None:
         """
         This function is responsible for BUFFERING AND SENDING message to the server.
         :param m: The message to send.
@@ -78,6 +83,8 @@ class ClientSocket:
         :type addr: tuple(ip, port)
         :param batch_size: The size of the batch.
         :type batch_size: int
+        :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
+        :type e: RSAEncyption
         """
         if self.protocol == "UDP":
             send_cmd = lambda x: self.socket.sendto(x, addr)
@@ -87,15 +94,18 @@ class ClientSocket:
             else:
                 raise ValueError(
                     "No need to specify address. It is required for UDP communication, not TCP.")
-        
+        if e is not None:
+            encrypt_cmd = lambda x: e.encrypt(x)
+        else:
+            encrypt_cmd = lambda x: x
         if isinstance(m.message, str):
             for start, end in m.splitted_data_generator(batch_size):
-                send_cmd(m.message[start: end].encode())
+                send_cmd(encrypt_cmd(m.message[start: end].encode()))
         else:
             for start, end in m.splitted_data_generator(batch_size):
-                send_cmd(m.message[start: end])
+                send_cmd(encrypt_cmd(m.message[start: end]))
 
-    def recv(self, buffer_size: int = 1024) -> Message:
+    def recv(self, buffer_size: int = 1024, e: RSAEncyption = None) -> Message:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer.
@@ -103,16 +113,21 @@ class ClientSocket:
         :return: The message received and the origin.
         :rtype: tuple(Message, tuple(ip, port))
         """
+        if e is not None:
+            decrypt_cmd = lambda x: e.decrypt(x)
+        else:
+            decrypt_cmd = lambda x: x
+        
         new_msg = True
         if self.protocol == "UDP":
             recv_cmd = self.socket.recvfrom
             while True:
                 data, address = recv_cmd(buffer_size)
                 if new_msg:
-                    m = Message.create_message_from_plain_data(data)
+                    m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
                 else:
-                    m += data
+                    m += decrypt_cmd(data)
                 if m.is_complete:
                     return m, address
         else:
@@ -120,10 +135,10 @@ class ClientSocket:
            while True:
                 data = recv_cmd(buffer_size)
                 if new_msg:
-                    m = Message.create_message_from_plain_data(data)
+                    m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
                 else:
-                    m += data
+                    m += decrypt_cmd(data)
                 if m.is_complete:
                     return m
         
@@ -178,14 +193,19 @@ def main():
     s = ClientSocket()
     client_encryption = RSAEncyption()
     client_encryption.generate_keys()
+
+    #key exchange
+    s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
+    m, _ = s.recv()
+    client_encryption.load_others_pubkey(m.get_plain_msg())
+
     
-    # 
-    # m = Message(b"Hello World!")
-    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-    #     m = Message(f.read())
-    # s.send_buffered(m, SERVER_ADDRESS)
-    # m, addr = s.recv()
-    # print(m)
+    
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+        m = Message(f.read())
+    s.send_buffered(m, SERVER_ADDRESS, e=client_encryption, batch_size=100)
+    m, addr = s.recv(e=client_encryption)
+    print(m.get_plain_msg())
 
     # SERVER_ADDRESS = ("127.0.0.1", 14_000)
     # s = ClientSocket("TCP")
