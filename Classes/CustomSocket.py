@@ -207,8 +207,6 @@ def main():
         m = Message(f.read())
     s.send_buffered(m, SERVER_ADDRESS, e=client_encryption)
     sig = Message(client_encryption.generate_signature(m.message))
-    # print(hashlib.sha256(m.message).hexdigest())
-    # print(hashlib.sha256(sig.message).hexdigest())
     s.send_buffered(sig, SERVER_ADDRESS, e=client_encryption)
 
     m, addr = s.recv(e=client_encryption)

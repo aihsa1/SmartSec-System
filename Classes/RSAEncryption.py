@@ -1,4 +1,4 @@
-from matplotlib.pyplot import isinteractive
+import hashlib
 import rsa
 
 
@@ -67,7 +67,7 @@ class RSAEncyption:
         try:
             return rsa.verify(msg.encode() if isinstance(msg, str) else msg, signature, self.other_pubkey) == RSAEncyption.HASH_METHOD
         except Exception as e:
-            print(e)
+            raise e
             return False
 
 

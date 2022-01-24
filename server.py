@@ -1,7 +1,7 @@
 
 import sys
 import os
-import hashlib
+import hashlib, rsa
 CLASSES_FOLDER_PATH = os.path.join(os.getcwd(), "Classes")
 if CLASSES_FOLDER_PATH not in sys.path:
     sys.path.append(CLASSES_FOLDER_PATH)
@@ -37,9 +37,8 @@ s.send_buffered(Message(server_encryption.export_my_pubkey()), addr)
 
 m, addr = s.recv(e=server_encryption)
 sig, _ = s.recv(e=server_encryption)
-# print(hashlib.sha256(m.message).hexdigest())
-# print(hashlib.sha256(sig.message).hexdigest())
-print(server_encryption.verify_signature(m.message, sig.message))
+print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
+
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
 
