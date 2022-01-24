@@ -4,6 +4,7 @@ from Message import Message
 from RSAEncryption import RSAEncyption
 
 #TODO: SIGNATURE VERIFICATION
+#TODO PROTOCOL IMPLEMENTATION
 class ClientSocket:
     """
     This class is responsible for creating and manipulating a client socket.
