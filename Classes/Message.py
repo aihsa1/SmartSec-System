@@ -1,5 +1,5 @@
 class Message:
-    DEFAULT_HEADER_SIZE = 12
+    DEFAULT_HEADER_SIZE = 20
     def __init__(self, message, header_size=DEFAULT_HEADER_SIZE, message_size=None):
         """
         Ths function is used to initialize the message object.
