@@ -1,3 +1,4 @@
+from matplotlib.pyplot import isinteractive
 import rsa
 
 
@@ -55,14 +56,16 @@ class RSAEncyption:
         :param msg: The message to sign
         :type msg: str
         """
-        return rsa.sign(msg.encode(), self.my_privkey, RSAEncyption.HASH_METHOD)
+        if isinstance(msg, str):
+            return rsa.sign(msg.encode(), self.my_privkey, RSAEncyption.HASH_METHOD)
+        return rsa.sign(msg, self.my_privkey, RSAEncyption.HASH_METHOD)
 
     def verify_signature(self, msg, signature):
         """
         This method verifies the signature of the given message. The signature is generated using the sender's public key, so we will be able to authenticate the incoming message.
         """
         try:
-            return rsa.verify(msg.encode(), signature, self.other_pubkey) == RSAEncyption.HASH_METHOD
+            return rsa.verify(msg.encode() if isinstance(msg, str) else msg, signature, self.other_pubkey) == RSAEncyption.HASH_METHOD
         except Exception as e:
             print(e)
             return False

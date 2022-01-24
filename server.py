@@ -1,6 +1,7 @@
 
 import sys
 import os
+import hashlib
 CLASSES_FOLDER_PATH = os.path.join(os.getcwd(), "Classes")
 if CLASSES_FOLDER_PATH not in sys.path:
     sys.path.append(CLASSES_FOLDER_PATH)
@@ -34,10 +35,11 @@ m, addr = s.recv()
 server_encryption.load_others_pubkey(m.get_plain_msg())
 s.send_buffered(Message(server_encryption.export_my_pubkey()), addr)
 
-# print(f"client's pubkey: {server_encryption.other_pubkey.save_pkcs1()}")
-# print(f"server's pubkey: {server_encryption.export_my_pubkey()}")
-
 m, addr = s.recv(e=server_encryption)
+sig, _ = s.recv(e=server_encryption)
+# print(hashlib.sha256(m.message).hexdigest())
+# print(hashlib.sha256(sig.message).hexdigest())
+print(server_encryption.verify_signature(m.message, sig.message))
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
 
