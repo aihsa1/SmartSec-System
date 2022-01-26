@@ -107,7 +107,7 @@ class ClientSocket:
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end]))
 
-    def recv(self, buffer_size: int = 128, e: RSAEncyption = None) -> Message:
+    def recv(self, buffer_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> Message:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer. It should be exactly the same as rsa.common.byte_size(publickey.n)
