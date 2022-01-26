@@ -1,7 +1,8 @@
-import multiprocessing
+import multiprocessing, time
 
 
 def get_input(pipe_socket: multiprocessing.Pipe):
+    time.sleep(10)
     pipe_socket.send(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg")
 
 def save_img(pipe_socket: multiprocessing.Pipe):
