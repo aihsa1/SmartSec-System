@@ -260,6 +260,9 @@ def main():
         m = Message(f.read())
     print("sending image")
     client_socket.send_buffered(m, e=client_encryption)
+    print("sending signature")
+    sig = Message(client_encryption.generate_signature(m.message))
+    client_socket.send_buffered(sig, e=client_encryption)
     client_socket.close()
 
 

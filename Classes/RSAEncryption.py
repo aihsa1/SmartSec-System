@@ -6,7 +6,6 @@ class RSAEncyption:
     HASH_METHOD = "SHA-256"
     KEY_SIZE = 1024
     RECV_BUFFER_SIZE = rsa.common.byte_size(rsa.newkeys(KEY_SIZE)[0].n)
-    print(RECV_BUFFER_SIZE)
 
     def __init__(self) -> None:
         """

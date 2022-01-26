@@ -83,6 +83,9 @@ print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hex
 
 m = client_socket.recv(e=server_encryption)
 print("recieved image")
+sig = client_socket.recv(e=server_encryption)
+print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
+print("signature recieved")
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
 
