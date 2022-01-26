@@ -39,14 +39,7 @@ INDICAOR_MESSAGES = {
 
 
 def communication():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    with open("img107.jpg", "rb") as image_file:
-        image_bytes = image_file.read()
-    m = Message(image_bytes)
-    for start, end in m.splitted_data_generator(100):
-        s.sendto(m.message[start: end], SERVER_ADDRESS)
-    data, address = s.recvfrom(1024)
-    print(data.decode())
+    pass
 
 
 #   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
