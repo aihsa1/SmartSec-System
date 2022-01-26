@@ -1,13 +1,18 @@
-import PySimpleGUI as sg
-import numpy as np
-import threading
-import socket
-import cv2
 import os
+import sys
+import cv2
+import socket
+import hashlib
+import threading
+import numpy as np
+import PySimpleGUI as sg
+from Scripts import add_classes_to_path
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
+from Classes.CustomSocket import ClientSocket
+from Classes.RSAEncryption import RSAEncyption
 
 
 model = None
@@ -39,7 +44,22 @@ INDICAOR_MESSAGES = {
 
 
 def communication():
-    pass
+    SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    s = ClientSocket()
+    client_encryption = RSAEncyption()
+    client_encryption.generate_keys
+
+    ##########key exchange#############
+    s.send_buffered(
+        Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
+    m, _ = s.recv()
+    client_encryption.load_others_pubkey(m.get_plain_msg())
+
+    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(
+        client_encryption.export_my_pubkey()))
+    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
+        client_encryption.other_pubkey.save_pkcs1()))
+    ############################
 
 
 #   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _

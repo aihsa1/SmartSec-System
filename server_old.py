@@ -2,13 +2,10 @@
 import hashlib
 import sys
 import os
-CLASSES_FOLDER_PATH = os.path.join(os.getcwd(), "Classes")
-if CLASSES_FOLDER_PATH not in sys.path:
-    sys.path.append(CLASSES_FOLDER_PATH)
+from Scripts import add_classes_to_path
 from Classes.Message import Message
 from Classes.RSAEncryption import RSAEncyption
 from Classes.CustomSocket import ServerSocket, ClientSocket
-sys.path.remove(CLASSES_FOLDER_PATH)
 
 ###############################UDP#####################################################
 # s = ServerSocket()
@@ -84,8 +81,8 @@ print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hex
 m = client_socket.recv(e=server_encryption)
 print("recieved image")
 sig = client_socket.recv(e=server_encryption)
-print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
 print("signature recieved")
+print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
 with open("img.jpg", "wb") as f:
     f.write(m.get_plain_msg())
 
