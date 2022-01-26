@@ -1,7 +1,5 @@
 import os
-import sys
 import cv2
-import socket
 import hashlib
 import threading
 import numpy as np
