@@ -4,6 +4,8 @@ import rsa
 
 class RSAEncyption:
     HASH_METHOD = "SHA-256"
+    KEY_SIZE = 1024
+    RECV_BUFFER_SIZE = rsa.common.byte_size(KEY_SIZE)
 
     def __init__(self) -> None:
         """
@@ -17,7 +19,7 @@ class RSAEncyption:
         """
         This method generates a public and private key pair.
         """
-        self.my_pubkey, self.my_privkey = rsa.newkeys(1024)
+        self.my_pubkey, self.my_privkey = rsa.newkeys(RSAEncyption.KEY_SIZE)
 
     def export_my_pubkey(self):
         return self.my_pubkey.save_pkcs1()

@@ -1,8 +1,8 @@
-
+import hashlib, base64
 import socket
 from Message import Message
 from RSAEncryption import RSAEncyption
-import hashlib
+RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
 
 #TODO: SIGNATURE VERIFICATION
 #TODO PROTOCOL IMPLEMENTATION
@@ -83,7 +83,7 @@ class ClientSocket:
         :type m: Message
         :param addr: The address of the server to connect. This param will be ignored for TCP communication.
         :type addr: tuple(ip, port)
-        :param batch_size: The size of the batch.
+        :param batch_size: The size of the batch. It should be less than rsa.common.byte_size(publickey.n)
         :type batch_size: int
         :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
         :type e: RSAEncyption
@@ -107,10 +107,10 @@ class ClientSocket:
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end]))
 
-    def recv(self, buffer_size: int = 1024, e: RSAEncyption = None) -> Message:
+    def recv(self, buffer_size: int = 128, e: RSAEncyption = None) -> Message:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
-        :param buffer_size: The size of the buffer.
+        :param buffer_size: The size of the buffer. It should be exactly the same as rsa.common.byte_size(publickey.n)
         :type buffer_size: int
         :return: The message received and the origin.
         :rtype: tuple(Message, tuple(ip, port))
@@ -126,7 +126,6 @@ class ClientSocket:
             while True:
                 data, address = recv_cmd(buffer_size)
                 if new_msg:
-                    print(data)
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
                 else:
@@ -192,7 +191,7 @@ class ServerSocket(ClientSocket):
 
 def main():
 
-    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    SERVER_ADDRESS = ("127.0.0.1", 14_000)
     # s = ClientSocket()
     # client_encryption = RSAEncyption()
     # client_encryption.generate_keys()
@@ -209,35 +208,59 @@ def main():
     # sig = Message(client_encryption.generate_signature(m.message))
     # s.send_buffered(sig, SERVER_ADDRESS, e=client_encryption)
 
+
     # m, addr = s.recv(e=client_encryption)
     # print(m.get_plain_msg())
 
-    SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    s = ClientSocket("TCP")
-    s.connect(SERVER_ADDRESS)
+    ####################TCP##############################
+    # SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    # s = ClientSocket("TCP")
+    # s.connect(SERVER_ADDRESS)
 
 
-    ##########key exchange#############
+    # ##########key exchange#############
+    # client_encryption = RSAEncyption()
+    # client_encryption.generate_keys()
+
+    # s.send_buffered(Message(client_encryption.export_my_pubkey()))
+    # m = s.recv()
+    # client_encryption.load_others_pubkey(m.get_plain_msg())
+
+    # # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    # # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    # #############################
+
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img30.jpg", "rb") as f:
+    #     # m = Message(base64.b64decode(f.read()))
+    #     m = Message(f.read())
+    # print(m.message)
+    # # m = Message("hello server".encode())
+    # s.send_buffered(m, e=client_encryption)
+    # # s.send_buffered(Message(client_encryption.generate_signature(m.message)), e=client_encryption)
+    # m = s.recv(e=client_encryption)
+    # print(m)
+
+    #############################TCP2##############################
+    client_socket = ClientSocket("TCP")
+    client_socket.connect(SERVER_ADDRESS)
+    print("connected to server")
+
     client_encryption = RSAEncyption()
     client_encryption.generate_keys()
 
-    s.send_buffered(Message(client_encryption.export_my_pubkey()))
-    m = s.recv()
+    client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
+    m = client_socket.recv()
     client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
-    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
-
-    # print(client_encryption.my_pubkey)
-    # print(client_encryption.other_pubkey)
-    #############################
+    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    ##############################
 
     with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
-    s.send_buffered(m, e=client_encryption)
-    # s.send_buffered(Message(client_encryption.generate_signature(m.message)), e=client_encryption)
-    m = s.recv(e=client_encryption)
-    print(m)
+    print("sending image")
+    client_socket.send_buffered(m, e=client_encryption)
+    client_socket.close()
 
 
 if __name__ == "__main__":
