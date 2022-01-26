@@ -19,3 +19,8 @@ s.send_buffered(Message(server_encryption.export_my_pubkey()), addr)
 print(f"client pubkey: {hashlib.sha256(server_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(server_encryption.other_pubkey.save_pkcs1()))
 print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hexdigest()}", type(server_encryption.export_my_pubkey()))
 ##########################
+
+# m, _ = s.recv()
+# print("recieved image")
+# with open("tmp.png", "wb") as f:
+#     f.write(m.get_plain_msg())
