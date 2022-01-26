@@ -1,4 +1,4 @@
-import hashlib, base64
+import hashlib
 import socket
 from Message import Message
 from RSAEncryption import RSAEncyption
