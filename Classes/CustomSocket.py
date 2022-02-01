@@ -103,8 +103,12 @@ class ClientSocket:
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end].encode()))
         else:
+            summary = 0
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end]))
+                summary += end - start
+                print(summary)
+            print("done")
 
     def recv(self, buffer_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> Message:
         """
@@ -129,6 +133,7 @@ class ClientSocket:
                     new_msg = False
                 else:
                     m += decrypt_cmd(data)
+                print(len(m.get_plain_msg()))
                 if m.is_complete:
                     return m, address
         else:
@@ -140,8 +145,10 @@ class ClientSocket:
                     new_msg = False
                 else:
                     m += decrypt_cmd(data)
+                print(len(m.get_plain_msg()))
                 if m.is_complete:
                     return m
+        
         
 
     def close(self) -> None:
@@ -199,6 +206,8 @@ def main():
     # s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
     # m, _ = s.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
+    # print(f"client pukey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
+    # print(f"server pukey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
     # ############################
     
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
@@ -255,13 +264,13 @@ def main():
     print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
     ##############################
 
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
         m = Message(f.read())
     print("sending image")
     client_socket.send_buffered(m, e=client_encryption)
-    print("sending signature")
-    sig = Message(client_encryption.generate_signature(m.message))
-    client_socket.send_buffered(sig, e=client_encryption)
+    # print("sending signature")
+    # sig = Message(client_encryption.generate_signature(m.message))
+    # client_socket.send_buffered(sig, e=client_encryption)
     client_socket.close()
 
 
