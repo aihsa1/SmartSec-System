@@ -1,5 +1,6 @@
 import os
 import cv2
+import gzip
 import hashlib
 import threading
 import numpy as np
@@ -48,33 +49,53 @@ INDICAOR_MESSAGES = {
 def communication():
     global frame_bytes, frame
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    s = ClientSocket()
+    # s = ClientSocket()
+    # client_encryption = RSAEncyption()
+    # client_encryption.generate_keys()
+
+    # ##########key exchange#############
+    # s.send_buffered(
+    #     Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
+    # m, _ = s.recv()
+    # client_encryption.load_others_pubkey(m.get_plain_msg())
+
+    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(
+    #     client_encryption.export_my_pubkey()))
+    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
+    #     client_encryption.other_pubkey.save_pkcs1()))
+    # ############################
+    # while frame is None:
+    #     sleep(.07)
+    # print("sending image")
+    # # cv2.imwrite("tmp.png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 8])
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    #     m = Message(f.read()*10)
+    # s.send_buffered(m, SERVER_ADDRESS)
+    # # s.send_buffered(Message(cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY).tobytes()), SERVER_ADDRESS)
+    # print("done")
+
+    client_socket = ClientSocket("TCP")
+    client_socket.connect(SERVER_ADDRESS)
+    print("connected to server")
+
     client_encryption = RSAEncyption()
     client_encryption.generate_keys()
 
-    ##########key exchange#############
-    s.send_buffered(
-        Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
-    m, _ = s.recv()
+    client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
+    m = client_socket.recv()
     client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(
-        client_encryption.export_my_pubkey()))
-    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
-        client_encryption.other_pubkey.save_pkcs1()))
-    ############################
-    while frame is None:
+    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+
+    while frame_bytes is None:
         sleep(.07)
-    print("sending image")
-    cv2.imwrite("tmp.png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 8])
-    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-    #     m = Message(f.read()*100)
-    # s.send_buffered(m, SERVER_ADDRESS)
-    # mutex = threading.Lock()
-    # mutex.acquire()
-    # s.send_buffered(Message(cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY).tobytes()), SERVER_ADDRESS)
-    # mutex.release()
-    print("done")
+    m = Message(frame_bytes)
+    client_socket.send_buffered(m, e=client_encryption)
+    sig = Message(client_encryption.generate_signature(m.message))
+    client_socket.send_buffered(sig, e=client_encryption)
+    input()
+    client_socket.close()
 
 
 #   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _

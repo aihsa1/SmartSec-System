@@ -118,7 +118,7 @@ class ClientSocket:
         :return: The message received and the origin.
         :rtype: tuple(Message, tuple(ip, port))
         """
-        buffer_size *= 8
+        # buffer_size *= 8
         if e is not None:
             decrypt_cmd = lambda x: e.decrypt(x)
         else:
@@ -265,15 +265,13 @@ def main():
     print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
     ##############################
 
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
         m = Message(f.read())
     print("sending image")
-    client_socket.send_buffered(m)
+    client_socket.send_buffered(m, e=client_encryption)
     print("sending signature")
-    # sig = Message(client_encryption.generate_signature(m.message))
-    # client_socket.send_buffered(sig, e=client_encryption)
-    client_socket.close()
-
+    sig = Message(client_encryption.generate_signature(m.message))
+    client_socket.send_buffered(sig, e=client_encryption)
 
 if __name__ == "__main__":
     main()
