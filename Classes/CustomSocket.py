@@ -107,7 +107,7 @@ class ClientSocket:
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end]))
                 summary += end - start
-                print(summary)
+                print(f"{summary/1_000_000} MB sent.")
             print("done")
 
     def recv(self, buffer_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> Message:
@@ -133,7 +133,7 @@ class ClientSocket:
                     new_msg = False
                 else:
                     m += decrypt_cmd(data)
-                print(len(m.get_plain_msg()))
+                print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
                     return m, address
         else:
@@ -145,7 +145,7 @@ class ClientSocket:
                     new_msg = False
                 else:
                     m += decrypt_cmd(data)
-                print(len(m.get_plain_msg()))
+                print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
                     return m
         
@@ -264,7 +264,7 @@ def main():
     print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
     ##############################
 
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\ilovepdf_images-extracted (1).zip", "rb") as f:
         m = Message(f.read())
     print("sending image")
     client_socket.send_buffered(m, e=client_encryption)
