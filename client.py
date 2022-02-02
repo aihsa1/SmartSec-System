@@ -3,10 +3,11 @@ import cv2
 import hashlib
 import threading
 import numpy as np
+from time import sleep
 import PySimpleGUI as sg
-from Scripts import add_classes_to_path
 from Classes.Timer import Timer
 from Classes.Message import Message
+from Scripts import add_classes_to_path
 from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
 from Classes.CustomSocket import ClientSocket
@@ -19,6 +20,8 @@ detect_fn = None
 paths = None
 files = None
 labels = None
+
+frame_bytes = None
 
 SERVER_ADDRESS = ("127.0.0.1", 14_000)
 
@@ -42,10 +45,11 @@ INDICAOR_MESSAGES = {
 
 
 def communication():
+    global frame_bytes
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
     s = ClientSocket()
     client_encryption = RSAEncyption()
-    client_encryption.generate_keys
+    client_encryption.generate_keys()
 
     ##########key exchange#############
     s.send_buffered(
@@ -58,6 +62,12 @@ def communication():
     print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
         client_encryption.other_pubkey.save_pkcs1()))
     ############################
+
+    while frame_bytes is None:
+        sleep(.07)
+    print("sending image")
+    s.send_buffered(Message(frame_bytes), SERVER_ADDRESS)
+    print("done")
 
 
 #   _____ _   _ _____ _______       _      _____ ____________   __  __  ____  _____  ______ _
@@ -203,7 +213,7 @@ def gui(detection_mode=True) -> None:
     :param detection_mode: True if the detection mode is enabled, False otherwise.
     :type detection_mode: bool
     """
-    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME
+    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes
 
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -254,6 +264,7 @@ def gui(detection_mode=True) -> None:
 
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
         window["-VIDEO-"].update(data=frame_bytes)
+        break
 
     cap.release()
     window.close()

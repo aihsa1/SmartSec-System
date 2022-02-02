@@ -198,21 +198,21 @@ class ServerSocket(ClientSocket):
 def main():
 
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    # s = ClientSocket()
-    # client_encryption = RSAEncyption()
-    # client_encryption.generate_keys()
+    s = ClientSocket()
+    client_encryption = RSAEncyption()
+    client_encryption.generate_keys()
 
-    # ##########key exchange#############
-    # s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
-    # m, _ = s.recv()
-    # client_encryption.load_others_pubkey(m.get_plain_msg())
-    # print(f"client pukey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
-    # print(f"server pukey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
-    # ############################
+    ##########key exchange#############
+    s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
+    m, _ = s.recv()
+    client_encryption.load_others_pubkey(m.get_plain_msg())
+    print(f"client pukey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
+    print(f"server pukey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
+    ############################
     
-    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-    #     m = Message(f.read())
-    # s.send_buffered(m, SERVER_ADDRESS, e=client_encryption)
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\tmp.pdf", "rb") as f:
+        m = Message(f.read())
+    s.send_buffered(m, SERVER_ADDRESS, e=client_encryption)
     # sig = Message(client_encryption.generate_signature(m.message))
     # s.send_buffered(sig, SERVER_ADDRESS, e=client_encryption)
 
@@ -249,29 +249,29 @@ def main():
     # print(m)
 
     #############################TCP2##############################
-    client_socket = ClientSocket("TCP")
-    client_socket.connect(SERVER_ADDRESS)
-    print("connected to server")
+    # client_socket = ClientSocket("TCP")
+    # client_socket.connect(SERVER_ADDRESS)
+    # print("connected to server")
 
-    client_encryption = RSAEncyption()
-    client_encryption.generate_keys()
+    # client_encryption = RSAEncyption()
+    # client_encryption.generate_keys()
 
-    client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
-    m = client_socket.recv()
-    client_encryption.load_others_pubkey(m.get_plain_msg())
+    # client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
+    # m = client_socket.recv()
+    # client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
-    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
-    ##############################
+    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    # ##############################
 
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\ilovepdf_images-extracted (1).zip", "rb") as f:
-        m = Message(f.read())
-    print("sending image")
-    client_socket.send_buffered(m, e=client_encryption)
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\ilovepdf_images-extracted (1).zip", "rb") as f:
+    #     m = Message(f.read())
+    # print("sending image")
+    # client_socket.send_buffered(m, e=client_encryption)
     # print("sending signature")
     # sig = Message(client_encryption.generate_signature(m.message))
     # client_socket.send_buffered(sig, e=client_encryption)
-    client_socket.close()
+    # client_socket.close()
 
 
 if __name__ == "__main__":
