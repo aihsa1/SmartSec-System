@@ -22,6 +22,7 @@ files = None
 labels = None
 
 frame_bytes = None
+frame = None
 
 SERVER_ADDRESS = ("127.0.0.1", 14_000)
 
@@ -45,7 +46,7 @@ INDICAOR_MESSAGES = {
 
 
 def communication():
-    global frame_bytes
+    global frame_bytes, frame
     SERVER_ADDRESS = ("127.0.0.1", 14_000)
     s = ClientSocket()
     client_encryption = RSAEncyption()
@@ -62,11 +63,17 @@ def communication():
     print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
         client_encryption.other_pubkey.save_pkcs1()))
     ############################
-
-    while frame_bytes is None:
+    while frame is None:
         sleep(.07)
     print("sending image")
-    s.send_buffered(Message(frame_bytes), SERVER_ADDRESS)
+    cv2.imwrite("tmp.png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 8])
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    #     m = Message(f.read()*100)
+    # s.send_buffered(m, SERVER_ADDRESS)
+    # mutex = threading.Lock()
+    # mutex.acquire()
+    # s.send_buffered(Message(cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY).tobytes()), SERVER_ADDRESS)
+    # mutex.release()
     print("done")
 
 
@@ -213,7 +220,7 @@ def gui(detection_mode=True) -> None:
     :param detection_mode: True if the detection mode is enabled, False otherwise.
     :type detection_mode: bool
     """
-    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes
+    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes, frame
 
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -261,10 +268,12 @@ def gui(detection_mode=True) -> None:
                 del t0
                 t0_exists = False
             gui_weapon_indicator(window, detections, confident)
-
+        mutex = threading.Lock()
+        mutex.acquire()
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+        mutex.release()
         window["-VIDEO-"].update(data=frame_bytes)
-        break
+        # break
 
     cap.release()
     window.close()

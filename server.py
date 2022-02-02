@@ -20,9 +20,9 @@ print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hex
     server_encryption.export_my_pubkey()))
 ##########################
 
-m, _ = s.recv(e=server_encryption)
+m, _ = s.recv()
 print("recieved image")
-with open("tmp.jpg", "wb") as f:
+with open("tmp.png", "wb") as f:
     f.write(m.get_plain_msg())
 
 # sig, _ = s.recv(e=server_encryption)
@@ -46,9 +46,9 @@ with open("tmp.jpg", "wb") as f:
 #     server_encryption.export_my_pubkey()))
 # ##########################
 
-# m = client.recv(e=server_encryption)
+# m = client.recv()
 # print("recieved image")
-# with open("tmp.zip", "wb") as f:
+# with open("tmp.pdf", "wb") as f:
 #     f.write(m.get_plain_msg())
 
 # sig, _ = s.recv(e=server_encryption)
