@@ -1,6 +1,7 @@
 import os
 import cv2
 import pickle
+import json
 import gzip
 import hashlib
 import threading
@@ -32,11 +33,9 @@ MIN_SCORE_THRESH = 0.5
 MAX_BOXES_TO_DRAW = 5
 MIN_TEST_TIME = 2  # the time take to detect the weapon in seconds
 
-INDICAOR_MESSAGES = {
-    "confident_found": "Weapon Found!",
-    "potential_found": "Potential Weapon Found!",
-    "not_found": "No Weapon Found!",
-}
+INDICAOR_MESSAGES = json.loads(
+    open(os.path.join("Configs", "INDICATOR_MESSAGES.json")).read()
+)
 
 
 #    _____ ____  __  __ __  __
@@ -86,8 +85,10 @@ def communication():
     m = client_socket.recv()
     client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
-    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(
+        client_encryption.export_my_pubkey()))
+    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
+        client_encryption.other_pubkey.save_pkcs1()))
 
     while frame is None:
         sleep(.07)

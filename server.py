@@ -53,18 +53,19 @@ def comm():
     # m = client.recv(e=server_encryption)
     m = client.recv()
     print("recieved image")
-    with open("tmp.png", "wb") as f:
-        f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())
+    # with open("tmp.png", "wb") as f:
+    #     f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())
     
     # sig = client.recv(e=server_encryption)
     # print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
-
-    # while True:
-    #     m = client.recv()
-    #     cv2.imshow("image", pickle.loads(m.get_plain_msg()))
-    #     if cv2.waitKey(10) & 0xFF == ord('q'):
-    #         cv2.destroyAllWindows()
-    #         break
+    
+    while True:
+        cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            break
+    client.close()
+    s.close
 
 
 if __name__ == "__main__":
