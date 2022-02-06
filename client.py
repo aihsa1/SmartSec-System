@@ -1,5 +1,6 @@
 import os
 import cv2
+import pickle
 import gzip
 import hashlib
 import threading
@@ -88,13 +89,13 @@ def communication():
     print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
     print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
 
-    while frame_bytes is None:
+    while frame is None:
         sleep(.07)
-    m = Message(frame_bytes)
-    client_socket.send_buffered(m, e=client_encryption)
-    sig = Message(client_encryption.generate_signature(m.message))
-    client_socket.send_buffered(sig, e=client_encryption)
-    input()
+    m = Message(pickle.dumps(frame))
+    # client_socket.send_buffered(m, e=client_encryption)
+    client_socket.send_buffered(m)
+    # sig = Message(client_encryption.generate_signature(m.message))
+    # client_socket.send_buffered(sig, e=client_encryption)
     client_socket.close()
 
 

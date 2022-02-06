@@ -1,6 +1,7 @@
-
 import gzip
 import hashlib
+import cv2
+import pickle
 from Scripts import add_classes_to_path
 from Classes.Message import Message
 from Classes.RSAEncryption import RSAEncyption
@@ -49,12 +50,22 @@ def comm():
         server_encryption.export_my_pubkey()))
     ##########################
 
-    m = client.recv(e=server_encryption)
+    # m = client.recv(e=server_encryption)
+    m = client.recv()
     print("recieved image")
     with open("tmp.png", "wb") as f:
-        f.write(m.get_plain_msg())
+        f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())
+    
+    # sig = client.recv(e=server_encryption)
+    # print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
 
-    sig = client.recv(e=server_encryption)
-    print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
+    # while True:
+    #     m = client.recv()
+    #     cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+    #     if cv2.waitKey(10) & 0xFF == ord('q'):
+    #         cv2.destroyAllWindows()
+    #         break
+
+
 if __name__ == "__main__":
     comm()
