@@ -2,7 +2,8 @@ import hashlib
 import socket
 from Message import Message
 from RSAEncryption import RSAEncyption
-RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
+# RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
+RECV_BUFFER_SIZE = 2048
 
 #TODO PROTOCOL IMPLEMENTATION
 class ClientSocket:
@@ -128,7 +129,7 @@ class ClientSocket:
         if self.protocol == "UDP":
             recv_cmd = self.socket.recvfrom
             while True:
-                data, address = recv_cmd(buffer_size)
+                data, address = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if new_msg:
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
@@ -140,7 +141,7 @@ class ClientSocket:
         else:
            recv_cmd = self.socket.recv
            while True:
-                data = recv_cmd(buffer_size)
+                data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if new_msg:
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False

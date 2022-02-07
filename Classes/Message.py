@@ -43,12 +43,12 @@ class Message:
         :type plain_data: str
         :param header_size: The size of the header of the communication protocol
         :type header_size: int
-        :return: The message object
+        :return: The message object if the plain data is not empty, otherwise, None
         :rtype: Message
         """
         space = b" " if isinstance(plain_data, bytes) else " "
         msg = plain_data[header_size:]
-        if int(plain_data[:plain_data.find(space)]) == len(msg):
+        if len(msg) == 0 or int(plain_data[:plain_data.find(space)]) == len(msg):
             return cls(msg, header_size)
         return cls(msg, header_size, int(plain_data[:plain_data.find(space)]))
 

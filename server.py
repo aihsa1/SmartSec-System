@@ -7,6 +7,7 @@ from Classes.Message import Message
 from Classes.RSAEncryption import RSAEncyption
 from Classes.CustomSocket import ClientSocket, ServerSocket
 
+
 def comm():
     # s = ServerSocket()
     # s.bind_and_listen(("0.0.0.0", 14_000))
@@ -50,20 +51,19 @@ def comm():
         server_encryption.export_my_pubkey()))
     ##########################
 
-    # m = client.recv(e=server_encryption)
-    m = client.recv()
-    print("recieved image")
-    # with open("tmp.png", "wb") as f:
-    #     f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())
-    
-    # sig = client.recv(e=server_encryption)
-    # print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
-    
     while True:
-        cv2.imshow("image", pickle.loads(m.get_plain_msg()))
-        if cv2.waitKey(10) & 0xFF == ord('q'):
+        # m = client.recv(e=server_encryption)
+        m = client.recv()
+        print("recieved image")
+        # with open("tmp.png", "wb") as f:
+        #     f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())
+
+        # sig = client.recv(e=server_encryption)
+        # print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
+        if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
+        cv2.imshow("image", pickle.loads(m.get_plain_msg()))
     client.close()
     s.close
 
