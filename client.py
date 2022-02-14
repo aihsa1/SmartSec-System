@@ -96,7 +96,12 @@ def communication():
     while is_cap_open:
         m = Message(pickle.dumps(frame))
         # client_socket.send_buffered(m, e=client_encryption)
-        client_socket.send_buffered(m)
+        try:
+            client_socket.send_buffered(m)
+        except (ConnectionResetError, ConnectionAbortedError):
+            print("server is closed")
+            break
+
         # sig = Message(client_encryption.generate_signature(m.message))
         # client_socket.send_buffered(sig, e=client_encryption)
         
@@ -332,6 +337,7 @@ def main(detection_mode=True) -> None:
         comm_thread = threading.Thread(target=communication, daemon=True)
         comm_thread.start()
         gui(detection_mode)
+        # gui(False)
         comm_thread.join()
 
 

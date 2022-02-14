@@ -3,7 +3,7 @@ import socket
 from Message import Message
 from RSAEncryption import RSAEncyption
 # RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
-RECV_BUFFER_SIZE = 2048
+RECV_BUFFER_SIZE = 8192
 
 #TODO PROTOCOL IMPLEMENTATION
 class ClientSocket:
