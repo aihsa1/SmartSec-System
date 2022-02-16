@@ -2,6 +2,7 @@ import hashlib
 import socket
 from Message import Message
 from RSAEncryption import RSAEncyption
+from AESEncryption import AESEncryption
 # RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
 RECV_BUFFER_SIZE = 8192
 
@@ -87,6 +88,7 @@ class ClientSocket:
         :type batch_size: int
         :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
         :type e: RSAEncyption
+
         """
         if self.protocol == "UDP":
             send_cmd = lambda x: self.socket.sendto(x, addr)
@@ -100,9 +102,12 @@ class ClientSocket:
             encrypt_cmd = lambda x: e.encrypt(x)
         else:
             encrypt_cmd = lambda x: x
+        
         if isinstance(m.message, str):
             for start, end in m.splitted_data_generator(batch_size):
                 send_cmd(encrypt_cmd(m.message[start: end].encode()))
+                summary += end - start
+                print(f"{summary/1_000_000} MB sent.")
         else:
             summary = 0
             for start, end in m.splitted_data_generator(batch_size):
@@ -251,28 +256,48 @@ def main():
     # print(m)
 
     #############################TCP2##############################
+    # client_socket = ClientSocket("TCP")
+    # client_socket.connect(SERVER_ADDRESS)
+    # print("connected to server")
+
+    # client_encryption = RSAEncyption()
+    # client_encryption.generate_keys()
+
+    # client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
+    # m = client_socket.recv()
+    # client_encryption.load_others_pubkey(m.get_plain_msg())
+
+    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    # ##############################
+
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
+    #     m = Message(f.read())
+    # print("sending image")
+    # client_socket.send_buffered(m, e=client_encryption)
+    # print("sending signature")
+    # sig = Message(client_encryption.generate_signature(m.message))
+    # client_socket.send_buffered(sig, e=client_encryption)
+
+    #################TCP AES#######################
     client_socket = ClientSocket("TCP")
     client_socket.connect(SERVER_ADDRESS)
     print("connected to server")
 
-    client_encryption = RSAEncyption()
-    client_encryption.generate_keys()
+    client_rsa = RSAEncyption()
+    client_rsa.generate_keys()
 
-    client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
+    client_socket.send_buffered(Message(client_rsa.export_my_pubkey()))
     m = client_socket.recv()
-    client_encryption.load_others_pubkey(m.get_plain_msg())
+    client_rsa.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
-    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
-    ##############################
+    print(f"client pubkey RSA: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}", type(client_rsa.export_my_pubkey()))
+    print(f"server pubkey RSA: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(client_rsa.other_pubkey.save_pkcs1()))
 
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
-        m = Message(f.read())
-    print("sending image")
-    client_socket.send_buffered(m, e=client_encryption)
-    print("sending signature")
-    sig = Message(client_encryption.generate_signature(m.message))
-    client_socket.send_buffered(sig, e=client_encryption)
+    client_aes = AESEncryption()
+    client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
+    print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+
 
 if __name__ == "__main__":
     main()

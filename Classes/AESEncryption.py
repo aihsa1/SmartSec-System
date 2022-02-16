@@ -46,10 +46,12 @@ class AESEncryption:
     def _extract_encrypted_messege(self, ciphertext):
         return ciphertext[AESEncryption.KEY_SIZE:]
 
-    def encrypt(self, plaintext):
+    def encrypt(self, plaintext, merged=True):
         self._new_nonce()
         ret = self.aes.nonce, self.aes.encrypt(plaintext)
-        return ret
+        if not merged:
+            return ret
+        return (ret[0] + ret[1])
 
     def decrypt(self, text):
         nonce, ciphertext = self._extract_nonce(
@@ -88,19 +90,19 @@ def main():
     #     plaintext = cipher.decrypt(nonce + ciphertext)
     #     print(plaintext2, cipher.verify_tag(tag[:]))
     # ----------------------------------------------------------------------------------
-    
+
     cipher = AESEncryption()
     plaintext = b"Hello World"
     cipher2 = AESEncryption(cipher.key)
     for _ in range(20):
-        nonce, ciphertext = cipher.encrypt(plaintext)
+        nonce, ciphertext = cipher.encrypt(plaintext, False)
         tag = cipher.generate_tag()
         plaintext2 = cipher2.decrypt(nonce + ciphertext)
         print(cipher2.verify_tag(tag))
         print(nonce)
-
         print(plaintext2)
-        nonce, ciphertext = cipher2.encrypt(plaintext)
+
+        nonce, ciphertext = cipher2.encrypt(plaintext, False)
         tag = cipher2.generate_tag()        
         plaintext2 = cipher.decrypt(nonce + ciphertext)
         print(cipher.verify_tag(tag))
