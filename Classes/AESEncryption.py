@@ -6,6 +6,9 @@ class AESEncryption:
     KEY_SIZE = 16
 
     def __init__(self, key=None) -> None:
+        """
+        
+        """
         if key is None:
             # encrpyiton mode
             self.key = os.urandom(AESEncryption.KEY_SIZE)
@@ -86,19 +89,23 @@ def main():
     #     print(plaintext2, cipher.verify_tag(tag[:]))
     # ----------------------------------------------------------------------------------
     
-    # cipher = AESEncryption()
-    # plaintext = b"Hello World"
-    # cipher2 = AESEncryption(cipher.key)
-    # for _ in range(20):
-    #     nonce, ciphertext = cipher.encrypt(plaintext)
-    #     plaintext2 = cipher2.decrypt(nonce + ciphertext)
-    #     print(nonce)
+    cipher = AESEncryption()
+    plaintext = b"Hello World"
+    cipher2 = AESEncryption(cipher.key)
+    for _ in range(20):
+        nonce, ciphertext = cipher.encrypt(plaintext)
+        tag = cipher.generate_tag()
+        plaintext2 = cipher2.decrypt(nonce + ciphertext)
+        print(cipher2.verify_tag(tag))
+        print(nonce)
 
-    #     print(plaintext2)
-    #     nonce, ciphertext = cipher2.encrypt(plaintext)
-    #     plaintext2 = cipher.decrypt(nonce + ciphertext)
-    #     print(nonce)
-    #     print(plaintext2)
+        print(plaintext2)
+        nonce, ciphertext = cipher2.encrypt(plaintext)
+        tag = cipher2.generate_tag()        
+        plaintext2 = cipher.decrypt(nonce + ciphertext)
+        print(cipher.verify_tag(tag))
+        print(nonce)
+        print(plaintext2)
 
 
 
