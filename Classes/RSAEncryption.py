@@ -3,6 +3,15 @@ import rsa
 
 
 class RSAEncyption:
+    """
+    This class is an interface to the RSA algorithm. It is used to encrypt and decrypt messages easily.
+    :HASH_METHOD: The hash method used to generate the signature.
+    :type HASH_METHOD: str
+    :var KEY_SIZE: The size of the key used for encryption and decryption.
+    :type KEY_SIZE: int
+    :var RECV_BUFFER_SIZE: The size of the buffer used to receive data from the socket. The value is calculated from the KEY_SIZE variable.
+    :type RECV_BUFFER_SIZE: int
+    """
     HASH_METHOD = "SHA-256"
     KEY_SIZE = 1024
     RECV_BUFFER_SIZE = rsa.common.byte_size(rsa.newkeys(KEY_SIZE)[0].n)
