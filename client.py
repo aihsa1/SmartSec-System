@@ -1,8 +1,8 @@
 import os
 import cv2
-import pickle
 import json
 import gzip
+import pickle
 import hashlib
 import threading
 import numpy as np
@@ -11,10 +11,11 @@ import PySimpleGUI as sg
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Scripts import add_classes_to_path
-from Screens.welcome import show_welcome_client
-from Screens.loading import show_loading_screen
 from Classes.CustomSocket import ClientSocket
 from Classes.RSAEncryption import RSAEncyption
+from Screens.welcome import show_welcome_client
+from Screens.loading import show_loading_screen
+from Classes.AESEncryption import AESEncryption
 
 
 model = None
@@ -79,31 +80,36 @@ def communication():
     client_socket.connect(SERVER_ADDRESS)
     print("connected to server")
 
-    client_encryption = RSAEncyption()
-    client_encryption.generate_keys()
+    client_rsa = RSAEncyption()
+    client_rsa.generate_keys()
 
-    client_socket.send_buffered(Message(client_encryption.export_my_pubkey()))
+    client_socket.send_buffered(Message(client_rsa.export_my_pubkey()))
     m = client_socket.recv()
-    client_encryption.load_others_pubkey(m.get_plain_msg())
+    client_rsa.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(
-        client_encryption.export_my_pubkey()))
-    print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
-        client_encryption.other_pubkey.save_pkcs1()))
+    print(f"client pubkey: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}", type(
+        client_rsa.export_my_pubkey()))
+    print(f"server pubkey: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
+        client_rsa.other_pubkey.save_pkcs1()))
+
+    client_aes = AESEncryption()
+    client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
+    print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
     while frame is None:
         sleep(.07)
     while is_cap_open:
         m = Message(pickle.dumps(frame))
-        # client_socket.send_buffered(m, e=client_encryption)
         try:
             client_socket.send_buffered(m)
+            # client_socket.send_buffered(m, e=client_rsa)
+            # client_socket.send_buffered(m, e=client_aes)
         except (ConnectionResetError, ConnectionAbortedError):
             print("server is closed")
             break
 
-        # sig = Message(client_encryption.generate_signature(m.message))
-        # client_socket.send_buffered(sig, e=client_encryption)
+        # sig = Message(client_rsa.generate_signature(m.message))
+        # client_socket.send_buffered(sig, e=client_rsa)
         
     client_socket.close()
 
@@ -336,8 +342,8 @@ def main(detection_mode=True) -> None:
         # run the main gui with detection + server connection
         comm_thread = threading.Thread(target=communication, daemon=True)
         comm_thread.start()
-        gui(detection_mode)
-        # gui(False)
+        # gui(detection_mode)
+        gui(False)
         comm_thread.join()
 
 

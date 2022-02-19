@@ -3,7 +3,7 @@ import socket
 from Message import Message
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
-# RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
+RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
 RECV_BUFFER_SIZE = 8192
 
 #TODO PROTOCOL IMPLEMENTATION
@@ -77,7 +77,7 @@ class ClientSocket:
         else:
             send_cmd(encrypt_cmd(m.message))
 
-    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = RECV_BUFFER_SIZE - 11, e: RSAEncyption = None) -> None:
+    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> None:
         """
         This function is responsible for BUFFERING AND SENDING message to the server.
         :param m: The message to send.
@@ -90,6 +90,11 @@ class ClientSocket:
         :type e: RSAEncyption
 
         """
+        if e is None or isinstance(e, RSAEncyption):
+            batch_size -= 11
+        else:
+            batch_size -= AESEncryption.KEY_SIZE
+        
         if self.protocol == "UDP":
             send_cmd = lambda x: self.socket.sendto(x, addr)
         else:
@@ -103,15 +108,17 @@ class ClientSocket:
         else:
             encrypt_cmd = lambda x: x
         
+        summary = 0
         if isinstance(m.message, str):
             for start, end in m.splitted_data_generator(batch_size):
-                send_cmd(encrypt_cmd(m.message[start: end].encode()))
+                b = encrypt_cmd(m.message[start: end].encode())
+                send_cmd(b)
                 summary += end - start
                 print(f"{summary/1_000_000} MB sent.")
         else:
-            summary = 0
             for start, end in m.splitted_data_generator(batch_size):
-                send_cmd(encrypt_cmd(m.message[start: end]))
+                b = encrypt_cmd(m.message[start: end])
+                send_cmd(b)
                 summary += end - start
                 print(f"{summary/1_000_000} MB sent.")
             print("done")
@@ -124,7 +131,6 @@ class ClientSocket:
         :return: The message received and the origin.
         :rtype: tuple(Message, tuple(ip, port))
         """
-        # buffer_size *= 8
         if e is not None:
             decrypt_cmd = lambda x: e.decrypt(x)
         else:
@@ -146,7 +152,11 @@ class ClientSocket:
         else:
            recv_cmd = self.socket.recv
            while True:
-                data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
+                # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
+                if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
+                    data = recv_cmd(m.message_size - len(m.get_plain_msg()) + AESEncryption.KEY_SIZE)
+                else:
+                    data = recv_cmd(buffer_size)
                 if new_msg:
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
@@ -176,7 +186,6 @@ class ServerSocket(ClientSocket):
         :type protocol: str("TCP", "UDP")
         """
         super().__init__(protocol=protocol)
-        self.is_bound = False
 
     def bind_and_listen(self, addr: tuple):
         """
@@ -297,6 +306,13 @@ def main():
     client_aes = AESEncryption()
     client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+
+    n = 100_000
+    m = Message(b"hi"*n)
+    client_socket.send_buffered(m, e=client_aes)
+    # client_socket.send_buffered(m)
+    print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+    
 
 
 if __name__ == "__main__":

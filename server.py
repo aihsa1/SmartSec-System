@@ -2,9 +2,10 @@ import gzip
 import hashlib
 import cv2
 import pickle
-from Scripts import add_classes_to_path
 from Classes.Message import Message
+from Scripts import add_classes_to_path
 from Classes.RSAEncryption import RSAEncyption
+from Classes.AESEncryption import AESEncryption
 from Classes.CustomSocket import ClientSocket, ServerSocket
 
 
@@ -37,22 +38,27 @@ def comm():
     s.bind_and_listen(("0.0.0.0", 14_000))
     client, addr = s.accept()
     client = ClientSocket.create_client_socket(client)
-    server_encryption = RSAEncyption()
-    server_encryption.generate_keys()
+    server_rsa = RSAEncyption()
+    server_rsa.generate_keys()
 
     ########key exchange#########
     m = client.recv()
-    server_encryption.load_others_pubkey(m.get_plain_msg())
-    client.send_buffered(Message(server_encryption.export_my_pubkey()))
+    server_rsa.load_others_pubkey(m.get_plain_msg())
+    client.send_buffered(Message(server_rsa.export_my_pubkey()))
 
-    print(f"client pubkey: {hashlib.sha256(server_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
-        server_encryption.other_pubkey.save_pkcs1()))
-    print(f"server pubkey: {hashlib.sha256(server_encryption.export_my_pubkey()).hexdigest()}", type(
-        server_encryption.export_my_pubkey()))
+    print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
+        server_rsa.other_pubkey.save_pkcs1()))
+    print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(
+        server_rsa.export_my_pubkey()))
+    
+    key_message = client.recv(e=server_rsa)
+    server_aes = AESEncryption(key=key_message.get_plain_msg())
+    print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
     ##########################
 
     while True:
-        # m = client.recv(e=server_encryption)
+        # m = client.recv(e=server_rsa)
+        # m = client.recv(e=server_aes)
         m = client.recv()
         print("recieved image")
         # with open("tmp.png", "wb") as f:

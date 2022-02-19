@@ -111,8 +111,13 @@ print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hex
 print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(server_rsa.export_my_pubkey()))
 
 key_message = client_socket.recv(e=server_rsa)
-client_aes = AESEncryption(key=key_message.get_plain_msg())
-print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+server_aes = AESEncryption(key=key_message.get_plain_msg())
+print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
+
+# m = client_socket.recv()
+m = client_socket.recv(e=server_aes)
+print(m.get_plain_msg() == b"hi"*100_000)
+print(hashlib.sha256(m.get_plain_msg()).hexdigest())
 
 client_socket.close()
 server_socket.close()
