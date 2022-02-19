@@ -4,7 +4,7 @@ from Message import Message
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
-RECV_BUFFER_SIZE = 8192
+RECV_BUFFER_SIZE = 16_384
 
 #TODO PROTOCOL IMPLEMENTATION
 class ClientSocket:
@@ -140,7 +140,7 @@ class ClientSocket:
         if self.protocol == "UDP":
             recv_cmd = self.socket.recvfrom
             while True:
-                data, address = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
+                data, address = recv_cmd(m.message_size - len(m.get_plain_msg()) + AESEncryption.KEY_SIZE) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if new_msg:
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
@@ -289,30 +289,51 @@ def main():
     # client_socket.send_buffered(sig, e=client_encryption)
 
     #################TCP AES#######################
-    client_socket = ClientSocket("TCP")
-    client_socket.connect(SERVER_ADDRESS)
-    print("connected to server")
+    # client_socket = ClientSocket("TCP")
+    # client_socket.connect(SERVER_ADDRESS)
+    # print("connected to server")
 
+    # client_rsa = RSAEncyption()
+    # client_rsa.generate_keys()
+
+    # client_socket.send_buffered(Message(client_rsa.export_my_pubkey()))
+    # m = client_socket.recv()
+    # client_rsa.load_others_pubkey(m.get_plain_msg())
+
+    # print(f"client pubkey RSA: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}", type(client_rsa.export_my_pubkey()))
+    # print(f"server pubkey RSA: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(client_rsa.other_pubkey.save_pkcs1()))
+
+    # client_aes = AESEncryption()
+    # client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
+    # print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
+    #     m = Message(f.read())
+    # client_socket.send_buffered(m, e=client_aes)
+    # # client_socket.send_buffered(m)
+    # print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+    
+
+    ############UDP AES#############################
+    s = ClientSocket()
     client_rsa = RSAEncyption()
     client_rsa.generate_keys()
 
-    client_socket.send_buffered(Message(client_rsa.export_my_pubkey()))
-    m = client_socket.recv()
+    ##########key exchange#############
+    s.send_buffered(Message(client_rsa.export_my_pubkey()), SERVER_ADDRESS)
+    m, _ = s.recv()
     client_rsa.load_others_pubkey(m.get_plain_msg())
-
-    print(f"client pubkey RSA: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}", type(client_rsa.export_my_pubkey()))
-    print(f"server pubkey RSA: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(client_rsa.other_pubkey.save_pkcs1()))
+    print(f"client pukey: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}")
+    print(f"server pukey: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}")
 
     client_aes = AESEncryption()
-    client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
+    s.send_buffered(Message(client_aes.key), SERVER_ADDRESS, e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
-    n = 100_000
-    m = Message(b"hi"*n)
-    client_socket.send_buffered(m, e=client_aes)
-    # client_socket.send_buffered(m)
+    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
+        m = Message(f.read())
+    s.send_buffered(m, SERVER_ADDRESS, e=client_aes)
     print(hashlib.sha256(m.get_plain_msg()).hexdigest())
-    
 
 
 if __name__ == "__main__":
