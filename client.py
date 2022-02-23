@@ -290,6 +290,7 @@ def gui(detection_mode=True) -> None:
             elif t0_exists:
                 del t0
                 t0_exists = False
+                window.refresh()
             gui_weapon_indicator(window, detections, confident)
         mutex = threading.Lock()
         mutex.acquire()
