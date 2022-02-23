@@ -8,14 +8,15 @@ import threading
 import numpy as np
 from time import sleep
 import PySimpleGUI as sg
+from Scripts import add_classes_to_path
 from Classes.Timer import Timer
 from Classes.Message import Message
-from Scripts import add_classes_to_path
 from Classes.CustomSocket import ClientSocket
 from Classes.RSAEncryption import RSAEncyption
+from Classes.AESEncryption import AESEncryption
 from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
-from Classes.AESEncryption import AESEncryption
+from Screens.detection_gui import generate_detection_gui_layout
 
 
 model = None
@@ -259,23 +260,7 @@ def gui(detection_mode=True) -> None:
     """
     global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes, frame, is_cap_open
 
-    cap = cv2.VideoCapture(0)
-    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
-
-    w, h = int(WIDTH_WEBCAM * 1.3), int(HEIGHT_WEBCAM * 1.3)
-
-    layout = [
-        [sg.Text("Webcam Feed With Detections", justification="center",
-                 font=(*sg.DEFAULT_FONT, "bold underline"), key="-TITLE-")],
-        [sg.Text("Weapon Not Found", justification="left",
-                 key="-FOUND-INDICATOR-")],
-        [sg.Image(filename='', key="-VIDEO-", enable_events=True, size=(WIDTH_WEBCAM, HEIGHT_WEBCAM), pad=(((w - WIDTH_WEBCAM)
-                  * 0.5, (h - HEIGHT_WEBCAM) * 0.5, (0, 0))), background_color="black")],
-        [sg.VSeparator()],
-
-    ]
+    layout, w, h = generate_detection_gui_layout()
 
     cap = cv2.VideoCapture(0)
     window = sg.Window('SmartSec Client', layout, size=(w, h))
@@ -340,11 +325,12 @@ def main(detection_mode=True) -> None:
         loading_thread.join()
 
         # run the main gui with detection + server connection
-        comm_thread = threading.Thread(target=communication, daemon=True)
-        comm_thread.start()
-        # gui(detection_mode)
-        gui(False)
-        comm_thread.join()
+        if event == "-CONNECT-SERVER-BUTTON-":
+            comm_thread = threading.Thread(target=communication, daemon=True)
+            comm_thread.start()
+        gui(detection_mode)
+        # gui(False)
+        comm_thread.join() if "comm_thread" in locals() else None
 
 
 if __name__ == "__main__":

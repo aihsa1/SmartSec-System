@@ -57,19 +57,13 @@ def comm():
     ##########################
 
     while True:
-        # m = client.recv(e=server_rsa)
         try:
             m = client.recv(e=server_aes)
         except ValueError:
             print("client is closed.")
             break
-        # m = client.recv()
         print("recieved image")
-        # with open("tmp.png", "wb") as f:
-        #     f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())
 
-        # sig = client.recv(e=server_encryption)
-        # print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
         if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
