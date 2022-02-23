@@ -69,7 +69,8 @@ def comm():
             break
         cv2.imshow("image", pickle.loads(m.get_plain_msg()))
     client.close()
-    s.close
+    s.close()
+    
 
 
 if __name__ == "__main__":
