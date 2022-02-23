@@ -58,7 +58,11 @@ def comm():
 
     while True:
         # m = client.recv(e=server_rsa)
-        m = client.recv(e=server_aes)
+        try:
+            m = client.recv(e=server_aes)
+        except ValueError:
+            print("client is closed.")
+            break
         # m = client.recv()
         print("recieved image")
         # with open("tmp.png", "wb") as f:
