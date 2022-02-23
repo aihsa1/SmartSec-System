@@ -93,57 +93,57 @@ from Classes.CustomSocket import ServerSocket, ClientSocket
 
 # ############TCP AES##################
 
-# server_socket = ServerSocket("TCP")
-# server_socket.bind_and_listen(("0.0.0.0", 14_000))
-# client_socket, addr = server_socket.accept()
-# client_socket = ClientSocket.create_client_socket(client_socket)
+server_socket = ServerSocket("TCP")
+server_socket.bind_and_listen(("0.0.0.0", 14_000))
+client_socket, addr = server_socket.accept()
+client_socket = ClientSocket.create_client_socket(client_socket)
 
-# print("client connencted")
-# ###########key exchange#########
-# server_rsa = RSAEncyption()
-# server_rsa.generate_keys()
-
-# m = client_socket.recv()
-# server_rsa.load_others_pubkey(m.get_plain_msg())
-# client_socket.send_buffered(Message(server_rsa.export_my_pubkey()))
-
-# print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(server_rsa.other_pubkey.save_pkcs1()))
-# print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(server_rsa.export_my_pubkey()))
-
-# key_message = client_socket.recv(e=server_rsa)
-# server_aes = AESEncryption(key=key_message.get_plain_msg())
-# print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
-
-# # m = client_socket.recv()
-# m = client_socket.recv(e=server_aes)
-# print(hashlib.sha256(m.get_plain_msg()).hexdigest())
-
-# with open(r"C:\Users\USER\Desktop\Cyber\PRJ\tmp.pdf", "wb") as f:
-#     f.write(m.get_plain_msg())
-
-# client_socket.close()
-# server_socket.close()
-
-
-############TCP UDP##################
-
-s = ServerSocket()
-s.bind_and_listen(("127.0.0.1", 14_000))
+print("client connencted")
+###########key exchange#########
 server_rsa = RSAEncyption()
 server_rsa.generate_keys()
 
-########key exchange#########
-m, addr = s.recv()
+m = client_socket.recv()
 server_rsa.load_others_pubkey(m.get_plain_msg())
-s.send_buffered(Message(server_rsa.export_my_pubkey()), addr)
+client_socket.send_buffered(Message(server_rsa.export_my_pubkey()))
 
 print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(server_rsa.other_pubkey.save_pkcs1()))
 print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(server_rsa.export_my_pubkey()))
 
-key_message, _ = s.recv(e=server_rsa)
+key_message = client_socket.recv(e=server_rsa)
 server_aes = AESEncryption(key=key_message.get_plain_msg())
 print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
 
-m, _ = s.recv(e=server_aes)
+# m = client_socket.recv()
+m = client_socket.recv(e=server_aes)
+print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+
 with open(r"C:\Users\USER\Desktop\Cyber\PRJ\tmp.pdf", "wb") as f:
     f.write(m.get_plain_msg())
+
+client_socket.close()
+server_socket.close()
+
+
+############TCP UDP##################
+
+# s = ServerSocket()
+# s.bind_and_listen(("127.0.0.1", 14_000))
+# server_rsa = RSAEncyption()
+# server_rsa.generate_keys()
+
+# ########key exchange#########
+# m, addr = s.recv()
+# server_rsa.load_others_pubkey(m.get_plain_msg())
+# s.send_buffered(Message(server_rsa.export_my_pubkey()), addr)
+
+# print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(server_rsa.other_pubkey.save_pkcs1()))
+# print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(server_rsa.export_my_pubkey()))
+
+# key_message, _ = s.recv(e=server_rsa)
+# server_aes = AESEncryption(key=key_message.get_plain_msg())
+# print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
+
+# m, _ = s.recv(e=server_aes)
+# with open(r"C:\Users\USER\Desktop\Cyber\PRJ\tmp.pdf", "wb") as f:
+#     f.write(m.get_plain_msg())
