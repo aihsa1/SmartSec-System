@@ -2,14 +2,20 @@ import gzip
 import hashlib
 import cv2
 import pickle
-from Classes.Message import Message
+import threading
+import PySimpleGUI as sg
 from Scripts import add_classes_to_path
+from Classes.Message import Message
+from Screens.detection_gui import generate_detection_gui_layout
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Classes.CustomSocket import ClientSocket, ServerSocket
 
+frame = None
 
 def comm():
+    global frame
+    
     # s = ServerSocket()
     # s.bind_and_listen(("0.0.0.0", 14_000))
     # server_encryption = RSAEncyption()
@@ -67,11 +73,34 @@ def comm():
         if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
-        cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+        # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+        frame = pickle.loads(m.get_plain_msg())
     client.close()
     s.close()
-    
+
+def gui():
+    global frame
+
+    layout, w, h = generate_detection_gui_layout()
+    window = sg.Window('SmartSec Server', layout, size=(w, h))
+    while True:
+        event, value = window.read(timeout=10)
+        if event == sg.WIN_CLOSED:
+            break
+        mutex = threading.Lock()
+        mutex.acquire()
+        if frame is not None:
+            frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+            window["-VIDEO-"].update(data=frame_bytes)
+        mutex.release()
+
+def main():
+    comm_thread = threading.Thread(target=comm, daemon=True)
+    comm_thread.start()
+    gui()
+    comm_thread.join()
+
 
 
 if __name__ == "__main__":
-    comm()
+    main()
