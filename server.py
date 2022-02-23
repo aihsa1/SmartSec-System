@@ -58,8 +58,8 @@ def comm():
 
     while True:
         # m = client.recv(e=server_rsa)
-        # m = client.recv(e=server_aes)
-        m = client.recv()
+        m = client.recv(e=server_aes)
+        # m = client.recv()
         print("recieved image")
         # with open("tmp.png", "wb") as f:
         #     f.write(cv2.imencode(".png", pickle.loads(m.get_plain_msg()))[1].tobytes())

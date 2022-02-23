@@ -101,9 +101,9 @@ def communication():
     while is_cap_open:
         m = Message(pickle.dumps(frame))
         try:
-            client_socket.send_buffered(m)
+            # client_socket.send_buffered(m)
             # client_socket.send_buffered(m, e=client_rsa)
-            # client_socket.send_buffered(m, e=client_aes)
+            client_socket.send_buffered(m, e=client_aes)
         except (ConnectionResetError, ConnectionAbortedError):
             print("server is closed")
             break
