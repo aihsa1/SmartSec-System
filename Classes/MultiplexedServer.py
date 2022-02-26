@@ -24,17 +24,24 @@ class MultiplexedServer:
         self.server_socket.bind_and_listen(("0.0.0.0", 14_000))
 
     def _select(self):
+        """
+        This method is used to select the sockets that are ready to be read and written to. DO NOT USE THIS METHOD BY ITSELF.
+        :return: a list of sockets that are ready to be read and a list of sockets that are ready to be written.
+        :rtype: tuple(rlist, wlist)
+        """
         client_sockets = list(self.client_sockets.values())
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
-        print(len(rlist))
         return rlist, wlist
 
     def read(self):
-        print("selecting")
+        """
+        This method is responsible of dealing with the sockets that are ready to be read from - reading from the multiplexed server socket.
+        """
         rlist, wlist = self._select()
         for s in rlist:
             if s is self.server_socket.socket:
+                # adding a new client
                 new_client_socket, new_client_addr = self.server_socket.accept()
                 new_client_clientsocket_object = ClientSocket.create_client_socket(
                     new_client_socket)
@@ -45,23 +52,20 @@ class MultiplexedServer:
                     ClientProperties.rsa: RSAEncyption(),
                     ClientProperties.aes: None
                 }
+                # encryption keys preperation
                 self.clients[new_client_addr][ClientProperties.rsa].generate_keys()
-
                 self.clients[new_client_addr][ClientProperties.rsa].load_others_pubkey(
-                    self.clients[new_client_addr][ClientProperties.clientsocket].recv().get_plain_msg())
-
+                    self.clients[new_client_addr][ClientProperties.clientsocket].recv().get_plain_msg())# get the public RSA-key of the client
                 self.clients[new_client_addr][ClientProperties.clientsocket].send(
                     Message(
                         self.clients[new_client_addr][ClientProperties.rsa].export_my_pubkey(
-                        )
+                        )# send the public RSA-key of the server
                     ))
-
                 aes_key = self.clients[new_client_addr][ClientProperties.clientsocket].recv(
-                    e=self.clients[new_client_addr][ClientProperties.rsa])
-
+                    e=self.clients[new_client_addr][ClientProperties.rsa])# get the AES-key of the client
                 self.clients[new_client_addr][ClientProperties.aes] = AESEncryption(
                     aes_key.get_plain_msg()
-                )
+                )#construct the AESEncryption object
                 print("===================================================")
                 print("New client connected: ", new_client_addr)
                 print(
