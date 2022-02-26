@@ -307,11 +307,11 @@ def main():
     client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
-    with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
-        m = Message(f.read())
-    client_socket.send_buffered(m, e=client_aes)
-    # client_socket.send_buffered(m)
-    print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+    # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
+    #     m = Message(f.read())
+    # client_socket.send_buffered(m, e=client_aes)
+    # # client_socket.send_buffered(m)
+    # print(hashlib.sha256(m.get_plain_msg()).hexdigest())
     
 
     ############UDP AES#############################

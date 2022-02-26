@@ -73,8 +73,8 @@ def comm():
         if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
-        # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
-        frame = pickle.loads(m.get_plain_msg())
+        cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+        # frame = pickle.loads(m.get_plain_msg())
     client.close()
     s.close()
 
@@ -97,7 +97,7 @@ def gui():
 def main():
     comm_thread = threading.Thread(target=comm, daemon=True)
     comm_thread.start()
-    gui()
+    # gui()
     comm_thread.join()
 
 
