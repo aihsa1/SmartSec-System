@@ -5,7 +5,6 @@ import cv2
 import pickle
 from time import sleep
 from select import select
-from Scripts import add_classes_to_path
 from Screens.detection_gui import generate_detection_gui_layout
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption

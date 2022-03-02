@@ -8,7 +8,6 @@ import threading
 import numpy as np
 from time import sleep
 import PySimpleGUI as sg
-from Scripts import add_classes_to_path
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Classes.CustomSocket import ClientSocket
