@@ -309,8 +309,9 @@ def main():
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
     #     m = Message(f.read())
-    # client_socket.send_buffered(m, e=client_aes)
-    # # client_socket.send_buffered(m)
+    m = Message("hello!")
+    client_socket.send_buffered(m, e=client_aes)
+    # client_socket.send_buffered(m)
     # print(hashlib.sha256(m.get_plain_msg()).hexdigest())
     
 

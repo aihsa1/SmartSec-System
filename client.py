@@ -329,8 +329,8 @@ def main(detection_mode=True) -> None:
         if event == "-CONNECT-SERVER-BUTTON-":
             comm_thread = threading.Thread(target=communication, daemon=True)
             comm_thread.start()
-        gui(detection_mode)
-        # gui(False)
+        # gui(detection_mode)
+        gui(False)
         comm_thread.join() if "comm_thread" in locals() else None
 
 
