@@ -8,6 +8,7 @@ import threading
 import numpy as np
 from time import sleep
 import PySimpleGUI as sg
+from Scripts import add_classes_to_path
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Classes.CustomSocket import ClientSocket
@@ -15,7 +16,7 @@ from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
-from Screens.detection_gui import generate_detection_gui_layout
+from Screens.detection_gui import generate_detection_gui_client
 
 
 model = None
@@ -259,7 +260,7 @@ def gui(detection_mode=True) -> None:
     """
     global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes, frame, is_cap_open
 
-    layout, w, h = generate_detection_gui_layout()
+    layout, w, h = generate_detection_gui_client()
 
     cap = cv2.VideoCapture(0)
     window = sg.Window('SmartSec Client', layout, size=(w, h))
