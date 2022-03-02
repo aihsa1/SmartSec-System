@@ -6,7 +6,7 @@ import threading
 import PySimpleGUI as sg
 from Scripts import add_classes_to_path
 from Classes.Message import Message
-from Screens.detection_gui import generate_detection_gui_layout
+from Screens.detection_gui import generate_detection_gui_server
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Classes.CustomSocket import ClientSocket, ServerSocket
@@ -81,7 +81,7 @@ def comm():
 def gui():
     global frame
 
-    layout, w, h = generate_detection_gui_layout()
+    layout, w, h = generate_detection_gui_server()
     window = sg.Window('SmartSec Server', layout, size=(w, h))
     while True:
         event, value = window.read(timeout=10)

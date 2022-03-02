@@ -71,8 +71,8 @@ def generate_detection_gui_server():
 
 if __name__ == "__main__":
     i = 0
-    # layout, w, h = generate_detection_gui_server()
-    layout, w, h = generate_detection_gui_client()
+    layout, w, h = generate_detection_gui_server()
+    # layout, w, h = generate_detection_gui_client()
     window = sg.Window('SmartSec Server', layout, size=(w, h))
     while True:
         event, value = window.read(timeout=10)
