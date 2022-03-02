@@ -69,7 +69,7 @@ class MultiplexedServer:
             frame = pickle.loads(m.get_plain_msg())
             frame = cv2.resize(frame, dsize=(MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
             frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
-            window["-VIDEO0-"].update(data=frame_bytes)
+            window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(data=frame_bytes)
             mutex.release()
         del self.client_threads[addr]
 
