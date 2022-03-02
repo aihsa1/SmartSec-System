@@ -3,9 +3,7 @@ import threading
 import hashlib
 import cv2
 import pickle
-from time import sleep
 from select import select
-from Screens.detection_gui import generate_detection_gui_layout
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 
@@ -38,6 +36,7 @@ class MultiplexedServer:
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
         return rlist, wlist
+    
     def _recv_video(self, addr):
         client = self.clients[addr][ClientProperties.clientsocket]
         client_aes = self.clients[addr][ClientProperties.aes]
@@ -111,10 +110,7 @@ class MultiplexedServer:
 
 
 def main():
-    m = MultiplexedServer()
-    while True:
-        m.read()
-        sleep(0.07)
+    pass
 
 
 if __name__ == "__main__":

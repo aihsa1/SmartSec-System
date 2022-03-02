@@ -35,7 +35,7 @@ def generate_detection_gui_client():
     return layout, w, h
 
 
-def generate_detection_gui_server(offset=0):
+def generate_detection_gui_server():
     global N_CAMERAS, N_IN_ROWS, N_CAMERAS_IN_PAGE
 
     cap = cv2.VideoCapture(0)
