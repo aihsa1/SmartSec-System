@@ -55,8 +55,10 @@ class MultiplexedServer:
         while True:
             try:
                 m = client.recv(e=client_aes)
-            except ValueError:
-                print("client is closed.")
+            except (ValueError, ConnectionResetError, ConnectionAbortedError):
+                print(f"{addr} has disconnected")
+                del self.client_sockets[addr]
+                del self.clients[addr]
                 break
             print("recieved image")
 
