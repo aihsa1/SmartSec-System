@@ -32,6 +32,10 @@ class MultiplexedServer:
         self.server_socket.bind_and_listen(("0.0.0.0", 14_000))
         self.window = window
 
+    def _remove_user_from_list(self, addr):
+        del self.client_sockets[addr]
+        del self.clients[addr]
+
     def _select(self):
         """
         This method is used to select the sockets that are ready to be read and written to. DO NOT USE THIS METHOD BY ITSELF.
@@ -42,9 +46,10 @@ class MultiplexedServer:
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
         return rlist, wlist
-    
+
     def _recv_video(self, addr, window):
         """
+        
         This auxilary method is used to receive video and to display it.
         :param addr: the addr of the client
         :type addr: tuple
@@ -57,8 +62,7 @@ class MultiplexedServer:
                 m = client.recv(e=client_aes)
             except (ValueError, ConnectionResetError, ConnectionAbortedError):
                 print(f"{addr} has disconnected")
-                del self.client_sockets[addr]
-                del self.clients[addr]
+                self._remove_user_from_lists(addr)
                 break
             print("recieved image")
 
@@ -69,9 +73,11 @@ class MultiplexedServer:
             mutex.acquire()
             # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
             frame = pickle.loads(m.get_plain_msg())
-            frame = cv2.resize(frame, dsize=(MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
+            frame = cv2.resize(frame, dsize=(
+                MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
             frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
-            window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(data=frame_bytes)
+            window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
+                data=frame_bytes)
             mutex.release()
         del self.client_threads[addr]
 
@@ -120,7 +126,8 @@ class MultiplexedServer:
             else:
                 addr = s.getpeername()
                 if addr not in self.client_threads.keys():
-                    self.client_threads[addr] = threading.Thread(target=self._recv_video, args=(addr, self.window), daemon=True)
+                    self.client_threads[addr] = threading.Thread(
+                        target=self._recv_video, args=(addr, self.window), daemon=True)
                     self.client_threads[addr].start()
                 # try:
                 #     m = client_socket.recv(e=client_aes)
