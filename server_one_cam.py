@@ -4,7 +4,8 @@ import cv2
 import pickle
 import threading
 import PySimpleGUI as sg
-from Scripts import add_classes_to_path
+from Scripts import add_folders_to_path
+from Classes.CommunicationCode import CommunicationCode
 from Classes.Message import Message
 from Screens.detection_gui import generate_detection_gui_server
 from Classes.RSAEncryption import RSAEncyption
@@ -13,9 +14,10 @@ from Classes.CustomSocket import ClientSocket, ServerSocket
 
 frame = None
 
+
 def comm():
     global frame
-    
+
     # s = ServerSocket()
     # s.bind_and_listen(("0.0.0.0", 14_000))
     # server_encryption = RSAEncyption()
@@ -50,13 +52,14 @@ def comm():
     ########key exchange#########
     m = client.recv()
     server_rsa.load_others_pubkey(m.get_plain_msg())
-    client.send_buffered(Message(server_rsa.export_my_pubkey()))
+    client.send_buffered(
+        Message(server_rsa.export_my_pubkey(), code=CommunicationCode.KEY))
 
     print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
         server_rsa.other_pubkey.save_pkcs1()))
     print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(
         server_rsa.export_my_pubkey()))
-    
+
     key_message = client.recv(e=server_rsa)
     server_aes = AESEncryption(key=key_message.get_plain_msg())
     print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
@@ -78,6 +81,7 @@ def comm():
     client.close()
     s.close()
 
+
 def gui():
     global frame
 
@@ -94,12 +98,12 @@ def gui():
             window["-VIDEO-"].update(data=frame_bytes)
         mutex.release()
 
+
 def main():
     comm_thread = threading.Thread(target=comm, daemon=True)
     comm_thread.start()
     # gui()
     comm_thread.join()
-
 
 
 if __name__ == "__main__":

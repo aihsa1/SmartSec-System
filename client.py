@@ -8,7 +8,8 @@ import threading
 import numpy as np
 from time import sleep
 import PySimpleGUI as sg
-from Scripts import add_classes_to_path
+from Scripts import add_folders_to_path
+from Classes.CommunicationCode import CommunicationCode
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Classes.CustomSocket import ClientSocket
@@ -84,7 +85,7 @@ def communication():
     client_rsa = RSAEncyption()
     client_rsa.generate_keys()
 
-    client_socket.send_buffered(Message(client_rsa.export_my_pubkey()))
+    client_socket.send_buffered(Message(client_rsa.export_my_pubkey(), code=CommunicationCode.KEY))
     m = client_socket.recv()
     client_rsa.load_others_pubkey(m.get_plain_msg())
 
@@ -94,7 +95,7 @@ def communication():
         client_rsa.other_pubkey.save_pkcs1()))
 
     client_aes = AESEncryption()
-    client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
+    client_socket.send_buffered(Message(client_aes.key, code=CommunicationCode.KEY), e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
     while frame is None:

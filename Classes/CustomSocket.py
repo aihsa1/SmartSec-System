@@ -1,6 +1,7 @@
 import hashlib
 import socket
 from Message import Message
+from CommunicationCode import CommunicationCode
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
@@ -49,7 +50,7 @@ class ClientSocket:
         else:
             self.socket.connect(addr)
 
-    def send(self, m: Message, addr: tuple = None, e: RSAEncyption = None) -> None:
+    def send(self, m: Message, addr: tuple = None, e: RSAEncyption = None, code=CommunicationCode.VIDEO) -> None:
         """
         This function is responsible for sending a message to the server. It should be NOTED that this function is not responsible for sending data buffered - the data is sent as one chunk. Use send_buffered method in order to do that.
         :param m: The message to send.
@@ -77,7 +78,7 @@ class ClientSocket:
         else:
             send_cmd(encrypt_cmd(m.message))
 
-    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> None:
+    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None, code=CommunicationCode.VIDEO) -> None:
         """
         This function is responsible for BUFFERING AND SENDING message to the server.
         :param m: The message to send.

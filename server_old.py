@@ -2,7 +2,7 @@
 import hashlib
 import sys
 import os
-from Scripts import add_classes_to_path
+from Scripts import add_folders_to_path
 from Classes.Message import Message
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption

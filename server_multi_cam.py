@@ -1,4 +1,4 @@
-from Scripts import add_classes_to_path
+from Scripts import add_folders_to_path
 from Classes.MultiplexedServer import MultiplexedServer
 import threading
 import PySimpleGUI as sg

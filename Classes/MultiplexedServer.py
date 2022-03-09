@@ -6,15 +6,7 @@ import pickle
 from select import select
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
-
-
-class ClientProperties:
-    plainsocket = "plainsocket"
-    clientsocket = "clientsocket"
-    clientname = "clientname"
-    client_rsa: "client_rsa"
-    rsa = "rsa"
-    aes = "aes"
+from ClientProperties import ClientProperties
 
 
 class MultiplexedServer:
@@ -49,7 +41,7 @@ class MultiplexedServer:
 
     def _recv_video(self, addr, window):
         """
-        
+
         This auxilary method is used to receive video and to display it.
         :param addr: the addr of the client
         :type addr: tuple
@@ -106,8 +98,8 @@ class MultiplexedServer:
                     self.clients[new_client_addr][ClientProperties.clientsocket].recv().get_plain_msg())  # get the public RSA-key of the client
                 self.clients[new_client_addr][ClientProperties.clientsocket].send(
                     Message(
-                        self.clients[new_client_addr][ClientProperties.rsa].export_my_pubkey(
-                        )  # send the public RSA-key of the server
+                        # send the public RSA-key of the server
+                        self.clients[new_client_addr][ClientProperties.rsa].export_my_pubkey(), code=CommunicationCode.KEY
                     ))
                 aes_key = self.clients[new_client_addr][ClientProperties.clientsocket].recv(
                     e=self.clients[new_client_addr][ClientProperties.rsa])  # get the AES-key of the client

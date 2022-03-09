@@ -1,6 +1,10 @@
+from CommunicationCode import CommunicationCode
+
+
 class Message:
     DEFAULT_HEADER_SIZE = 20
-    def __init__(self, message, header_size=DEFAULT_HEADER_SIZE, message_size=None):
+
+    def __init__(self, message, header_size=DEFAULT_HEADER_SIZE, message_size=None, code=CommunicationCode.VIDEO):
         """
         Ths function is used to initialize the message object.
         :param message: The message to be sent
@@ -18,14 +22,16 @@ class Message:
             self.message_size = len(message)
             self.is_complete = True
 
+        self.code = code
         self.header_size = header_size
-        
+
         # set is_compelete and message_size according to the message dtype
         if isinstance(message, bytes):
-            self.message = f"{self.message_size: <{self.header_size}}".encode(
+            self.message = f"{(str(self.message_size) + '_' + self.code): <{self.header_size}}".encode(
             ) + message
+            self.code = self.code.encode()
         else:
-            self.message = f"{self.message_size: <{self.header_size}}" + message
+            self.message = f"{(str(self.message_size) + '_' + self.code): <{self.header_size}}" + message
 
     def get_plain_msg(self):
         """
@@ -46,11 +52,22 @@ class Message:
         :return: The message object if the plain data is not empty, otherwise, None
         :rtype: Message
         """
-        space = b" " if isinstance(plain_data, bytes) else " "
+        underscore = "_"
+        
+        if isinstance(plain_data, bytes):
+            underscore = underscore.encode()
+            underscore_index = plain_data.find(underscore)
+            code = plain_data[underscore_index + 1: underscore_index + 2]
+        else:
+            underscore_index = plain_data.find(underscore)
+            code = plain_data[underscore_index + 1: underscore_index + 2].encode()
+
         msg = plain_data[header_size:]
-        if len(msg) == 0 or int(plain_data[:plain_data.find(space)]) == len(msg):
-            return cls(msg, header_size)
-        return cls(msg, header_size, int(plain_data[:plain_data.find(space)]))
+        complete_len = int(plain_data[:plain_data.find(underscore)])
+        
+        if len(msg) == 0 or complete_len == len(msg):
+            return cls(msg, header_size, code=code.decode())
+        return cls(msg, header_size, complete_len, code=code.decode())
 
     def __iadd__(self, string):
         """
@@ -125,10 +142,28 @@ def main():
     # print(m)
     # m += "123"
 
-    m = Message(" ".join([str(i) for i in range(15)]), 12)
+    # m = Message(" ".join([str(i) for i in range(15)]), 12)
+    # print(m)
+    # print(len(m.message))
+    # print(list(m.splitted_data_generator(11)))
+
+    m = Message(b"hello world!", message_size=30)
     print(m)
-    print(len(m.message))
-    print(list(m.splitted_data_generator(11)))
+    print(m.code)
+    m += b"hi"
+    m += b"hi"
+    m += b"hi"
+    m += b"hi"
+    print(m)
+    print(m.code)
+
+    # m = Message.create_message_from_plain_data(
+    #     "12_1                Hello World!", 20)
+    # print(m.message)
+    # print(m.message_size)
+    # print(m.is_complete)
+    # print(m.code)
+    # print(type(m.code))
 
 
 if __name__ == "__main__":
