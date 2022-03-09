@@ -27,10 +27,12 @@ def show_welcome_client():
                             "Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
                     ],
                     [
-                        sg.Button(button_text="Connect Server & Detect", key="-CONNECT-SERVER-BUTTON-",
+                        sg.Button(button_text="Connect Server & Detect from a Webcam", key="-CONNECT-SERVER-BUTTON-",
                                   tooltip="Connect to the server and detect pistols", focus=False, enable_events=True),
-                        sg.Button(button_text="Detect Locally", key="-DETECT-LOCALLY-BUTTON-",
-                                  tooltip="Detect pistols locally, without reporting to the server", focus=False, enable_events=True)
+                        sg.Button(button_text="Detect Locally Using a Webcam", key="-DETECT-LOCALLY-WEBCAM-BUTTON-",
+                                  tooltip="Detect locally using a webcam, without reporting to the server", focus=False, enable_events=True),
+                        sg.Button(button_text="Detect Locally from a Video", key="-DETECT-LOCALLY-VIDEO-BUTTON-",
+                                  tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
                     ],
                 ], element_justification="center"
             )
@@ -44,7 +46,7 @@ def show_welcome_client():
         event, values = window.read()
         if event == sg.WIN_CLOSED:
             break
-        if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-BUTTON-"]:
+        if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-WEBCAM-BUTTON-"]:
             ret = event
             break
     window.close()
