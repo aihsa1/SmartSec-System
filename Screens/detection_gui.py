@@ -1,4 +1,6 @@
 import cv2
+import os
+import json
 import PySimpleGUI as sg
 
 
@@ -38,6 +40,9 @@ def generate_detection_gui_client():
 def generate_detection_gui_server():
     global N_CAMERAS, N_IN_ROWS, N_CAMERAS_IN_PAGE
 
+    with open(os.path.join("Configs", "icons.json"), "r") as f:
+        MIC_IMAGE = json.loads(f.read())["mic"]
+
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -64,7 +69,15 @@ def generate_detection_gui_server():
                 [sg.Text("Webcam Feed With Detections", justification="center",
                          font=(*sg.DEFAULT_FONT, "bold underline"), key="-COL-")],
                 *cameras_layout
-            ], scrollable=True, expand_x=True, expand_y=True, element_justification="c")]
+            ], scrollable=True, expand_x=True, expand_y=True, element_justification="c"),
+
+            sg.Column(
+                [
+                    [sg.Button(button_text="", key="-MIC-BUTTON-", image_data=MIC_IMAGE
+                                  , tooltip="open/close mic", focus=False, enable_events=True)]
+                ]
+            )
+            ]
     ]
     return layout, w, h
 
