@@ -12,6 +12,7 @@ def gui(layout, w, h):
     while True:
         event, value = window.read(timeout=5)
         if event == sg.WIN_CLOSED:
+            print("closing window")
             break
     window.close()
 
@@ -23,7 +24,8 @@ def main():
     while True:
         m.read()
         sleep(0.07)
-    gui_thread.join()
+        if not gui_thread.is_alive():
+            break
 
 if __name__ == "__main__":
     main()

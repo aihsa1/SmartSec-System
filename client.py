@@ -85,17 +85,19 @@ def communication():
     client_rsa = RSAEncyption()
     client_rsa.generate_keys()
 
-    client_socket.send_buffered(Message(client_rsa.export_my_pubkey(), code=CommunicationCode.KEY))
+    client_socket.send_buffered(
+        Message(client_rsa.export_my_pubkey(), code=CommunicationCode.KEY))
     m = client_socket.recv()
     client_rsa.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}", type(
-        client_rsa.export_my_pubkey()))
-    print(f"server pubkey: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
-        client_rsa.other_pubkey.save_pkcs1()))
+    print(
+        f"client pubkey: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}")
+    print(
+        f"server pubkey: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}")
 
     client_aes = AESEncryption()
-    client_socket.send_buffered(Message(client_aes.key, code=CommunicationCode.KEY), e=client_rsa)
+    client_socket.send_buffered(
+        Message(client_aes.key, code=CommunicationCode.KEY), e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
     while frame is None:
@@ -112,7 +114,7 @@ def communication():
 
         # sig = Message(client_rsa.generate_signature(m.message))
         # client_socket.send_buffered(sig, e=client_rsa)
-        
+
     client_socket.close()
 
 
@@ -298,7 +300,7 @@ def gui(detection_mode=True) -> None:
         frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
         mutex.release()
         window["-VIDEO-"].update(data=frame_bytes)
-    
+
     is_cap_open = False
     cap.release()
     window.close()
