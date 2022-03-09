@@ -24,7 +24,8 @@ class MultiplexedServer:
         self.server_socket.bind_and_listen(("0.0.0.0", 14_000))
         self.window = window
 
-    def _remove_user_from_list(self, addr):
+    def _remove_user_from_lists(self, addr):
+        del self.client_threads[addr]
         del self.client_sockets[addr]
         del self.clients[addr]
 
@@ -71,7 +72,6 @@ class MultiplexedServer:
             window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
                 data=frame_bytes)
             mutex.release()
-        del self.client_threads[addr]
 
     def read(self):
         """
