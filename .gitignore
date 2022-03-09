@@ -5,3 +5,4 @@ Tensorflow/models
 img*.jpg
 *.pem
 *.pdf
+*tmp*.py
