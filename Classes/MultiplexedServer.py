@@ -7,6 +7,7 @@ from select import select
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 from ClientProperties import ClientProperties
+from CommunicationCode import CommunicationCode
 
 
 class MultiplexedServer:

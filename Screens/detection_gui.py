@@ -67,7 +67,7 @@ def generate_detection_gui_server():
         [sg.Column(
             [
                 [sg.Text("Webcam Feed With Detections", justification="center",
-                         font=(*sg.DEFAULT_FONT, "bold underline"), key="-COL-")],
+                         font=(*sg.DEFAULT_FONT, "bold underline"), key="-HEADING-")],
                 *cameras_layout
             ], scrollable=True, expand_x=True, expand_y=True, element_justification="c"),
 

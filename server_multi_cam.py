@@ -14,6 +14,8 @@ def gui(layout, w, h):
         if event == sg.WIN_CLOSED:
             print("closing window")
             break
+        if event == "-MIC-BUTTON-":
+            pass
     window.close()
 
 def main():
