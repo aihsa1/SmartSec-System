@@ -51,8 +51,7 @@ INDICAOR_MESSAGES = json.loads(
 
 
 def communication():
-    global frame_bytes, frame, is_cap_open
-    SERVER_ADDRESS = ("127.0.0.1", 14_000)
+    global frame_bytes, frame, is_cap_open, SERVER_ADDRESS
     # s = ClientSocket()
     # client_encryption = RSAEncyption()
     # client_encryption.generate_keys()
