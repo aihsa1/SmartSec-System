@@ -5,7 +5,7 @@ from CommunicationCode import CommunicationCode
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
-RECV_BUFFER_SIZE = 16_384
+RECV_BUFFER_SIZE = 4_096
 
 #TODO PROTOCOL IMPLEMENTATION
 class ClientSocket:
