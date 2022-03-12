@@ -321,12 +321,12 @@ def main(detection_mode=True) -> None:
     # import necassary module if doing detection
     if event is not None and detection_mode:
         # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
-        done_loading_flag = [False, ]
-        loading_thread = threading.Thread(target=initialize_model,
-                                          args=(done_loading_flag,), daemon=True)
-        loading_thread.start()
-        show_loading_screen("Loading...", done_loading_flag)
-        loading_thread.join()
+        # done_loading_flag = [False, ]
+        # loading_thread = threading.Thread(target=initialize_model,
+        #                                   args=(done_loading_flag,), daemon=True)
+        # loading_thread.start()
+        # show_loading_screen("Loading...", done_loading_flag)
+        # loading_thread.join()
 
         # run the main gui with detection + server connection
         if event == "-CONNECT-SERVER-BUTTON-":

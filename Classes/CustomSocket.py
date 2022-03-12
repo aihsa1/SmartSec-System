@@ -134,14 +134,16 @@ class ClientSocket:
         """
         if e is not None:
             decrypt_cmd = lambda x: e.decrypt(x)
+            offset = AESEncryption.KEY_SIZE
         else:
             decrypt_cmd = lambda x: x
+            offset = 0
         
         new_msg = True
         if self.protocol == "UDP":
             recv_cmd = self.socket.recvfrom
             while True:
-                data, address = recv_cmd(m.message_size - len(m.get_plain_msg()) + AESEncryption.KEY_SIZE) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
+                data, address = recv_cmd(m.message_size - len(m.get_plain_msg()) + offset) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if new_msg:
                     m = Message.create_message_from_plain_data(decrypt_cmd(data))
                     new_msg = False
@@ -155,7 +157,8 @@ class ClientSocket:
            while True:
                 # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
-                    data = recv_cmd(m.message_size - len(m.get_plain_msg()) + AESEncryption.KEY_SIZE)
+                    data = recv_cmd(m.message_size - len(m.get_plain_msg()) + offset)
+                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 else:
                     data = recv_cmd(buffer_size)
                 if new_msg:
