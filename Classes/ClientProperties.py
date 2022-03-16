@@ -5,3 +5,5 @@ class ClientProperties:
     client_rsa: "client_rsa"
     rsa = "rsa"
     aes = "aes"
+    webcam_width = "webcam_width"
+    webcam_height = "webcam_height"

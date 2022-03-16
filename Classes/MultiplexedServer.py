@@ -3,6 +3,7 @@ import threading
 import hashlib
 import cv2
 import pickle
+import numpy as np
 from select import select
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
@@ -51,9 +52,11 @@ class MultiplexedServer:
         """
         client = self.clients[addr][ClientProperties.clientsocket]
         client_aes = self.clients[addr][ClientProperties.aes]
+        w, h = self.clients[addr][ClientProperties.webcam_width], self.clients[addr][ClientProperties.webcam_height]
         while True:
             try:
                 m = client.recv(e=client_aes)
+                # m = client.recv()
             except (ValueError, ConnectionResetError, ConnectionAbortedError):
                 print(f"{addr} has disconnected")
                 self._remove_user_from_lists(addr)
@@ -66,7 +69,11 @@ class MultiplexedServer:
             mutex = threading.Lock()
             mutex.acquire()
             # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
-            frame = pickle.loads(m.get_plain_msg())
+            # frame = pickle.loads(m.get_plain_msg())
+            
+            frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
+            frame = np.reshape(frame, (w, h, 3))
+            
             frame = cv2.resize(frame, dsize=(
                 MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
             frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
@@ -113,6 +120,12 @@ class MultiplexedServer:
                 self.clients[new_client_addr][ClientProperties.aes] = AESEncryption(
                     aes_key.get_plain_msg()
                 )  # construct the AESEncryption object
+                # get the dimensions of the webcam of the new client
+                h, w = pickle.loads(self.clients[new_client_addr][ClientProperties.clientsocket].recv(
+                    e=self.clients[new_client_addr][ClientProperties.aes]
+                ).get_plain_msg())
+                self.clients[new_client_addr][ClientProperties.webcam_width] = w
+                self.clients[new_client_addr][ClientProperties.webcam_height] = h
                 print("===================================================")
                 print("New client connected: ", new_client_addr)
                 print(
