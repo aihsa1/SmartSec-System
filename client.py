@@ -99,14 +99,20 @@ def communication():
         Message(client_aes.key, code=CommunicationCode.KEY), e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
+    client_socket.send(
+        Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM, ClientSocket.HEIGHT_WEBCAM)), code=CommunicationCode.INFO),
+        e=client_aes
+    )
+
     while frame is None:
         sleep(.07)
     while is_cap_open:
-        m = Message(pickle.dumps(frame))
+        # m = Message(pickle.dumps(frame))
+        m = Message(frame.tobytes())
         try:
-            # client_socket.send_buffered(m)
+            client_socket.send_buffered(m)
             # client_socket.send_buffered(m, e=client_rsa)
-            client_socket.send_buffered(m, e=client_aes)
+            # client_socket.send_buffered(m, e=client_aes)
         except (ConnectionResetError, ConnectionAbortedError):
             print("server is closed")
             break

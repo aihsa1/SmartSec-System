@@ -1,5 +1,6 @@
 import hashlib
 import socket
+import cv2
 from Message import Message
 from CommunicationCode import CommunicationCode
 from RSAEncryption import RSAEncyption
@@ -14,6 +15,11 @@ class ClientSocket:
     All of the functions and properties were organized in purpose of making the communication easier to use in this project.
     NOTE: This class is not responsible for the connection between the client and the server, it only creates the socket and makes it ready to be used. Also, this class is a base class for the ServerSocket class.
     """
+
+    cap = cv2.VideoCapture(0)
+    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    del cap
 
     def __init__(self, protocol: str = "UDP", existing_socket=None) -> None:
         """

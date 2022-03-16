@@ -11,6 +11,7 @@ from Screens.detection_gui import generate_detection_gui_server
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Classes.CustomSocket import ClientSocket, ServerSocket
+import numpy as np
 
 frame = None
 
@@ -63,11 +64,15 @@ def comm():
     key_message = client.recv(e=server_rsa)
     server_aes = AESEncryption(key=key_message.get_plain_msg())
     print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
+
+    m = client.recv(e=server_aes)
+    h, w = pickle.loads(m.get_plain_msg())
     ##########################
 
     while True:
         try:
-            m = client.recv(e=server_aes)
+            # m = client.recv(e=server_aes)
+            m = client.recv()
         except ValueError:
             print("client is closed.")
             break
@@ -76,7 +81,10 @@ def comm():
         if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
-        cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+        # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+        frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
+        frame = np.reshape(frame, (w, h, 3))
+        cv2.imshow("image", frame)
         # frame = pickle.loads(m.get_plain_msg())
     client.close()
     s.close()
