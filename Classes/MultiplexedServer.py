@@ -57,7 +57,8 @@ class MultiplexedServer:
             try:
                 m = client.recv(e=client_aes)
                 # m = client.recv()
-            except (ValueError, ConnectionResetError, ConnectionAbortedError):
+            except (ValueError, ConnectionResetError, ConnectionAbortedError) as e:
+                print(e)
                 print(f"{addr} has disconnected")
                 self._remove_user_from_lists(addr)
                 break
@@ -72,7 +73,7 @@ class MultiplexedServer:
             # frame = pickle.loads(m.get_plain_msg())
             
             frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
-            frame = np.reshape(frame, (w, h, 3))
+            frame = np.reshape(frame, (w, h, -1))
             
             frame = cv2.resize(frame, dsize=(
                 MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))

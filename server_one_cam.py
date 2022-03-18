@@ -71,8 +71,8 @@ def comm():
 
     while True:
         try:
-            # m = client.recv(e=server_aes)
-            m = client.recv()
+            m = client.recv(e=server_aes)
+            # m = client.recv()
         except ValueError:
             print("client is closed.")
             break
@@ -83,7 +83,7 @@ def comm():
             break
         # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
         frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
-        frame = np.reshape(frame, (w, h, 3))
+        frame = np.reshape(frame, (w, h, -1))
         cv2.imshow("image", frame)
         # frame = pickle.loads(m.get_plain_msg())
     client.close()
