@@ -162,7 +162,7 @@ class ClientSocket:
            recv_cmd = self.socket.recv
            while True:
                 # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
-                if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
+                if not new_msg and m.message_size - len(m.get_plain_msg()) + offset < buffer_size:
                     data = recv_cmd(m.message_size - len(m.get_plain_msg()) + offset)
                 else:
                     data = recv_cmd(buffer_size)
