@@ -97,7 +97,7 @@ class ClientSocket:
         :type e: RSAEncyption
 
         """
-        if e is None or isinstance(e, RSAEncyption):
+        if isinstance(e, RSAEncyption):
             batch_size -= 11
         else:
             batch_size -= AESEncryption.KEY_SIZE
