@@ -115,20 +115,18 @@ class ClientSocket:
         else:
             encrypt_cmd = lambda x: x
         
+        
         summary = 0
         if isinstance(m.message, str):
-            for start, end in m.splitted_data_generator(batch_size):
-                b = encrypt_cmd(m.message[start: end].encode())
-                send_cmd(b)
-                summary += end - start
-                print(f"{summary/1_000_000} MB sent.")
+            m = Message(encrypt_cmd(m.get_plain_msg().encode()), code=m.code)
         else:
-            for start, end in m.splitted_data_generator(batch_size):
-                b = encrypt_cmd(m.message[start: end])
+            m = Message(encrypt_cmd(m.get_plain_msg()), code=m.code.decode())
+        for start, end in m.splitted_data_generator(batch_size):
+                b = m.message[start: end]
                 send_cmd(b)
                 summary += end - start
                 print(f"{summary/1_000_000} MB sent.")
-            print("done")
+        print("done")
 
     def recv(self, buffer_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> Message:
         """
@@ -151,13 +149,13 @@ class ClientSocket:
             while True:
                 data, address = recv_cmd(m.message_size - len(m.get_plain_msg()) + offset) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if new_msg:
-                    m = Message.create_message_from_plain_data(decrypt_cmd(data))
+                    m = Message.create_message_from_plain_data(data)
                     new_msg = False
                 else:
-                    m += decrypt_cmd(data)
+                    m += data
                 print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
-                    return m, address
+                    return Message(decrypt_cmd(m.get_plain_msg())), address
         else:
            recv_cmd = self.socket.recv
            while True:
@@ -167,13 +165,13 @@ class ClientSocket:
                 else:
                     data = recv_cmd(buffer_size)
                 if new_msg:
-                    m = Message.create_message_from_plain_data(decrypt_cmd(data))
+                    m = Message.create_message_from_plain_data(data)
                     new_msg = False
                 else:
-                    m += decrypt_cmd(data)
+                    m += data
                 print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
-                    return m
+                    return Message(decrypt_cmd(m.get_plain_msg()))
         
         
 
@@ -318,10 +316,10 @@ def main():
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
     #     m = Message(f.read())
-    m = Message("hello!")
+    m = Message(b"hello!"*100000)
     client_socket.send_buffered(m, e=client_aes)
     # client_socket.send_buffered(m)
-    # print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+    print(hashlib.sha256(m.get_plain_msg()).hexdigest())
     
 
     ############UDP AES#############################

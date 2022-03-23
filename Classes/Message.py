@@ -147,15 +147,15 @@ def main():
     # print(len(m.message))
     # print(list(m.splitted_data_generator(11)))
 
-    m = Message(b"hello world!", message_size=30)
-    print(m)
-    print(m.code)
-    m += b"hi"
-    m += b"hi"
-    m += b"hi"
-    m += b"hi"
-    print(m)
-    print(m.code)
+    # m = Message(b"hello world!", message_size=30)
+    # print(m)
+    # print(m.code)
+    # m += b"hi"
+    # m += b"hi"
+    # m += b"hi"
+    # m += b"hi"
+    # print(m)
+    # print(m.code)
 
     # m = Message.create_message_from_plain_data(
     #     "12_1                Hello World!", 20)
@@ -164,6 +164,18 @@ def main():
     # print(m.is_complete)
     # print(m.code)
     # print(type(m.code))
+    from AESEncryption import AESEncryption
+    e1 = AESEncryption()
+    e2 = AESEncryption(key=e1.key)
+    print(e1.key)
+    print(e2.key)
+    content = b"hi"
+    content_enc = e1.encrypt(content)
+    m = Message(content_enc)
+    print(m)
+    print(len(m.message))
+    
+    
 
 
 if __name__ == "__main__":

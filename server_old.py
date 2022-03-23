@@ -118,8 +118,8 @@ print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
 m = client_socket.recv(e=server_aes)
 print(hashlib.sha256(m.get_plain_msg()).hexdigest())
 
-with open(r"C:\Users\USER\Desktop\Cyber\PRJ\tmp.pdf", "wb") as f:
-    f.write(m.get_plain_msg())
+# with open(r"C:\Users\USER\Desktop\Cyber\PRJ\tmp.pdf", "wb") as f:
+#     f.write(m.get_plain_msg())
 
 client_socket.close()
 server_socket.close()
