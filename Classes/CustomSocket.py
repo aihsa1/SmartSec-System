@@ -80,9 +80,10 @@ class ClientSocket:
             encrypt_cmd = lambda x: x
         
         if isinstance(m.message, str):
-            send_cmd(encrypt_cmd(m.message.encode()))
+            m = Message(encrypt_cmd(m.get_plain_msg().encode()), code=m.code)
         else:
-            send_cmd(encrypt_cmd(m.message))
+            m = Message(encrypt_cmd(m.get_plain_msg()), code=m.code.decode())
+        send_cmd(m.message)
 
     def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None, code=CommunicationCode.VIDEO) -> None:
         """
