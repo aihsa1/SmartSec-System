@@ -147,7 +147,7 @@ class ClientSocket:
         if self.protocol == "UDP":
             recv_cmd = self.socket.recvfrom
             while True:
-                data, address = recv_cmd(m.message_size - len(m.get_plain_msg()) + offset) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
+                data, address = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
                 if new_msg:
                     m = Message.create_message_from_plain_data(data)
                     new_msg = False
@@ -160,8 +160,8 @@ class ClientSocket:
            recv_cmd = self.socket.recv
            while True:
                 # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
-                if not new_msg and m.message_size - len(m.get_plain_msg()) + offset < buffer_size:
-                    data = recv_cmd(m.message_size - len(m.get_plain_msg()) + offset)
+                if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
+                    data = recv_cmd(m.message_size - len(m.get_plain_msg()))
                 else:
                     data = recv_cmd(buffer_size)
                 if new_msg:

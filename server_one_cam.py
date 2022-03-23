@@ -69,11 +69,13 @@ def comm():
     h, w = pickle.loads(m.get_plain_msg())
     ##########################
 
+
     while True:
         try:
             m = client.recv(e=server_aes)
             # m = client.recv()
-        except ValueError:
+        except ValueError as e:
+            print(e)
             print("client is closed.")
             break
         print("recieved image")
