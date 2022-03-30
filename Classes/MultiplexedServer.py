@@ -15,6 +15,7 @@ class MultiplexedServer:
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    BLACK_SCREEN = cv2.imencode(".png", np.zeros((HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
     del cap
 
     def __init__(self, window):
@@ -27,6 +28,7 @@ class MultiplexedServer:
         self.window = window
 
     def _remove_user_from_lists(self, addr):
+        self.window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(data=MultiplexedServer.BLACK_SCREEN)
         del self.client_threads[addr]
         del self.client_sockets[addr]
         del self.clients[addr]

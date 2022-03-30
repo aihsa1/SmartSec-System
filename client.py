@@ -1,7 +1,6 @@
 import os
 import cv2
 import json
-import gzip
 import pickle
 import hashlib
 import threading
