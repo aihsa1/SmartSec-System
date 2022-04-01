@@ -64,7 +64,7 @@ class PyMongoInterface:
         """
         return self.client[db_name][col_name].find(*objs, limit=limit, sort=sort)
 
-    def update_one(self, filter: dict, update: dict, db_name: str, col_name: str) -> pymongo.results.UpdateResult:
+    def update_one(self, filter: dict, update: dict, *, db_name: str, col_name: str) -> pymongo.results.UpdateResult:
         """
         This function updates the first document that matches the given query.
         :param filter: The query as would be specified to PyMongo.
@@ -80,7 +80,7 @@ class PyMongoInterface:
         """
         return self.client[db_name][col_name].update_one(filter, update)
 
-    def update_many(self, filter: dict, update: dict, db_name: str, col_name: str) -> pymongo.results.UpdateResult:
+    def update_many(self, filter: dict, update: dict, *, db_name: str, col_name: str) -> pymongo.results.UpdateResult:
         """
         This function updates all documents that match the given query.
         :param filter: The query as would be specified to PyMongo.
@@ -96,7 +96,7 @@ class PyMongoInterface:
         """
         return self.client[db_name][col_name].update_many(filter, update)
 
-    def delete_one(self, query: dict, db_name: str, col_name) -> pymongo.results.DeleteResult:
+    def delete_one(self, query: dict, *, db_name: str, col_name) -> pymongo.results.DeleteResult:
         """
         This function deletes the first document that matches the given query.
         :param query: The query as would be specified to PyMongo.
@@ -110,7 +110,7 @@ class PyMongoInterface:
         """
         return self.client[db_name][col_name].delete_one(query)
 
-    def delete_many(self, query: dict, db_name: str, col_name: str) -> pymongo.results.DeleteResult:
+    def delete_many(self, query: dict, *, db_name: str, col_name: str) -> pymongo.results.DeleteResult:
         """
         This function deletes all documents that matches the given query.
         :param query: The query as would be specified to PyMongo.
@@ -155,13 +155,13 @@ class PyMongoInterface:
         return bson.Regex.from_native(re.compile(regex))
 
     @classmethod
-    def generate_objectid(cls, *args) -> bson.ObjectId:
+    def generate_objectid(cls, id=None) -> bson.ObjectId:
         """
         This function generates a bson.ObjectId object from the given arguments.
         :param args: The arguments to generate the ObjectId from.
         :type args: List[str]
         """
-        return bson.ObjectId(*args)
+        return bson.ObjectId(id)
 
 
 def main():
