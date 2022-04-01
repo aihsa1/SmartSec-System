@@ -3,6 +3,7 @@ import pymongo
 import bson
 import re
 
+
 class PyMongoInterface:
     DEFAULT_USERNAME = "KyHSAVsQnqTw1HC0"
     DEFAULT_PASSWORD = "XnHZPdap8941pypr"
@@ -24,7 +25,7 @@ class PyMongoInterface:
             raise e
         else:
             print("Connected to MongoDB.")
-    
+
     def list_database_names(self) -> List[str]:
         """
         This function returns a list of the names of the databases in the MongoDB instance.
@@ -32,7 +33,7 @@ class PyMongoInterface:
         :rtype: List[str]
         """
         return self.client.list_database_names()
-    
+
     def insert(self, *docs, db_name: str, col_name: str) -> pymongo.results.InsertManyResult:
         """
         This function inserts the given documents into a collection.
@@ -46,8 +47,8 @@ class PyMongoInterface:
         :rtype: pymongo.results.InsertManyResult
         """
         return self.client[db_name][col_name].insert_many(docs)
-    
-    def find(self, *objs, db_name: str, col_name: str, limit: int=0, sort: List[Tuple[str, int]]=[]) -> pymongo.cursor.Cursor:
+
+    def find(self, *objs, db_name: str, col_name: str, limit: int = 0, sort: List[Tuple[str, int]] = []) -> pymongo.cursor.Cursor:
         """
         This function returns a cursor to the documents that match the given query.
         :param objs: The query as would be specified to PyMongo.
@@ -62,7 +63,7 @@ class PyMongoInterface:
         :type sort: List[Tuple[str, int]]
         """
         return self.client[db_name][col_name].find(*objs, limit=limit, sort=sort)
-    
+
     def update_one(self, filter: dict, update: dict, db_name: str, col_name: str) -> pymongo.results.UpdateResult:
         """
         This function updates the first document that matches the given query.
@@ -78,7 +79,7 @@ class PyMongoInterface:
         :rtype: pymongo.results.UpdateResult
         """
         return self.client[db_name][col_name].update_one(filter, update)
-    
+
     def update_many(self, filter: dict, update: dict, db_name: str, col_name: str) -> pymongo.results.UpdateResult:
         """
         This function updates all documents that match the given query.
@@ -94,7 +95,7 @@ class PyMongoInterface:
         :rtype: pymongo.results.UpdateResult
         """
         return self.client[db_name][col_name].update_many(filter, update)
-    
+
     def delete_one(self, query: dict, db_name: str, col_name) -> pymongo.results.DeleteResult:
         """
         This function deletes the first document that matches the given query.
@@ -108,7 +109,7 @@ class PyMongoInterface:
         :rtype: pymongo.results.DeleteResult
         """
         return self.client[db_name][col_name].delete_one(query)
-    
+
     def delete_many(self, query: dict, db_name: str, col_name: str) -> pymongo.results.DeleteResult:
         """
         This function deletes all documents that matches the given query.
@@ -122,25 +123,26 @@ class PyMongoInterface:
         :rtype: pymongo.results.DeleteResult
         """
         return self.client[db_name][col_name].delete_many(query)
+
     def close(self) -> None:
         """
         This function closes the connection to the database.
         """
         self.client.close()
         print("Connection to MongoDB closed.")
-    
+
     def __enter__(self) -> 'PyMongoInterface':
         """
         This function is called when the object is used in a with statement.
         """
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """
         This function is called when the object is used in a with statement.
         """
         self.client.close()
-    
+
     @classmethod
     def generate_regex(cls, regex: str) -> bson.Regex:
         """
@@ -151,7 +153,7 @@ class PyMongoInterface:
         :rtype: bson.Regex
         """
         return bson.Regex.from_native(re.compile(regex))
-    
+
     @classmethod
     def generate_objectid(cls, *args) -> bson.ObjectId:
         """
@@ -160,8 +162,6 @@ class PyMongoInterface:
         :type args: List[str]
         """
         return bson.ObjectId(*args)
-    
-    
 
 
 def main():
@@ -184,7 +184,6 @@ def main():
 
         # pattern = PyMongoInterface.generate_regex("^.*David.*$")
         # db.update_many({"name": {"$regex": pattern}}, {"$set": {"age": 3000}}, db_name="tmp", col_name="tmp-col")
-
 
 
 if __name__ == "__main__":

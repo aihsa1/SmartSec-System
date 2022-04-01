@@ -9,16 +9,23 @@ from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 from ClientProperties import ClientProperties
 from CommunicationCode import CommunicationCode
+from typing import List, Tuple
 
 
 class MultiplexedServer:
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    BLACK_SCREEN = cv2.imencode(".png", np.zeros((HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
+    BLACK_SCREEN = cv2.imencode(".png", np.zeros(
+        (HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
     del cap
 
-    def __init__(self, window):
+    def __init__(self, window) -> None:
+        """
+        This is the constructor of the class. This function is responsible for initializing the server.
+        :param window: the window to display on
+        :type window: sg.Window
+        """
         self.server_socket = ServerSocket("TCP")
         self.client_sockets = {}  # {addr: s}
         # self.client_names = {}# {addr, name}
@@ -27,30 +34,37 @@ class MultiplexedServer:
         self.server_socket.bind_and_listen(("0.0.0.0", 14_000))
         self.window = window
 
-    def _remove_user_from_lists(self, addr):
-        self.window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(data=MultiplexedServer.BLACK_SCREEN)
+    def _remove_user_from_lists(self, addr: Tuple[str, int]) -> None:
+        """
+        This method is used to remove a user from the lists and it is called when a user disconnects. DO NOT USE THIS METHOD BY ITSELF.
+        :param addr: the addr of the client
+        :type addr: Tuple[str, int]
+        """
+        self.window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
+            data=MultiplexedServer.BLACK_SCREEN)
         del self.client_threads[addr]
         del self.client_sockets[addr]
         del self.clients[addr]
 
-    def _select(self):
+    def _select(self) -> Tuple[List, List]:
         """
         This method is used to select the sockets that are ready to be read and written to. DO NOT USE THIS METHOD BY ITSELF.
         :return: a list of sockets that are ready to be read and a list of sockets that are ready to be written.
-        :rtype: tuple(rlist, wlist)
+        :rtype: Tuple[rlist, wlist]
         """
         client_sockets = list(self.client_sockets.values())
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
         return rlist, wlist
 
-    def _recv_video(self, addr, window):
+    def _recv_video(self, addr: Tuple[str, int], window) -> None:
         """
 
         This auxilary method is used to receive video and to display it.
         :param addr: the addr of the client
-        :type addr: tuple
+        :type addr: Tuple[str, int]
         :param window: the window to display on
+        :type window: sg.Window
         """
         client = self.clients[addr][ClientProperties.clientsocket]
         client_aes = self.clients[addr][ClientProperties.aes]
@@ -73,10 +87,10 @@ class MultiplexedServer:
             mutex.acquire()
             # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
             # frame = pickle.loads(m.get_plain_msg())
-            
+
             frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
             frame = np.reshape(frame, (w, h, -1))
-            
+
             frame = cv2.resize(frame, dsize=(
                 MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
             frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
@@ -88,7 +102,6 @@ class MultiplexedServer:
                 print(e)
                 return
             mutex.release()
-            
 
     def read(self):
         """
