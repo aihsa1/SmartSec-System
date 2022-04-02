@@ -1,5 +1,5 @@
-import hashlib
 import rsa
+from typing import Tuple, Union
 
 
 class RSAEncyption:
@@ -36,7 +36,7 @@ class RSAEncyption:
     def load_others_pubkey(self, pubkey_pkcs1):
         self.other_pubkey = rsa.PublicKey.load_pkcs1(pubkey_pkcs1)
 
-    def encrypt(self, msg):
+    def encrypt(self, msg) -> bytes:
         """
         Encrypts a message using the senders public key
         :param msg: The message to decrypt
@@ -48,7 +48,7 @@ class RSAEncyption:
             return rsa.encrypt(msg, self.other_pubkey)
         return rsa.encrypt(msg, self.other_pubkey)
 
-    def decrypt(self, ciphertext):
+    def decrypt(self, ciphertext) -> bytes:
         """
         Decrypt the incoming ciphertext using our private key. This ciphertext is encrypted by the sender using our public key.
         :param ciphertext: The encrypted message
@@ -61,7 +61,7 @@ class RSAEncyption:
         #     print(e)
         #     return False
 
-    def generate_signature(self, msg):
+    def generate_signature(self, msg) -> bytes:
         """
         This method generates a signature for the given message. The signature is generated using our private key, so the receiver will be able to authenticate the  received message.
         :param msg: The message to sign
@@ -71,9 +71,15 @@ class RSAEncyption:
             return rsa.sign(msg.encode(), self.my_privkey, RSAEncyption.HASH_METHOD)
         return rsa.sign(msg, self.my_privkey, RSAEncyption.HASH_METHOD)
 
-    def verify_signature(self, msg, signature):
+    def verify_signature(self, msg: Union[str, bytes], signature: bytes) -> bool:
         """
         This method verifies the signature of the given message. The signature is generated using the sender's public key, so we will be able to authenticate the incoming message.
+        :param msg: The message to verify
+        :type msg: Union[str, bytes]
+        :param signature: The signature to verify
+        :type signature: bytes
+        :return: True if the signature is valid, False otherwise
+        :rtype: bool
         """
         try:
             return rsa.verify(msg.encode() if isinstance(msg, str) else msg, signature, self.other_pubkey) == RSAEncyption.HASH_METHOD

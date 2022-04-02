@@ -3,8 +3,10 @@ import threading
 import hashlib
 import cv2
 import pickle
+import socket
 import numpy as np
 from select import select
+import PySimpleGUI as sg
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 from ClientProperties import ClientProperties
@@ -37,7 +39,7 @@ class MultiplexedServer:
     def _remove_user_from_lists(self, addr: Tuple[str, int]) -> None:
         """
         This method is used to remove a user from the lists and it is called when a user disconnects. DO NOT USE THIS METHOD BY ITSELF.
-        :param addr: the addr of the client
+        :param addr: the addr of the client - Tuple[ip, port]
         :type addr: Tuple[str, int]
         """
         self.window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
@@ -46,18 +48,18 @@ class MultiplexedServer:
         del self.client_sockets[addr]
         del self.clients[addr]
 
-    def _select(self) -> Tuple[List, List]:
+    def _select(self) -> Tuple[List[socket.socket], List[socket.socket]]:
         """
         This method is used to select the sockets that are ready to be read and written to. DO NOT USE THIS METHOD BY ITSELF.
-        :return: a list of sockets that are ready to be read and a list of sockets that are ready to be written.
-        :rtype: Tuple[rlist, wlist]
+        :return: a list of sockets that are ready to be read and a list of sockets that are ready to be written - Tuple[rlist, wlist]
+        :rtype: Tuple[List[socket.socket], List[socket.socket]]
         """
         client_sockets = list(self.client_sockets.values())
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
         return rlist, wlist
 
-    def _recv_video(self, addr: Tuple[str, int], window) -> None:
+    def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
 
         This auxilary method is used to receive video and to display it.
@@ -103,7 +105,7 @@ class MultiplexedServer:
                 return
             mutex.release()
 
-    def read(self):
+    def read(self) -> None:
         """
         This method is responsible of dealing with the sockets that are ready to be read from - reading from the multiplexed server socket.
         """

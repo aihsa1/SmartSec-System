@@ -1,5 +1,6 @@
 import hashlib
 import socket
+from typing import Tuple, Union
 import cv2
 from Message import Message
 from CommunicationCode import CommunicationCode
@@ -21,11 +22,13 @@ class ClientSocket:
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     del cap
 
-    def __init__(self, protocol: str = "UDP", existing_socket=None) -> None:
+    def __init__(self, protocol: str = "UDP", existing_socket: socket.socket=None) -> None:
         """
         This function is responsible for creating a client socket.
         :param protocol: The protocol to use.
         :type protocol: str("TCP", "UDP")
+        :param existing_socket: The socket to use. USE THE create_client_socket CLASS METHOD INSTEAD.
+        :type existing_socket: socket.socket
         """
         if existing_socket is None:
             self.socket = socket.socket(
@@ -37,34 +40,36 @@ class ClientSocket:
         self.protocol = protocol
 
     @classmethod
-    def create_client_socket(cls, client_socket) -> "ClientSocket":
+    def create_client_socket(cls, client_socket: socket.socket) -> "ClientSocket":
         """
-        This function is a factory method for ClientSocket from existing socket object.
+        This function is a factory method for ClientSocket from existing socket.socket object.
+        :param client_socket: The socket to use.
+        :type client_socket: socket.socket
         :return: The client socket object.
         :rtype: ClientSocket
         """
         return cls("TCP", client_socket)
 
-    def connect(self, addr) -> None:
+    def connect(self, addr: Tuple[str, int]) -> None:
         """
         This function is responsible for connecting to the server. USE ONLY FOR TCP
         :param addr: The address of the server to connect.
-        :type addr: tuple(ip, port)
+        :type addr: Tuple[str, int]
         """
         if self.protocol == "UDP":
             raise ValueError("UDP communication does not require connection.")
         else:
             self.socket.connect(addr)
 
-    def send(self, m: Message, addr: tuple = None, e: RSAEncyption = None, code=CommunicationCode.VIDEO) -> None:
+    def send(self, m: Message, addr: Tuple[str, int] = None, *, e: Union[RSAEncyption, AESEncryption] = None, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
         """
         This function is responsible for sending a message to the server. It should be NOTED that this function is not responsible for sending data buffered - the data is sent as one chunk. Use send_buffered method in order to do that.
         :param m: The message to send.
         :type m: Message
         :param addr: The address of the server to connect.
-        :type addr: tuple(ip, port)
-        :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
-        :type e: RSAEncyption
+        :type addr: Tuple[str, int]
+        :param e: The encryption object. This param will be used to encrypt messages (AESEncrytion | RSAEncryption). if None is provided, no encryption will be used.
+        :type e: Union[RSAEncyption, AESEncryption]
         """
         if self.protocol == "UDP":
             send_cmd = lambda x: self.socket.sendto(x, addr)
@@ -85,18 +90,19 @@ class ClientSocket:
             m = Message(encrypt_cmd(m.get_plain_msg()), code=m.code.decode())
         send_cmd(m.message)
 
-    def send_buffered(self, m: Message, addr: tuple = None, batch_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None, code=CommunicationCode.VIDEO) -> None:
+    def send_buffered(self, m: Message, addr: Tuple[str, int] = None, batch_size: int = RECV_BUFFER_SIZE, *, e: Union[RSAEncyption, AESEncryption] = None, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
         """
         This function is responsible for BUFFERING AND SENDING message to the server.
         :param m: The message to send.
         :type m: Message
         :param addr: The address of the server to connect. This param will be ignored for TCP communication.
-        :type addr: tuple(ip, port)
+        :type addr: Tuple[str, int]
         :param batch_size: The size of the batch. It should be less than rsa.common.byte_size(publickey.n)
         :type batch_size: int
         :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
-        :type e: RSAEncyption
-
+        :type e: Union[RSAEncyption, AESEncryption]
+        :param code: The code of the message. If nothing is provided, the code will be assumed to be CommunicationCode.VIDEO.
+        :type code: CommunicationCode
         """
         if isinstance(e, RSAEncyption):
             batch_size -= 11
@@ -129,13 +135,13 @@ class ClientSocket:
                 print(f"{summary/1_000_000} MB sent.")
         print("done")
 
-    def recv(self, buffer_size: int = RECV_BUFFER_SIZE, e: RSAEncyption = None) -> Message:
+    def recv(self, buffer_size: int = RECV_BUFFER_SIZE, *, e: Union[RSAEncyption, AESEncryption] = None) -> Tuple[Message, Tuple[str, int]]:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer. It should be exactly the same as rsa.common.byte_size(publickey.n)
         :type buffer_size: int
-        :return: The message received and the origin.
-        :rtype: tuple(Message, tuple(ip, port))
+        :return: The message received and the origin - Tuple(Message, Tuple(ip, port)).
+        :rtype: Tuple[Message, Tuple[str, int]]
         """
         if e is not None:
             decrypt_cmd = lambda x: e.decrypt(x)
@@ -177,6 +183,9 @@ class ClientSocket:
         
 
     def close(self) -> None:
+        """
+        This function is responsible for closing the socket. USE ONLY WITH TCP.
+        """
         self.socket.close() if self.protocol == "TCP" else None
 
 
@@ -205,6 +214,9 @@ class ServerSocket(ClientSocket):
         self.socket.listen() if self.protocol == "TCP" else None
     
     def accept(self):
+        """
+        This function is responsible for accepting a connection from a client. USE ONLY WITH TCP.
+        """
         if self.protocol == "UDP":
             raise ValueError("UDP communication does not require connection.")
         else:

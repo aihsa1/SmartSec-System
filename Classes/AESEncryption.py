@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 import os
 from Message import Message
+from typing import Tuple, Union
 
 
 class AESEncryption:
@@ -11,7 +12,7 @@ class AESEncryption:
     """
     KEY_SIZE = 16
 
-    def __init__(self, key=None) -> None:
+    def __init__(self, key: bytes=None) -> None:
         """
         This is the constructor for the AESEncryption class. Every object is used as an interface to the AES encryption algorithm.
         :param key: The key used for encryption and decryption. If no key is provided, a random key is generated. Otherwise, the key is used.
@@ -26,7 +27,7 @@ class AESEncryption:
             self.key = key
             self.aes = AES.new(key, AES.MODE_GCM)
 
-    def _new_nonce(self, nonce=None):
+    def _new_nonce(self, nonce: bytes=None) -> None:
         """
         This method updates the nonce used for encryption and decryption. if no nonce is provided, it will be used instead of a random one.
         :param nonce: The nonce to use. If no nonce is provided, a random one will be generated.
@@ -34,7 +35,7 @@ class AESEncryption:
         """
         self.aes = AES.new(self.key, AES.MODE_GCM, nonce=nonce)
 
-    def _extract_nonce(self, ciphertext):
+    def _extract_nonce(self, ciphertext: bytes) -> bytes:
         """
         This auxiliary method extracts the nonce from the ciphertext.
         :param ciphertext: The ciphertext to extract the nonce from.
@@ -44,7 +45,7 @@ class AESEncryption:
         """
         return ciphertext[:AESEncryption.KEY_SIZE]
 
-    def _extract_encrypted_messege(self, ciphertext):
+    def _extract_encrypted_messege(self, ciphertext: bytes) -> bytes:
         """
         This auxiliary method extracts the cipher from the data recieved.
         :param ciphertext: The ciphertext to extract the cipher from.
@@ -54,7 +55,7 @@ class AESEncryption:
         """
         return ciphertext[AESEncryption.KEY_SIZE:]
 
-    def encrypt(self, plaintext, merged=True):
+    def encrypt(self, plaintext, merged: bool=True) -> Union[Tuple, bytes]:
         """
         This method encrypts the given plaintext.
         :param plaintext: The plaintext to encrypt
@@ -62,7 +63,7 @@ class AESEncryption:
         :param merged: If True, the nonce and ciphertext are merged into one string of bytes. If False, the nonce and ciphertext are returned separately (as a tuple).
         :type merged: bool
         :return:  (nonce + ciphertext) or (nonce, ciphertext)
-        :rtype: bytes/tuple
+        :rtype: Union[Tuple, bytes]
         """
         self._new_nonce()
         ret = self.aes.nonce, self.aes.encrypt(plaintext)
@@ -70,7 +71,7 @@ class AESEncryption:
             return (ret[0] + ret[1])
         return ret
 
-    def decrypt(self, text):
+    def decrypt(self, text: bytes) -> bytes:
         """
         This method decrypts the given ciphertext. NOTE that the nonce should be in the text and before the ciphertext.
         :param text: A string of bytes containing the nonce and ciphertext. It should be as received from the encrypt() method.
@@ -83,13 +84,15 @@ class AESEncryption:
         self._new_nonce(nonce)
         return self.aes.decrypt(ciphertext)
 
-    def generate_tag(self):
+    def generate_tag(self) -> bytes:
         """
         This method generates a tag for the current nonce. The tag is used to verify the integrity and authenticity of the message.
+        :return: The tag
+        :rtype: bytes
         """
         return self.aes.digest()
 
-    def verify_tag(self, tag):
+    def verify_tag(self, tag: bytes) -> bool:
         """
         This method verifies the integrity and authenticity of the message.
         :param tag: The tag to verify.

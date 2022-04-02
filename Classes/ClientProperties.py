@@ -1,4 +1,7 @@
 class ClientProperties:
+    """
+    This class is used to store the client properties.
+    """
     plainsocket = "plainsocket"
     clientsocket = "clientsocket"
     clientname = "clientname"

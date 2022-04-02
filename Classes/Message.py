@@ -1,18 +1,19 @@
+from typing import Union, Generator, List
 from CommunicationCode import CommunicationCode
 
 
 class Message:
     DEFAULT_HEADER_SIZE = 20
 
-    def __init__(self, message, header_size=DEFAULT_HEADER_SIZE, message_size=None, code=CommunicationCode.VIDEO):
+    def __init__(self, message: Union[str, bytes], header_size: int=DEFAULT_HEADER_SIZE, message_size: Union[int, None]=None, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
         """
         Ths function is used to initialize the message object.
         :param message: The message to be sent
-        :type message: str/bytesr
+        :type message: Union[str, bytes]
         :param header_size: The size of the header of the communication protocol
         :type header_size: int
         :param message_size: The size of the message to be sent. If not specified, the message param size is assumed to be the size of the message. otherwise, the message size is assumed to be the specified size. It should be noted that specifiying the message size is optional, and it is used only to create a message and acummulate buffered data to it.
-        :type message_size: int/None
+        :type message_size: Union[int, None]
         """
         # set is_compelete and message_size according to the params
         if message_size is not None:
@@ -42,7 +43,7 @@ class Message:
         return self.message[self.header_size:]  # takes str and bytes into account
 
     @classmethod
-    def create_message_from_plain_data(cls, plain_data, header_size=DEFAULT_HEADER_SIZE):
+    def create_message_from_plain_data(cls, plain_data: bytes, header_size: int=DEFAULT_HEADER_SIZE) -> 'Message':
         """
         This function is used to create a message from the plain data.
         :param plain_data: The plain data to be sent
@@ -69,7 +70,7 @@ class Message:
             return cls(msg, header_size, code=code.decode())
         return cls(msg, header_size, complete_len, code=code.decode())
 
-    def __iadd__(self, string):
+    def __iadd__(self, string: Union[str, bytes]) -> 'Message':
         """
         This function is used to accumulate the message ON RECIEVEING ONLY
         :param string: The string to be added to the message
@@ -90,7 +91,7 @@ class Message:
         self.is_complete = len(self.get_plain_msg()) == self.message_size
         return self
 
-    def splitted_data_generator(self, batch_size):
+    def splitted_data_generator(self, batch_size: int) -> Generator[List[int], None, None]:
         """
         This function is used to generate the splitted data indicies from the message
         :param batch_size: The size of the batch
@@ -103,7 +104,7 @@ class Message:
             yield [start_index, start_index + batch_size]
         yield [len(self.message) // batch_size * batch_size, len(self.message) // batch_size * batch_size + len(self.message) % batch_size]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         This function is used to return the header + message
         :return: The header + message
