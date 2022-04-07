@@ -91,7 +91,7 @@ class Message:
         self.is_complete = len(self.get_plain_msg()) == self.message_size
         return self
 
-    def splitted_data_generator(self, batch_size: int) -> Generator[List[int], None, None]:
+    def splitted_data_generator(self, batch_size: int, separete_header: bool=False) -> Generator[List[int], None, None]:
         """
         This function is used to generate the splitted data indicies from the message
         :param batch_size: The size of the batch
@@ -99,10 +99,17 @@ class Message:
         :return: yields the splitted data indicies
         :rtype: generator
         """
-        for i in range(len(self.message) // batch_size):
-            start_index = i*batch_size
+        if not separete_header:
+            message = self.message
+            offset = 0
+        else:
+            message = self.get_plain_msg()
+            offset = self.header_size
+            yield [0, offset]
+        for i in range(len(message) // batch_size):
+            start_index = i*batch_size + offset
             yield [start_index, start_index + batch_size]
-        yield [len(self.message) // batch_size * batch_size, len(self.message) // batch_size * batch_size + len(self.message) % batch_size]
+        yield [len(message) // batch_size * batch_size + offset, len(message) // batch_size * batch_size + len(message) % batch_size + offset]
 
     def __str__(self) -> str:
         """
@@ -165,18 +172,21 @@ def main():
     # print(m.is_complete)
     # print(m.code)
     # print(type(m.code))
-    from AESEncryption import AESEncryption
-    e1 = AESEncryption()
-    e2 = AESEncryption(key=e1.key)
-    print(e1.key)
-    print(e2.key)
-    content = b"hi"
-    content_enc = e1.encrypt(content)
-    m = Message(content_enc)
+    # from AESEncryption import AESEncryption
+    # e1 = AESEncryption()
+    # e2 = AESEncryption(key=e1.key)
+    # print(e1.key)
+    # print(e2.key)
+    # content = b"hi"
+    # content_enc = e1.encrypt(content)
+    # m = Message(content_enc)
+    # print(m)
+    # print(len(m.message))
+    
+    m = Message("hello world")
     print(m)
     print(len(m.message))
-    
-    
+    print(list(m.splitted_data_generator(4, True)))
 
 
 if __name__ == "__main__":
