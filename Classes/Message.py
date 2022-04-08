@@ -1,10 +1,12 @@
 from typing import Union, Generator, List
+from functools import singledispatchmethod
 from CommunicationCode import CommunicationCode
 
 
 class Message:
     DEFAULT_HEADER_SIZE = 20
 
+    @singledispatchmethod
     def __init__(self, message: Union[str, bytes], header_size: int=DEFAULT_HEADER_SIZE, message_size: Union[int, None]=None, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
         """
         Ths function is used to initialize the message object.
@@ -33,17 +35,37 @@ class Message:
             self.code = self.code.encode()
         else:
             self.message = f"{(str(self.message_size) + '_' + self.code): <{self.header_size}}" + message
+    
+    @__init__.register(int)
+    def _(self, length: int, header_size: int=DEFAULT_HEADER_SIZE, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
+        """
+        This function is used to initialize an EMPTY the message object.
+        :param length: The length of the message to be sent
+        :type length: int
+        :param header_size: The size of the header of the communication protocol
+        :type header_size: int
+        :param message_size: The size of the message to be sent. If not specified, the message param size is assumed to be the size of the message. otherwise, the message size is assumed to be the specified size. It should be noted that specifiying the message size is optional, and it is used only to create a message and acummulate buffered data to it.
+        :type message_size: Union[int, None]
+        """
+        self.__init__(b"", header_size=header_size, message_size=length, code=code)
 
-    def get_plain_msg(self):
+    def get_plain_msg(self) -> Union[str, bytes]:
         """
         This function is used to get the plain message from the message object
         :return: The plain message
-        :rtype: str
+        :rtype: Union[str, bytes]
         """
         return self.message[self.header_size:]  # takes str and bytes into account
+    def get_header(self) -> Union[str, bytes]:
+        """
+        This function is used to get the header of the message
+        :return: The header of the message
+        :rtype: Union[str, bytes]
+        """
+        return self.message[:self.header_size]  # takes str and bytes into account
 
     @classmethod
-    def create_message_from_plain_data(cls, plain_data: bytes, header_size: int=DEFAULT_HEADER_SIZE) -> 'Message':
+    def create_accumulator_from_plain_data(cls, plain_data: bytes, header_size: int=DEFAULT_HEADER_SIZE) -> 'Message':
         """
         This function is used to create a message from the plain data.
         :param plain_data: The plain data to be sent
@@ -53,22 +75,11 @@ class Message:
         :return: The message object if the plain data is not empty, otherwise, None
         :rtype: Message
         """
-        underscore = "_"
-        
-        if isinstance(plain_data, bytes):
-            underscore = underscore.encode()
-            underscore_index = plain_data.find(underscore)
-            code = plain_data[underscore_index + 1: underscore_index + 2]
-        else:
-            underscore_index = plain_data.find(underscore)
-            code = plain_data[underscore_index + 1: underscore_index + 2].encode()
-
-        msg = plain_data[header_size:]
+        underscore = "_".encode()
+        underscore_index = plain_data.find(underscore)
+        code = plain_data[underscore_index + 1: underscore_index + 2]
         complete_len = int(plain_data[:plain_data.find(underscore)])
-        
-        if len(msg) == 0 or complete_len == len(msg):
-            return cls(msg, header_size, code=code.decode())
-        return cls(msg, header_size, complete_len, code=code.decode())
+        return cls(complete_len, header_size, code=code.decode())
 
     def __iadd__(self, string: Union[str, bytes]) -> 'Message':
         """
@@ -183,10 +194,20 @@ def main():
     # print(m)
     # print(len(m.message))
     
-    m = Message("hello world")
+    # m = Message("hello world")
+    # print(m)
+    # print(len(m.message))
+    # print(list(m.splitted_data_generator(4, True)))
+
+    # m = Message(11)
+    # print(m)
+    # m += "hello world"
+    # print(m)
+
+    m = Message.create_accumulator_from_plain_data(b"11_1                ")
     print(m)
-    print(len(m.message))
-    print(list(m.splitted_data_generator(4, True)))
+    m += b"hello world"
+    print(m)
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ class ClientSocket:
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     del cap
 
-    def __init__(self, protocol: str = "UDP", existing_socket: socket.socket=None) -> None:
+    def __init__(self, protocol: str = "UDP", existing_socket: socket.socket=None, message_header_size: int=Message.DEFAULT_HEADER_SIZE) -> None:
         """
         This function is responsible for creating a client socket.
         :param protocol: The protocol to use.
@@ -38,6 +38,7 @@ class ClientSocket:
         else:
             self.socket = existing_socket
         self.protocol = protocol
+        self.message_header_size = message_header_size
 
     @classmethod
     def create_client_socket(cls, client_socket: socket.socket) -> "ClientSocket":
@@ -128,7 +129,7 @@ class ClientSocket:
             m = Message(encrypt_cmd(m.get_plain_msg().encode()), code=m.code)
         else:
             m = Message(encrypt_cmd(m.get_plain_msg()), code=m.code.decode())
-        for start, end in m.splitted_data_generator(batch_size):
+        for start, end in m.splitted_data_generator(batch_size, True):
                 b = m.message[start: end]
                 send_cmd(b)
                 summary += end - start
@@ -165,20 +166,31 @@ class ClientSocket:
                     return Message(decrypt_cmd(m.get_plain_msg())), address
         else:
            recv_cmd = self.socket.recv
+           data = recv_cmd(self.message_header_size)
+           m = Message.create_accumulator_from_plain_data(data)
            while True:
-                # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
-                if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
-                    data = recv_cmd(m.message_size - len(m.get_plain_msg()))
+                if m.message_size - len(m.get_plain_msg()) < buffer_size:
+                   data = recv_cmd(m.message_size - len(m.get_plain_msg()))
                 else:
                     data = recv_cmd(buffer_size)
-                if new_msg:
-                    m = Message.create_message_from_plain_data(data)
-                    new_msg = False
-                else:
-                    m += data
+                m += data
                 print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
                     return Message(decrypt_cmd(m.get_plain_msg()))
+        #    while True:
+        #         # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
+        #         if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
+        #             data = recv_cmd(m.message_size - len(m.get_plain_msg()))
+        #         else:
+        #             data = recv_cmd(buffer_size)
+        #         if new_msg:
+        #             m = Message.create_message_from_plain_data(data)
+        #             new_msg = False
+        #         else:
+        #             m += data
+        #         print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
+        #         if m.is_complete:
+        #             return Message(decrypt_cmd(m.get_plain_msg()))
         
         
 
