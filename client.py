@@ -116,6 +116,7 @@ def communication():
                 print(m)
                 client_socket.send(m, e=client_aes)
                 # client_socket.send(m)
+                sent_message = True
 
         else:
             sent_message = False

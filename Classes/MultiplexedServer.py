@@ -80,29 +80,31 @@ class MultiplexedServer:
                 print(f"{addr} has disconnected")
                 self._remove_user_from_lists(addr)
                 break
-            print("recieved image")
+            # print("recieved image")
 
             if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
                 cv2.destroyAllWindows()
                 break
+            
             mutex = threading.Lock()
             mutex.acquire()
-            # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
-            # frame = pickle.loads(m.get_plain_msg())
-
-            frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
-            frame = np.reshape(frame, (w, h, -1))
-
-            frame = cv2.resize(frame, dsize=(
-                MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
-            frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
-            try:
-                window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
-                    data=frame_bytes)
-            except Exception as e:
-                mutex.release()
-                print(e)
-                return
+            if m.code.decode() == CommunicationCode.INFO:            
+                print(m.get_plain_msg())
+            else:
+                # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+                # frame = pickle.loads(m.get_plain_msg())
+                frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
+                frame = np.reshape(frame, (w, h, -1))
+                frame = cv2.resize(frame, dsize=(
+                    MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
+                frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+                try:
+                    window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
+                        data=frame_bytes)
+                except Exception as e:
+                    mutex.release()
+                    print(e)
+                    return
             mutex.release()
 
     def read(self) -> None:
