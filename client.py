@@ -29,6 +29,7 @@ labels = None
 frame_bytes = None
 frame = None
 is_cap_open = False
+confident = None
 
 SERVER_ADDRESS = ("127.0.0.1", 14_000)
 
@@ -50,7 +51,7 @@ INDICAOR_MESSAGES = json.loads(
 
 
 def communication():
-    global frame_bytes, frame, is_cap_open, SERVER_ADDRESS
+    global frame_bytes, frame, is_cap_open, SERVER_ADDRESS, confident
     # s = ClientSocket()
     # client_encryption = RSAEncyption()
     # client_encryption.generate_keys()
@@ -102,10 +103,24 @@ def communication():
         Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM, ClientSocket.HEIGHT_WEBCAM)), code=CommunicationCode.INFO),
         e=client_aes
     )
-
+    sent_message = False# sent a message indicating that a weapon has been found
     while frame is None:
         sleep(.07)
     while is_cap_open:
+        mutex = threading.Lock()
+        mutex.acquire()
+        print(confident)
+        if confident:
+            if not sent_message:
+                m = Message("found", code=CommunicationCode.INFO)
+                print(m)
+                client_socket.send(m, e=client_aes)
+                # client_socket.send(m)
+
+        else:
+            sent_message = False
+        mutex.release()
+        
         # m = Message(pickle.dumps(frame))
         m = Message(frame.tobytes())
         try:
@@ -265,7 +280,7 @@ def gui(detection_mode=True) -> None:
     :param detection_mode: True if the detection mode is enabled, False otherwise.
     :type detection_mode: bool
     """
-    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes, frame, is_cap_open
+    global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes, frame, is_cap_open, confident
 
     layout, w, h = generate_detection_gui_client()
 
@@ -288,12 +303,15 @@ def gui(detection_mode=True) -> None:
             # engage indicator if there are any detections
             if len(detections["detection_scores"][detections["detection_scores"] >= MIN_SCORE_THRESH]) > 0:
                 t0_exists = "t0" in locals()
+                mutex = threading.Lock()
+                mutex.acquire()
                 if not t0_exists:
                     t0 = Timer()
                     confident = False
                 else:
                     if t0.elapsed_time() > MIN_TEST_TIME:
                         confident = True
+                mutex.release()
             elif t0_exists:
                 del t0
                 t0_exists = False
@@ -325,19 +343,19 @@ def main(detection_mode=True) -> None:
     # import necassary module if doing detection
     if event is not None and detection_mode:
         # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
-        # done_loading_flag = [False, ]
-        # loading_thread = threading.Thread(target=initialize_model,
-        #                                   args=(done_loading_flag,), daemon=True)
-        # loading_thread.start()
-        # show_loading_screen("Loading...", done_loading_flag)
-        # loading_thread.join()
+        done_loading_flag = [False, ]
+        loading_thread = threading.Thread(target=initialize_model,
+                                          args=(done_loading_flag,), daemon=True)
+        loading_thread.start()
+        show_loading_screen("Loading...", done_loading_flag)
+        loading_thread.join()
 
         # run the main gui with detection + server connection
         if event == "-CONNECT-SERVER-BUTTON-":
             comm_thread = threading.Thread(target=communication, daemon=True)
             comm_thread.start()
-        # gui(detection_mode)
-        gui(False)
+        gui(detection_mode)
+        # gui(False)
         comm_thread.join() if "comm_thread" in locals() else None
 
 

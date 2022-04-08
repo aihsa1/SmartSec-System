@@ -78,16 +78,19 @@ def comm():
             print(e)
             print("client is closed.")
             break
-        print("recieved image")
+        # print("recieved image")
 
         if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
-        # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
-        frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
-        frame = np.reshape(frame, (w, h, -1))
-        cv2.imshow("image", frame)
-        # frame = pickle.loads(m.get_plain_msg())
+        if m.code.decode() == CommunicationCode.INFO:            
+            print(m.get_plain_msg())
+        else:
+            # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
+            frame = np.frombuffer(m.get_plain_msg(), dtype=np.uint8)
+            frame = np.reshape(frame, (w, h, -1))
+            cv2.imshow("image", frame)
+            # frame = pickle.loads(m.get_plain_msg())
     client.close()
     s.close()
 

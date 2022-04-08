@@ -204,9 +204,11 @@ def main():
     # m += "hello world"
     # print(m)
 
-    m = Message.create_accumulator_from_plain_data(b"11_1                ")
-    print(m)
-    m += b"hello world"
+    # m = Message.create_accumulator_from_plain_data(b"11_1                ")
+    # print(m)
+    # m += b"hello world"
+    # print(m)
+    m = Message.create_accumulator_from_plain_data(b"11_2                ")
     print(m)
 
 

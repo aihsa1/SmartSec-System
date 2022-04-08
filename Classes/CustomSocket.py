@@ -133,10 +133,10 @@ class ClientSocket:
                 b = m.message[start: end]
                 send_cmd(b)
                 summary += end - start
-                print(f"{summary/1_000_000} MB sent.")
+                # print(f"{summary/1_000_000} MB sent.")
         print("done")
 
-    def recv(self, buffer_size: int = RECV_BUFFER_SIZE, *, e: Union[RSAEncyption, AESEncryption] = None) -> Tuple[Message, Tuple[str, int]]:
+    def recv(self, buffer_size: int = RECV_BUFFER_SIZE, *, e: Union[RSAEncyption, AESEncryption] = None) -> Union[Tuple[Message, Tuple[str, int]], Message]:
         """
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer. It should be exactly the same as rsa.common.byte_size(publickey.n)
@@ -161,7 +161,7 @@ class ClientSocket:
                     new_msg = False
                 else:
                     m += data
-                print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
+                # print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
                     return Message(decrypt_cmd(m.get_plain_msg())), address
         else:
@@ -174,9 +174,9 @@ class ClientSocket:
                 else:
                     data = recv_cmd(buffer_size)
                 m += data
-                print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
+                # print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
-                    return Message(decrypt_cmd(m.get_plain_msg()))
+                    return Message(decrypt_cmd(m.get_plain_msg()), m.header_size, code=m.code.decode())
         #    while True:
         #         # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
         #         if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
