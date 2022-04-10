@@ -20,6 +20,9 @@ class MultiplexedServer:
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     BLACK_SCREEN = cv2.imencode(".png", np.zeros(
         (HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
+    FRAME_PRECENT = 2
+    GREEN = (0, 255, 0)# green in BGR format (4 CV2)
+    RED = (0, 0, 255)# green in BGR format (4 CV2)
     del cap
 
     def __init__(self, window) -> None:
@@ -58,6 +61,19 @@ class MultiplexedServer:
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
         return rlist, wlist
+    
+    def _draw_incicator_frame(self, img: np.ndarray, found: bool) -> None:
+        w, h = img.shape[1], img.shape[0]
+        frame_color = MultiplexedServer.GREEN if found else MultiplexedServer.RED
+        top_bottom_frame_width = int(w * MultiplexedServer.FRAME_PRECENT / 100)
+        left_right_frame_width = int(h * MultiplexedServer.FRAME_PRECENT / 100)
+
+        img[0: top_bottom_frame_width, :, :] = frame_color
+        img[top_bottom_frame_width * (-1):, :, :] = frame_color
+        img[:, 0: left_right_frame_width, :] = frame_color
+        img[:, left_right_frame_width * (-1):, :] = frame_color
+
+
 
     def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
@@ -71,6 +87,7 @@ class MultiplexedServer:
         client = self.clients[addr][ClientProperties.clientsocket]
         client_aes = self.clients[addr][ClientProperties.aes]
         w, h = self.clients[addr][ClientProperties.webcam_width], self.clients[addr][ClientProperties.webcam_height]
+        found_indicator = False
         while True:
             try:
                 m = client.recv(e=client_aes)
@@ -88,7 +105,8 @@ class MultiplexedServer:
             
             mutex = threading.Lock()
             mutex.acquire()
-            if m.code.decode() == CommunicationCode.INFO:            
+            if m.code.decode() == CommunicationCode.INFO:
+                found_indicator = m.get_plain_msg().decode() == "FOUND"
                 print(m.get_plain_msg())
             else:
                 # cv2.imshow("image", pickle.loads(m.get_plain_msg()))
@@ -97,6 +115,7 @@ class MultiplexedServer:
                 frame = np.reshape(frame, (w, h, -1))
                 frame = cv2.resize(frame, dsize=(
                     MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
+                self._draw_incicator_frame(frame, found_indicator)
                 frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
                 try:
                     window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(

@@ -113,7 +113,7 @@ def communication():
         print(confident)
         if confident:
             if not sent_alert_confident:
-                m = Message("found", code=CommunicationCode.INFO)
+                m = Message("FOUND", code=CommunicationCode.INFO)
                 print(m)
                 client_socket.send(m, e=client_aes)
                 # client_socket.send(m)
@@ -121,7 +121,7 @@ def communication():
                 sent_alert_not_confident = False
 
         elif not sent_alert_not_confident:
-            m = Message("done", code=CommunicationCode.INFO)
+            m = Message("DONE", code=CommunicationCode.INFO)
             print(m)
             client_socket.send(m, e=client_aes)
             sent_alert_confident = False
