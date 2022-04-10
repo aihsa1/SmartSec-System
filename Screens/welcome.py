@@ -6,11 +6,14 @@
 #      \/  \/   |______|______\_____\____/|_|  |_|______| |_____/ \_____|_|  \_\______|______|_| \_|
 
 import PySimpleGUI as sg
+from typing import Tuple
 
 
-def show_welcome_client():
+def show_welcome_client() -> Tuple[str, bool]:
     """
     This function is responsible for displaying the welcome window.
+    :return: Tuple of the event and the detection mode (e, flag)
+    :rtype: Tuple[str, bool]
     """
     w, h = sg.Window.get_screen_size()
     w, h = int(w // 1.8), int(h // 1.8)
@@ -27,8 +30,8 @@ def show_welcome_client():
                     #         "Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
                     # ],
                     [
-                        sg.Button(button_text="Connect to Server", key="-CONNECT-SERVER-BUTTON-",
-                                  tooltip="Connect to the server and detect pistols from a video feed", focus=False, enable_events=True),
+                        sg.Button(button_text="Connect to Server & Detect", key="-CONNECT-SERVER-BUTTON-",
+                                  tooltip="Connect to the server & detect pistols from a video feed", focus=False, enable_events=True),
                         sg.Button(button_text="Detect Locally from Webcam", key="-DETECT-LOCALLY-WEBCAM-BUTTON-",
                                   tooltip="Detect locally using a webcam, without reporting to the server", focus=False, enable_events=True),
                         sg.Checkbox("Detection", default=True, enable_events=True, key="-DETECTION-CHECKBOX-", tooltip="use ML pistol detection or not"),
@@ -43,13 +46,13 @@ def show_welcome_client():
     window = sg.Window("Welcome to SmartSec", layout, size=(w, h))
 
     # EVENT LOOP
-    ret = None
+    ret = (None, False)
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
             break
-        if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-WEBCAM-BUTTON-"]:
-            ret = event
+        if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-WEBCAM-BUTTON-", "-DETECT-LOCALLY-VIDEO-BUTTON-"]:
+            ret = (event , window["-DETECTION-CHECKBOX-"].Get())
             break
     window.close()
     return ret

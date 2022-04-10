@@ -343,30 +343,27 @@ def gui(detection_mode=True) -> None:
 #  | |\/| | / /\ \   | | | . ` |
 #  | |  | |/ ____ \ _| |_| |\  |
 #  |_|  |_/_/    \_\_____|_| \_|
-def main(detection_mode=True) -> None:
+def main() -> None:
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
-    event = show_welcome_client()
-
+    event, detection_mode = show_welcome_client()
     # import necassary module if doing detection
-    if event is not None and detection_mode:
-        # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
-        done_loading_flag = [False, ]
-        loading_thread = threading.Thread(target=initialize_model,
-                                          args=(done_loading_flag,), daemon=True)
-        loading_thread.start()
-        show_loading_screen("Loading...", done_loading_flag)
-        loading_thread.join()
-
-        # run the main gui with detection + server connection
+    if event is not None:
+        if detection_mode:
+            # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
+            done_loading_flag = [False, ]
+            loading_thread = threading.Thread(target=initialize_model,
+                                            args=(done_loading_flag,), daemon=True)
+            loading_thread.start()
+            show_loading_screen("Loading...", done_loading_flag)
+            loading_thread.join()
+        
         if event == "-CONNECT-SERVER-BUTTON-":
             comm_thread = threading.Thread(target=communication, daemon=True)
             comm_thread.start()
         gui(detection_mode)
-        # gui(False)
         comm_thread.join() if "comm_thread" in locals() else None
-
 
 if __name__ == "__main__":
     main()
