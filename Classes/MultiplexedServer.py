@@ -99,13 +99,14 @@ class MultiplexedServer:
                     MultiplexedServer.MAX_QUEUED_INCIDENTS)
                 t.update_time()
             mutex.release()
-        
+
         mutex = threading.Lock()
         mutex.acquire()
         if not self.insert_queue.empty():
             self.db.insert(*self.insert_queue.queue,
-                               db_name="SmartSecDB", col_name="Pistols")
-            print(f"dumped {self.insert_queue.qsize()} items to db. Now shutting down.")
+                           db_name="SmartSecDB", col_name="Pistols")
+            print(
+                f"dumped {self.insert_queue.qsize()} items to db. Now shutting down.")
         mutex.release()
 
     def _report_incident(self, addr: Tuple[str, int], img: np.ndarray) -> None:
@@ -116,9 +117,9 @@ class MultiplexedServer:
         mutex.acquire()
         print(self.insert_queue.qsize())
         self.insert_queue.put_nowait({"addr": addr, "img": img_bytes, "dtype": dtype,
-                       "date": date})
+                                      "date": date})
         mutex.release()
-    
+
     def insert_queue_checker(self) -> threading.Thread:
         t = threading.Thread(target=self._dump_insert_queue, daemon=True)
         t.start()
@@ -167,8 +168,7 @@ class MultiplexedServer:
                 frame = np.reshape(frame, (w, h, -1))
                 frame = cv2.resize(frame, dsize=(
                     MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
-                frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
-                
+
                 if found_indicator:
                     color = MultiplexedServer.GREEN
                     if not reported_indicator:
@@ -178,7 +178,8 @@ class MultiplexedServer:
                     color = MultiplexedServer.RED
                     reported_indicator = False
                 self._draw_indicator_frame(frame, color)
-                
+                frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+
                 try:
                     window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
                         data=frame_bytes)
@@ -186,7 +187,7 @@ class MultiplexedServer:
                     mutex.release()
                     print(e)
                     return
-                
+
             mutex.release()
 
     def read(self) -> None:
