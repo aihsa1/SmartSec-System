@@ -151,19 +151,19 @@ class ClientSocket:
             decrypt_cmd = lambda x: x
             offset = 0
         
-        new_msg = True
         if self.protocol == "UDP":
             recv_cmd = self.socket.recvfrom
+            data, addr = recv_cmd(self.message_header_size)
+            m = Message.create_accumulator_from_plain_data(data)
             while True:
-                data, address = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
-                if new_msg:
-                    m = Message.create_message_from_plain_data(data)
-                    new_msg = False
-                else:
+                    if m.message_size - len(m.get_plain_msg()) < buffer_size:
+                        data = recv_cmd(m.message_size - len(m.get_plain_msg()))
+                    else:
+                        data = recv_cmd(buffer_size)
                     m += data
-                # print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
-                if m.is_complete:
-                    return Message(decrypt_cmd(m.get_plain_msg())), address
+                    # print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
+                    if m.is_complete:
+                        return Message(decrypt_cmd(m.get_plain_msg()), m.header_size, code=m.code.decode()), addr
         else:
            recv_cmd = self.socket.recv
            data = recv_cmd(self.message_header_size)
@@ -177,20 +177,6 @@ class ClientSocket:
                 # print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
                 if m.is_complete:
                     return Message(decrypt_cmd(m.get_plain_msg()), m.header_size, code=m.code.decode())
-        #    while True:
-        #         # data = recv_cmd(m.message_size - len(m.get_plain_msg())) if "m" in locals() and m.message_size - len(m.get_plain_msg()) < buffer_size else recv_cmd(buffer_size)
-        #         if not new_msg and m.message_size - len(m.get_plain_msg()) < buffer_size:
-        #             data = recv_cmd(m.message_size - len(m.get_plain_msg()))
-        #         else:
-        #             data = recv_cmd(buffer_size)
-        #         if new_msg:
-        #             m = Message.create_message_from_plain_data(data)
-        #             new_msg = False
-        #         else:
-        #             m += data
-        #         print(f"{len(m.get_plain_msg())/1_000_000} MB received.")
-        #         if m.is_complete:
-        #             return Message(decrypt_cmd(m.get_plain_msg()))
         
         
 
