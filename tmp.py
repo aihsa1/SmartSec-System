@@ -2,6 +2,7 @@ import pymongo
 import bson
 import re
 import datetime
+import numpy as np
 
 USERNAME = "KyHSAVsQnqTw1HC0"
 PASSWORD = "XnHZPdap8941pypr"
@@ -23,10 +24,14 @@ col = db["tmp-col"]
 
 # col.insert_one({"name": "Davidov", "age": 28, "date": datetime.datetime.now()})
 
-
+# col.insert_one({"arr": np.array([1,2,3], dtype=np.uint8).tobytes()})
 
 for x in col.find({}, sort=[("name", pymongo.ASCENDING)]):
     print(x)
+
+# for x in col.find({"_id": bson.ObjectId('6252d3d02b03fb89f2b774ca')}, sort=[("name", pymongo.ASCENDING)]):
+#     print(np.frombuffer(x["arr"], dtype=np.uint8))
+#     print(type(np.frombuffer(x["arr"], dtype=np.uint8)))
 
 # for x in col.find({"name": "john"}):
 #     print(x)

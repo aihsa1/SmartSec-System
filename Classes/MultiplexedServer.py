@@ -1,20 +1,28 @@
-from CustomSocket import *
-import threading
-import hashlib
+from datetime import datetime
 import cv2
 import pickle
 import socket
+import hashlib
+import datetime
+import threading
 import numpy as np
-from select import select
+from time import sleep
+from Timer import Timer
+from queue import Queue
 import PySimpleGUI as sg
+from select import select
+from CustomSocket import *
+from typing import List, Tuple
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
+from PyMongoInterface import PyMongoInterface
 from ClientProperties import ClientProperties
 from CommunicationCode import CommunicationCode
-from typing import List, Tuple
 
 
 class MultiplexedServer:
+    DB_INSERT_TIMER_DELAY = 20
+    MAX_QUEUED_INCIDENTS = 3
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -38,6 +46,20 @@ class MultiplexedServer:
         self.client_threads = {}
         self.server_socket.bind_and_listen(("0.0.0.0", 14_000))
         self.window = window
+        self.db = PyMongoInterface()
+        self.insert_queue = Queue(MultiplexedServer.MAX_QUEUED_INCIDENTS)
+        self.final_dump_flag = False
+
+    def _select(self) -> Tuple[List[socket.socket], List[socket.socket]]:
+        """
+        This method is used to select the sockets that are ready to be read and written to. DO NOT USE THIS METHOD BY ITSELF.
+        :return: a list of sockets that are ready to be read and a list of sockets that are ready to be written - Tuple[rlist, wlist]
+        :rtype: Tuple[List[socket.socket], List[socket.socket]]
+        """
+        client_sockets = list(self.client_sockets.values())
+        rlist, wlist, _ = select(
+            [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
+        return rlist, wlist
 
     def _remove_user_from_lists(self, addr: Tuple[str, int]) -> None:
         """
@@ -51,20 +73,8 @@ class MultiplexedServer:
         del self.client_sockets[addr]
         del self.clients[addr]
 
-    def _select(self) -> Tuple[List[socket.socket], List[socket.socket]]:
-        """
-        This method is used to select the sockets that are ready to be read and written to. DO NOT USE THIS METHOD BY ITSELF.
-        :return: a list of sockets that are ready to be read and a list of sockets that are ready to be written - Tuple[rlist, wlist]
-        :rtype: Tuple[List[socket.socket], List[socket.socket]]
-        """
-        client_sockets = list(self.client_sockets.values())
-        rlist, wlist, _ = select(
-            [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
-        return rlist, wlist
-
-    def _draw_incicator_frame(self, img: np.ndarray, found: bool) -> None:
+    def _draw_indicator_frame(self, img: np.ndarray, frame_color: tuple) -> None:
         w, h = img.shape[1], img.shape[0]
-        frame_color = MultiplexedServer.GREEN if found else MultiplexedServer.RED
         top_bottom_frame_width = int(w * MultiplexedServer.FRAME_PRECENT / 100)
         left_right_frame_width = int(h * MultiplexedServer.FRAME_PRECENT / 100)
 
@@ -72,7 +82,47 @@ class MultiplexedServer:
         img[top_bottom_frame_width * (-1):, :, :] = frame_color
         img[:, 0: left_right_frame_width, :] = frame_color
         img[:, left_right_frame_width * (-1):, :] = frame_color
-        print("drawn")
+
+    def _dump_insert_queue(self):
+        t = Timer()
+        while True:
+            sleep(0.2)
+            mutex = threading.Lock()
+            mutex.acquire()
+            if self.final_dump_flag:
+                break
+            if self.insert_queue.full() or (t.elapsed_time() > MultiplexedServer.DB_INSERT_TIMER_DELAY and not self.insert_queue.empty()):
+                self.db.insert(*self.insert_queue.queue,
+                               db_name="SmartSecDB", col_name="Pistols")
+                print("inserted queue to db")
+                self.insert_queue = Queue(
+                    MultiplexedServer.MAX_QUEUED_INCIDENTS)
+                t.update_time()
+            mutex.release()
+        
+        mutex = threading.Lock()
+        mutex.acquire()
+        if not self.insert_queue.empty():
+            self.db.insert(*self.insert_queue.queue,
+                               db_name="SmartSecDB", col_name="Pistols")
+            print(f"dumped {self.insert_queue.qsize()} items to db. Now shutting down.")
+        mutex.release()
+
+    def _report_incident(self, addr: Tuple[str, int], img: np.ndarray) -> None:
+        img_bytes = img.tobytes()
+        dtype = np.dtype(img.dtype).__str__()
+        date = datetime.datetime.now()
+        mutex = threading.Lock()
+        mutex.acquire()
+        print(self.insert_queue.qsize())
+        self.insert_queue.put_nowait({"addr": addr, "img": img_bytes, "dtype": dtype,
+                       "date": date})
+        mutex.release()
+    
+    def insert_queue_checker(self) -> threading.Thread:
+        t = threading.Thread(target=self._dump_insert_queue, daemon=True)
+        t.start()
+        return t
 
     def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
@@ -87,6 +137,7 @@ class MultiplexedServer:
         client_aes = self.clients[addr][ClientProperties.aes]
         w, h = self.clients[addr][ClientProperties.webcam_width], self.clients[addr][ClientProperties.webcam_height]
         found_indicator = False
+        reported_indicator = False
         while True:
             try:
                 m = client.recv(e=client_aes)
@@ -116,8 +167,18 @@ class MultiplexedServer:
                 frame = np.reshape(frame, (w, h, -1))
                 frame = cv2.resize(frame, dsize=(
                     MultiplexedServer.WIDTH_WEBCAM // 2, MultiplexedServer.HEIGHT_WEBCAM // 2))
-                self._draw_incicator_frame(frame, found_indicator)
                 frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
+                
+                if found_indicator:
+                    color = MultiplexedServer.GREEN
+                    if not reported_indicator:
+                        self._report_incident(addr, frame)
+                        reported_indicator = True
+                else:
+                    color = MultiplexedServer.RED
+                    reported_indicator = False
+                self._draw_indicator_frame(frame, color)
+                
                 try:
                     window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
                         data=frame_bytes)
@@ -125,6 +186,7 @@ class MultiplexedServer:
                     mutex.release()
                     print(e)
                     return
+                
             mutex.release()
 
     def read(self) -> None:

@@ -27,11 +27,14 @@ def main():
         *generate_detection_gui_server(),), daemon=True)
     gui_thread.start()
     m = MultiplexedServer(window)
+    t = m.insert_queue_checker()
     while True:
         m.read()
         sleep(0.07)
         if not gui_thread.is_alive():
             break
+    m.final_dump_flag = True
+    t.join()
 
 
 if __name__ == "__main__":
