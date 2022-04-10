@@ -73,11 +73,11 @@ def generate_detection_gui_server():
 
             sg.Column(
                 [
-                    [sg.Button(button_text="", key="-MIC-BUTTON-", image_data=MIC_IMAGE
-                                  , tooltip="open/close mic", focus=False, enable_events=True)]
+                    [sg.Button(button_text="", key="-MIC-BUTTON-", image_data=MIC_IMAGE,
+                               tooltip="open/close mic", focus=False, enable_events=True)]
                 ]
-            )
-            ]
+        )
+        ]
     ]
     return layout, w, h
 

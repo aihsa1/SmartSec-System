@@ -6,6 +6,8 @@ from time import sleep
 from Screens.detection_gui import generate_detection_gui_server
 
 window = None
+
+
 def gui(layout, w, h):
     global window
     window = sg.Window("SmartSec Server", layout, size=(w, h))
@@ -18,9 +20,11 @@ def gui(layout, w, h):
             pass
     window.close()
 
+
 def main():
     global window
-    gui_thread = threading.Thread(target=gui, args=(*generate_detection_gui_server(),), daemon=True)
+    gui_thread = threading.Thread(target=gui, args=(
+        *generate_detection_gui_server(),), daemon=True)
     gui_thread.start()
     m = MultiplexedServer(window)
     while True:
@@ -28,6 +32,7 @@ def main():
         sleep(0.07)
         if not gui_thread.is_alive():
             break
+
 
 if __name__ == "__main__":
     main()

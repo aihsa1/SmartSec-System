@@ -69,7 +69,6 @@ def comm():
     h, w = pickle.loads(m.get_plain_msg())
     ##########################
 
-
     while True:
         try:
             m = client.recv(e=server_aes)
@@ -83,7 +82,7 @@ def comm():
         if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
             cv2.destroyAllWindows()
             break
-        if m.code.decode() == CommunicationCode.INFO:            
+        if m.code.decode() == CommunicationCode.INFO:
             print(m.get_plain_msg())
         else:
             # cv2.imshow("image", pickle.loads(m.get_plain_msg()))

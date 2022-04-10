@@ -7,7 +7,7 @@ class Message:
     DEFAULT_HEADER_SIZE = 20
 
     @singledispatchmethod
-    def __init__(self, message: Union[str, bytes], header_size: int=DEFAULT_HEADER_SIZE, message_size: Union[int, None]=None, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
+    def __init__(self, message: Union[str, bytes], header_size: int = DEFAULT_HEADER_SIZE, message_size: Union[int, None] = None, code: CommunicationCode = CommunicationCode.VIDEO) -> None:
         """
         Ths function is used to initialize the message object.
         :param message: The message to be sent
@@ -35,9 +35,9 @@ class Message:
             self.code = self.code.encode()
         else:
             self.message = f"{(str(self.message_size) + '_' + self.code): <{self.header_size}}" + message
-    
+
     @__init__.register(int)
-    def _(self, length: int, header_size: int=DEFAULT_HEADER_SIZE, code: CommunicationCode=CommunicationCode.VIDEO) -> None:
+    def _(self, length: int, header_size: int = DEFAULT_HEADER_SIZE, code: CommunicationCode = CommunicationCode.VIDEO) -> None:
         """
         This function is used to initialize an EMPTY the message object.
         :param length: The length of the message to be sent
@@ -47,7 +47,8 @@ class Message:
         :param message_size: The size of the message to be sent. If not specified, the message param size is assumed to be the size of the message. otherwise, the message size is assumed to be the specified size. It should be noted that specifiying the message size is optional, and it is used only to create a message and acummulate buffered data to it.
         :type message_size: Union[int, None]
         """
-        self.__init__(b"", header_size=header_size, message_size=length, code=code)
+        self.__init__(b"", header_size=header_size,
+                      message_size=length, code=code)
 
     def get_plain_msg(self) -> Union[str, bytes]:
         """
@@ -56,6 +57,7 @@ class Message:
         :rtype: Union[str, bytes]
         """
         return self.message[self.header_size:]  # takes str and bytes into account
+
     def get_header(self) -> Union[str, bytes]:
         """
         This function is used to get the header of the message
@@ -65,7 +67,7 @@ class Message:
         return self.message[:self.header_size]  # takes str and bytes into account
 
     @classmethod
-    def create_accumulator_from_plain_data(cls, plain_data: bytes, header_size: int=DEFAULT_HEADER_SIZE) -> 'Message':
+    def create_accumulator_from_plain_data(cls, plain_data: bytes, header_size: int = DEFAULT_HEADER_SIZE) -> 'Message':
         """
         This function is used to create a message from the plain data.
         :param plain_data: The plain data to be sent
@@ -102,7 +104,7 @@ class Message:
         self.is_complete = len(self.get_plain_msg()) == self.message_size
         return self
 
-    def splitted_data_generator(self, batch_size: int, separete_header: bool=False) -> Generator[List[int], None, None]:
+    def splitted_data_generator(self, batch_size: int, separete_header: bool = False) -> Generator[List[int], None, None]:
         """
         This function is used to generate the splitted data indicies from the message
         :param batch_size: The size of the batch
@@ -193,7 +195,7 @@ def main():
     # m = Message(content_enc)
     # print(m)
     # print(len(m.message))
-    
+
     # m = Message("hello world")
     # print(m)
     # print(len(m.message))

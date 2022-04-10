@@ -34,7 +34,8 @@ def show_welcome_client() -> Tuple[str, bool]:
                                   tooltip="Connect to the server & detect pistols from a video feed", focus=False, enable_events=True),
                         sg.Button(button_text="Detect Locally from Webcam", key="-DETECT-LOCALLY-WEBCAM-BUTTON-",
                                   tooltip="Detect locally using a webcam, without reporting to the server", focus=False, enable_events=True),
-                        sg.Checkbox("Detection", default=True, enable_events=True, key="-DETECTION-CHECKBOX-", tooltip="use ML pistol detection or not"),
+                        sg.Checkbox("Detection", default=True, enable_events=True,
+                                    key="-DETECTION-CHECKBOX-", tooltip="use ML pistol detection or not"),
                         sg.VerticalSeparator(),
                         sg.Button(button_text="Detect Locally from a Video", key="-DETECT-LOCALLY-VIDEO-BUTTON-",
                                   tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
@@ -52,7 +53,7 @@ def show_welcome_client() -> Tuple[str, bool]:
         if event == sg.WIN_CLOSED:
             break
         if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-WEBCAM-BUTTON-", "-DETECT-LOCALLY-VIDEO-BUTTON-"]:
-            ret = (event , window["-DETECTION-CHECKBOX-"].Get())
+            ret = (event, window["-DETECTION-CHECKBOX-"].Get())
             break
     window.close()
     return ret

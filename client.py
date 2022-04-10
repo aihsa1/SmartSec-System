@@ -100,10 +100,11 @@ def communication():
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
     client_socket.send(
-        Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM, ClientSocket.HEIGHT_WEBCAM)), code=CommunicationCode.INFO),
+        Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM,
+                ClientSocket.HEIGHT_WEBCAM)), code=CommunicationCode.INFO),
         e=client_aes
     )
-    sent_alert_confident = False# sent a message indicating that a weapon has been found
+    sent_alert_confident = False  # sent a message indicating that a weapon has been found
     sent_alert_not_confident = True
     while frame is None:
         sleep(.07)
@@ -128,7 +129,7 @@ def communication():
             sent_alert_not_confident = True
             # client_socket.send(m)
         mutex.release()
-        
+
         # m = Message(pickle.dumps(frame))
         m = Message(frame.tobytes())
         try:
@@ -354,16 +355,17 @@ def main() -> None:
             # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
             done_loading_flag = [False, ]
             loading_thread = threading.Thread(target=initialize_model,
-                                            args=(done_loading_flag,), daemon=True)
+                                              args=(done_loading_flag,), daemon=True)
             loading_thread.start()
             show_loading_screen("Loading...", done_loading_flag)
             loading_thread.join()
-        
+
         if event == "-CONNECT-SERVER-BUTTON-":
             comm_thread = threading.Thread(target=communication, daemon=True)
             comm_thread.start()
         gui(detection_mode)
         comm_thread.join() if "comm_thread" in locals() else None
+
 
 if __name__ == "__main__":
     main()

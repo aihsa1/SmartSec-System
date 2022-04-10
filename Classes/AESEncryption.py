@@ -12,7 +12,7 @@ class AESEncryption:
     """
     KEY_SIZE = 16
 
-    def __init__(self, key: bytes=None) -> None:
+    def __init__(self, key: bytes = None) -> None:
         """
         This is the constructor for the AESEncryption class. Every object is used as an interface to the AES encryption algorithm.
         :param key: The key used for encryption and decryption. If no key is provided, a random key is generated. Otherwise, the key is used.
@@ -27,7 +27,7 @@ class AESEncryption:
             self.key = key
             self.aes = AES.new(key, AES.MODE_GCM)
 
-    def _new_nonce(self, nonce: bytes=None) -> None:
+    def _new_nonce(self, nonce: bytes = None) -> None:
         """
         This method updates the nonce used for encryption and decryption. if no nonce is provided, it will be used instead of a random one.
         :param nonce: The nonce to use. If no nonce is provided, a random one will be generated.
@@ -55,7 +55,7 @@ class AESEncryption:
         """
         return ciphertext[AESEncryption.KEY_SIZE:]
 
-    def encrypt(self, plaintext, merged: bool=True) -> Union[Tuple, bytes]:
+    def encrypt(self, plaintext, merged: bool = True) -> Union[Tuple, bytes]:
         """
         This method encrypts the given plaintext.
         :param plaintext: The plaintext to encrypt
@@ -140,21 +140,20 @@ def main():
     #     # print(plaintext2)
 
     #     nonce, ciphertext = cipher2.encrypt(plaintext, False)
-    #     tag = cipher2.generate_tag()        
+    #     tag = cipher2.generate_tag()
     #     plaintext2 = cipher.decrypt(nonce + ciphertext)
     #     print(cipher.verify_tag(tag))
     #     print(nonce)
     #     # print(plaintext2)
-    
+
     # m = Message(b"hi"*(10**5))
     # indicies1 = list(m.splitted_data_generator(4096))
 
-    
     # cipher = AESEncryption()
     # ciphertexts = []
     # for start, end in indicies1:
     #     ciphertexts.append(cipher.encrypt(m.message[start:end]))
-    
+
     # cipher2 = AESEncryption(cipher.key)
     # plaintexts = []
     # for c in ciphertexts:
@@ -172,14 +171,14 @@ def main():
     i = 0
     while True:
         if "new_msg" not in locals():
-            new_msg = Message.create_message_from_plain_data(cipher2.decrypt(ciphertexts[i]))
+            new_msg = Message.create_message_from_plain_data(
+                cipher2.decrypt(ciphertexts[i]))
         else:
             new_msg += cipher2.decrypt(ciphertexts[i])
         i += 1
         if new_msg.is_complete:
             break
     print(new_msg.message == m.message)
-
 
 
 if __name__ == "__main__":

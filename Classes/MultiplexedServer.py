@@ -21,8 +21,8 @@ class MultiplexedServer:
     BLACK_SCREEN = cv2.imencode(".png", np.zeros(
         (HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
     FRAME_PRECENT = 2
-    GREEN = (0, 255, 0)# green in BGR format (4 CV2)
-    RED = (0, 0, 255)# green in BGR format (4 CV2)
+    GREEN = (0, 255, 0)  # green in BGR format (4 CV2)
+    RED = (0, 0, 255)  # green in BGR format (4 CV2)
     del cap
 
     def __init__(self, window) -> None:
@@ -61,7 +61,7 @@ class MultiplexedServer:
         rlist, wlist, _ = select(
             [self.server_socket.socket] + client_sockets, client_sockets, [], 1)
         return rlist, wlist
-    
+
     def _draw_incicator_frame(self, img: np.ndarray, found: bool) -> None:
         w, h = img.shape[1], img.shape[0]
         frame_color = MultiplexedServer.GREEN if found else MultiplexedServer.RED
@@ -73,8 +73,6 @@ class MultiplexedServer:
         img[:, 0: left_right_frame_width, :] = frame_color
         img[:, left_right_frame_width * (-1):, :] = frame_color
         print("drawn")
-
-
 
     def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
@@ -105,7 +103,7 @@ class MultiplexedServer:
             #     break
             if len(m.get_plain_msg()) == 0:
                 break
-            
+
             mutex = threading.Lock()
             mutex.acquire()
             if m.code.decode() == CommunicationCode.INFO:

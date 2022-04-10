@@ -107,8 +107,10 @@ m = client_socket.recv()
 server_rsa.load_others_pubkey(m.get_plain_msg())
 client_socket.send_buffered(Message(server_rsa.export_my_pubkey()))
 
-print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(server_rsa.other_pubkey.save_pkcs1()))
-print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(server_rsa.export_my_pubkey()))
+print(f"client pubkey: {hashlib.sha256(server_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
+    server_rsa.other_pubkey.save_pkcs1()))
+print(f"server pubkey: {hashlib.sha256(server_rsa.export_my_pubkey()).hexdigest()}", type(
+    server_rsa.export_my_pubkey()))
 
 key_message = client_socket.recv(e=server_rsa)
 server_aes = AESEncryption(key=key_message.get_plain_msg())
