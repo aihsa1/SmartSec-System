@@ -72,6 +72,7 @@ class MultiplexedServer:
         img[top_bottom_frame_width * (-1):, :, :] = frame_color
         img[:, 0: left_right_frame_width, :] = frame_color
         img[:, left_right_frame_width * (-1):, :] = frame_color
+        print("drawn")
 
 
 
@@ -99,8 +100,10 @@ class MultiplexedServer:
                 break
             # print("recieved image")
 
-            if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
-                cv2.destroyAllWindows()
+            # if cv2.waitKey(10) & 0xFF == ord('q') or len(m.get_plain_msg()) == 0:
+            #     cv2.destroyAllWindows()
+            #     break
+            if len(m.get_plain_msg()) == 0:
                 break
             
             mutex = threading.Lock()

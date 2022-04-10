@@ -20,17 +20,19 @@ def show_welcome_client():
                 [
                     [sg.Text(
                         "Welcome to SmartSec - the Pistol Detection App", font=("Helvetica", 25))],
-                    [sg.Text("This app will detect pistols in your surroundings", font=(
+                    [sg.Text("Detect pistols in your surroundings", font=(
                         "Helvetica", 15))],
+                    # [
+                    #     sg.Text("Server Connection Status: ", font=("Helvetica", 10)), sg.Text(
+                    #         "Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
+                    # ],
                     [
-                        sg.Text("Server Connection Status: ", font=("Helvetica", 10)), sg.Text(
-                            "Not Connected", font=("Helvetica", 10), key="-SERVER-STATUS-", text_color="red")
-                    ],
-                    [
-                        sg.Button(button_text="Connect Server & Detect from a Webcam", key="-CONNECT-SERVER-BUTTON-",
-                                  tooltip="Connect to the server and detect pistols", focus=False, enable_events=True),
-                        sg.Button(button_text="Detect Locally Using a Webcam", key="-DETECT-LOCALLY-WEBCAM-BUTTON-",
+                        sg.Button(button_text="Connect to Server", key="-CONNECT-SERVER-BUTTON-",
+                                  tooltip="Connect to the server and detect pistols from a video feed", focus=False, enable_events=True),
+                        sg.Button(button_text="Detect Locally from Webcam", key="-DETECT-LOCALLY-WEBCAM-BUTTON-",
                                   tooltip="Detect locally using a webcam, without reporting to the server", focus=False, enable_events=True),
+                        sg.Checkbox("Detection", default=True, enable_events=True, key="-DETECTION-CHECKBOX-", tooltip="use ML pistol detection or not"),
+                        sg.VerticalSeparator(),
                         sg.Button(button_text="Detect Locally from a Video", key="-DETECT-LOCALLY-VIDEO-BUTTON-",
                                   tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
                     ],
