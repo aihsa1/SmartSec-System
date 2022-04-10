@@ -103,7 +103,8 @@ def communication():
         Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM, ClientSocket.HEIGHT_WEBCAM)), code=CommunicationCode.INFO),
         e=client_aes
     )
-    sent_message = False# sent a message indicating that a weapon has been found
+    sent_alert_confident = False# sent a message indicating that a weapon has been found
+    sent_alert_not_confident = True
     while frame is None:
         sleep(.07)
     while is_cap_open:
@@ -111,15 +112,21 @@ def communication():
         mutex.acquire()
         print(confident)
         if confident:
-            if not sent_message:
+            if not sent_alert_confident:
                 m = Message("found", code=CommunicationCode.INFO)
                 print(m)
                 client_socket.send(m, e=client_aes)
                 # client_socket.send(m)
-                sent_message = True
+                sent_alert_confident = True
+                sent_alert_not_confident = False
 
-        else:
-            sent_message = False
+        elif not sent_alert_not_confident:
+            m = Message("done", code=CommunicationCode.INFO)
+            print(m)
+            client_socket.send(m, e=client_aes)
+            sent_alert_confident = False
+            sent_alert_not_confident = True
+            # client_socket.send(m)
         mutex.release()
         
         # m = Message(pickle.dumps(frame))
@@ -316,6 +323,7 @@ def gui(detection_mode=True) -> None:
             elif t0_exists:
                 del t0
                 t0_exists = False
+                confident = False
                 window.refresh()
             gui_weapon_indicator(window, detections, confident)
         mutex = threading.Lock()
