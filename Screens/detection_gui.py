@@ -116,7 +116,7 @@ def generate_db_gui_server(data=[], headings=[]):
 
 
 def db_alert_gui_server(i, output, image):
-    sg.popup_no_buttons(output.__str__(), title=f"info about document {i}",
+    sg.popup_no_buttons("\n".join([f"{k}: {v}" for k, v in output]), title=f"info about document {i}",
                         image=image)
 
 

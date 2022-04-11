@@ -24,7 +24,7 @@ def db_gui(values, headings, images):
             img_bytes = images[selected_index]
             db_alert_gui_server(
                 selected_index,
-                tuple(zip(headings, values[selected_index])),
+                zip(headings, values[selected_index]),
                 img_bytes)  # TODO: ADD AN IMAGE
 
 
