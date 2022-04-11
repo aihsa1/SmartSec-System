@@ -115,8 +115,8 @@ def generate_db_gui_server(data=[], headings=[]):
     return layout, w, h
 
 
-def db_alert_gui_server(output, image):
-    sg.popup_no_buttons(output.__str__(), title=f"info",
+def db_alert_gui_server(i, output, image):
+    sg.popup_no_buttons(output.__str__(), title=f"info about document {i}",
                         image=sg.EMOJI_BASE64_HAPPY_BIG_SMILE)
 
 
@@ -148,29 +148,38 @@ def main():
 
     # --------------------------------------------------------------------------------------------------------------------
 
-    import bson
+    from bson import ObjectId
     import datetime
 
-    data = [
-        {'_id': bson.ObjectId('624089122f3170c6f1338089'),
-         'name': 'David', 'age': 3000},
-        {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'),
-         'name': 'David', 'age': 3000},
-        {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'),
-         'name': 'Davidov', 'age': 3000},
-        {'_id': bson.ObjectId('624089122f3170c6f133808a'),
-         'name': 'Jacob', 'age': 50},
-        {'_id': bson.ObjectId('624088f14d260b008081f374'),
-         'name': 'Ran Davidos', 'age': 3000}
-    ]
-    data = [list(v.values()) for v in data]
+    # data = [
+    #     {'_id': bson.ObjectId('624089122f3170c6f1338089'),
+    #      'name': 'David', 'age': 3000},
+    #     {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'),
+    #      'name': 'David', 'age': 3000},
+    #     {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'),
+    #      'name': 'Davidov', 'age': 3000},
+    #     {'_id': bson.ObjectId('624089122f3170c6f133808a'),
+    #      'name': 'Jacob', 'age': 50},
+    #     {'_id': bson.ObjectId('624088f14d260b008081f374'),
+    #      'name': 'Ran Davidos', 'age': 3000}
+    # ]
+    # data = [list(v.values()) for v in data]
+    
     # data = [
     #     ['Bob', '24', 'Engineer'],
     #     ['Sue', '40', 'Retired'],
     #     ['Joe', '32', 'Programmer'],
     #     ['Mary', '28', 'Teacher'],
     # ]
-    layout, w, h = generate_db_gui_server(data, ["_id", "name", "age"])
+    # headings = ["_id", "name", "age"]
+
+
+    data = [[ObjectId('6252f0d6118784a746aa9475'), ['127.0.0.1', 57371], 'uint8', datetime.datetime(2022, 4, 10, 17, 59, 34, 571000)], [ObjectId('6252f0e2118784a746aa9476'), ['127.0.0.1', 57371], 'uint8', datetime.datetime(2022, 4, 10, 17, 59, 46, 481000)], [ObjectId('6252f17f0585945a344776bc'), ['127.0.0.1', 57430], 'uint8', datetime.datetime(2022, 4, 10, 18, 2, 23, 789000)], [ObjectId('6252f2195b802e4a2e0d5bc0'), ['127.0.0.1', 57487],
+                                                                                                                                                                                                                                                                                                                                                                                            'uint8', datetime.datetime(2022, 4, 10, 18, 4, 57, 427000)], [ObjectId('6252f2305b802e4a2e0d5bc1'), ['127.0.0.1', 57487], 'uint8', datetime.datetime(2022, 4, 10, 18, 5, 16, 797000)], [ObjectId('6252f2385b802e4a2e0d5bc2'), ['127.0.0.1', 57487], 'uint8', datetime.datetime(2022, 4, 10, 18, 5, 22, 675000)], [ObjectId('6252fbcf0273a2cba8e11739'), ['127.0.0.1', 56718], 'uint8', datetime.datetime(2022, 4, 10, 18, 46, 23, 133000)]]
+    headings = ['_id', 'addr', 'dtype', 'date']
+
+
+    layout, w, h = generate_db_gui_server(data, headings)
     w = sg.Window("SmartSec DB", layout, size=(w, h), resizable=True)
     while True:
         event, values = w.read()
