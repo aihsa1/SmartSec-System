@@ -1,6 +1,8 @@
 from Scripts import add_folders_to_path
 from Classes.MultiplexedServer import MultiplexedServer
 import threading
+import cv2
+import numpy as np
 import multiprocessing
 import PySimpleGUI as sg
 from time import sleep
@@ -9,7 +11,7 @@ from Screens.detection_gui import generate_detection_gui_server, db_alert_gui_se
 window = None
 
 
-def db_gui(values, headings):
+def db_gui(values, headings, images):
     layout, w, h = generate_db_gui_server(values, headings)
 
     win = sg.Window("SmartSec DB", layout, size=(w, h))
@@ -19,19 +21,26 @@ def db_gui(values, headings):
             break
         if event == '-TABLE-':
             selected_index = value["-TABLE-"][0]
-            db_alert_gui_server(selected_index, tuple(
-                zip(headings, values[selected_index])), "")  # TODO: ADD AN IMAGE
+            img_bytes = images[selected_index]
+            db_alert_gui_server(
+                selected_index,
+                tuple(zip(headings, values[selected_index])),
+                img_bytes)  # TODO: ADD AN IMAGE
 
 
 def _load_data(db, limit=20):
     print("fetching data")
-    data = list(db.find({}, {"img": False}, db_name="SmartSecDB",
+    data = list(db.find({}, {"dtype": False}, db_name="SmartSecDB",
                 col_name="Pistols", limit=limit))
     headings = list(data[0].keys())
+    headings.remove("img")
+    images = [d.pop("img") for d in data]
+    print(headings)
+    print(data)
     values = [list(v.values()) for v in data]
 
     p = multiprocessing.Process(target=db_gui, args=(
-        values, headings), daemon=True, name="db_gui_process")
+        values, headings, images), daemon=True, name="db_gui_process")
     p.start()
     p.join()
     print("db ui is closed")
@@ -42,7 +51,11 @@ def server_gui(layout, w, h, db):
     db_thread = threading.Thread(target=_load_data, args=(
         db,), daemon=True, name="db_load_and_gui_thread")
     is_db_thread_obsolete = False
+
+    mutex = threading.Lock()
+    mutex.acquire()
     window = sg.Window("SmartSec Server", layout, size=(w, h))
+    mutex.release()
     while True:
         event, value = window.read(timeout=5)
         if event == sg.WIN_CLOSED:
@@ -61,10 +74,14 @@ def server_gui(layout, w, h, db):
 
 def main():
     global window
-    m = MultiplexedServer(window)
+    m = MultiplexedServer(None)
     gui_thread = threading.Thread(target=server_gui, args=(
         *generate_detection_gui_server(), m.db), daemon=True)
     gui_thread.start()
+    mutex = threading.Lock()
+    mutex.acquire()
+    m.window = window
+    mutex.release()
     t = m.insert_queue_checker()
     while True:
         m.read()

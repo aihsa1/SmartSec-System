@@ -33,6 +33,8 @@ class MultiplexedServer:
     GREEN = (0, 255, 0)  # green in BGR format (4 CV2)
     RED = (0, 0, 255)  # green in BGR format (4 CV2)
 
+    SAVED_IMG_SIZE = (250, 200)
+
     def __init__(self, window) -> None:
         """
         This is the constructor of the class. This function is responsible for initializing the server.
@@ -110,8 +112,8 @@ class MultiplexedServer:
         mutex.release()
 
     def _report_incident(self, addr: Tuple[str, int], img: np.ndarray) -> None:
-        img_bytes = img.tobytes()
         dtype = np.dtype(img.dtype).__str__()
+        img_bytes = cv2.imencode(".png", img)[1].tobytes()
         date = datetime.datetime.now()
         mutex = threading.Lock()
         mutex.acquire()
@@ -172,7 +174,7 @@ class MultiplexedServer:
                 if found_indicator:
                     color = MultiplexedServer.GREEN
                     if not reported_indicator:
-                        self._report_incident(addr, frame)
+                        self._report_incident(addr, cv2.resize(frame, dsize=MultiplexedServer.SAVED_IMG_SIZE))
                         reported_indicator = True
                 else:
                     color = MultiplexedServer.RED

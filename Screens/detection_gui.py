@@ -117,7 +117,7 @@ def generate_db_gui_server(data=[], headings=[]):
 
 def db_alert_gui_server(i, output, image):
     sg.popup_no_buttons(output.__str__(), title=f"info about document {i}",
-                        image=sg.EMOJI_BASE64_HAPPY_BIG_SMILE)
+                        image=image)
 
 
 def main():
