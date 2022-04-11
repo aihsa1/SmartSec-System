@@ -2,6 +2,8 @@ import hashlib
 import socket
 from typing import Tuple, Union
 import cv2
+import os
+import json
 from Message import Message
 from CommunicationCode import CommunicationCode
 from RSAEncryption import RSAEncyption
@@ -17,10 +19,8 @@ class ClientSocket:
     NOTE: This class is not responsible for the connection between the client and the server, it only creates the socket and makes it ready to be used. Also, this class is a base class for the ServerSocket class.
     """
 
-    cap = cv2.VideoCapture(0)
-    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    del cap
+    with open(os.path.join("Configs", "dimensions.json"), "r") as f:
+        WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
 
     def __init__(self, protocol: str = "UDP", existing_socket: socket.socket = None, message_header_size: int = Message.DEFAULT_HEADER_SIZE) -> None:
         """

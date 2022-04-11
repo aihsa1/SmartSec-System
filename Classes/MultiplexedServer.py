@@ -23,15 +23,15 @@ from CommunicationCode import CommunicationCode
 class MultiplexedServer:
     DB_INSERT_TIMER_DELAY = 20
     MAX_QUEUED_INCIDENTS = 3
-    cap = cv2.VideoCapture(0)
-    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    with open(os.path.join("Configs", "dimensions.json"), "r") as f:
+        WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
+    
     BLACK_SCREEN = cv2.imencode(".png", np.zeros(
         (HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
     FRAME_PRECENT = 2
     GREEN = (0, 255, 0)  # green in BGR format (4 CV2)
     RED = (0, 0, 255)  # green in BGR format (4 CV2)
-    del cap
 
     def __init__(self, window) -> None:
         """

@@ -12,10 +12,8 @@ N_CAMERAS_IN_PAGE = 4
 
 def generate_detection_gui_client():
 
-    cap = cv2.VideoCapture(0)
-    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
+    with open(os.path.join("Configs", "dimensions.json"), "r") as f:
+        WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
 
     w, h = int(WIDTH_WEBCAM * 1.3), int(HEIGHT_WEBCAM * 1.3)
 
@@ -40,10 +38,8 @@ def generate_detection_gui_client():
 def generate_detection_gui_server():
     global N_CAMERAS, N_IN_ROWS, N_CAMERAS_IN_PAGE
 
-    cap = cv2.VideoCapture(0)
-    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
+    with open(os.path.join("Configs", "dimensions.json"), "r") as f:
+        WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
 
     w, h = int(WIDTH_WEBCAM * 1.2), int(HEIGHT_WEBCAM * 1.2)
     with open(os.path.join("Configs", "icons.json"), "r") as f:
@@ -81,10 +77,8 @@ def generate_detection_gui_server():
     return layout, w, h
 
 def generate_db_gui_server():
-    cap = cv2.VideoCapture(0)
-    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
+    with open(os.path.join("Configs", "dimensions.json"), "r") as f:
+        WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
 
     layout = [
         [
@@ -112,28 +106,42 @@ def generate_db_gui_server():
     ]
 
 
+def main():
+    # i = 0
+    # layout, w, h = generate_detection_gui_server()
+    # # layout, w, h = generate_detection_gui_client()
+    # window = sg.Window('SmartSec Server', layout, size=(w, h))
+    # while True:
+    #     event, value = window.read(timeout=10)
+    #     if event == sg.WIN_CLOSED:
+    #         break
+    #     # if event == "-BUTTON-NEXT-":
+    #     #     for j in range(min(N_CAMERAS_IN_PAGE, N_CAMERAS)):
+    #     #         window[f"-VIDEO{i * N_CAMERAS_IN_PAGE + j}-"].Update(visible=False)
+    #     #     for j in range(min(N_CAMERAS_IN_PAGE, N_CAMERAS-N_CAMERAS_IN_PAGE)):
+    #     #         print(f"{(i + 1) * N_CAMERAS_IN_PAGE + j} is visible")
+    #     #         window[f"-VIDEO{(i + 1) * N_CAMERAS_IN_PAGE + j}-"].Update(visible=True)
+    #     #     i += 1
+
+    #     # [
+    #     # sg.Button(button_text="<", key="-BUTTON-PREV-",
+    #     #             enable_events=True, size=(int(WIDTH_WEBCAM * 0.005), int(HEIGHT_WEBCAM * 0.005))),
+    #     # sg.Button(button_text=">", key="-BUTTON-NEXT-",
+    #     #             enable_events=True, size=(int(WIDTH_WEBCAM * 0.005), int(HEIGHT_WEBCAM * 0.005)))
+    #     # ]
+
+    # window.close()
+    import bson, datetime
+
+    data = [
+        {'_id': bson.ObjectId('6252d3d02b03fb89f2b774ca'), 'arr': b'\x01\x02\x03'},
+        {'_id': bson.ObjectId('624089122f3170c6f1338089'), 'name': 'David', 'age': 3000},
+        {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'), 'name': 'David', 'age': 3000, 'ref': bson.ObjectId('624088f14d260b008081f374')},
+        {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'), 'name': 'Davidov', 'age': 3000, 'date': datetime.datetime(2022, 3, 30, 7, 59, 41, 59000)},
+        {'_id': bson.ObjectId('624089122f3170c6f133808a'), 'name': 'Jacob', 'age': 50},
+        {'_id': bson.ObjectId('624088f14d260b008081f374'), 'name': 'Ran Davidos', 'age': 3000}
+    ]
+
+
 if __name__ == "__main__":
-    i = 0
-    layout, w, h = generate_detection_gui_server()
-    # layout, w, h = generate_detection_gui_client()
-    window = sg.Window('SmartSec Server', layout, size=(w, h))
-    while True:
-        event, value = window.read(timeout=10)
-        if event == sg.WIN_CLOSED:
-            break
-        # if event == "-BUTTON-NEXT-":
-        #     for j in range(min(N_CAMERAS_IN_PAGE, N_CAMERAS)):
-        #         window[f"-VIDEO{i * N_CAMERAS_IN_PAGE + j}-"].Update(visible=False)
-        #     for j in range(min(N_CAMERAS_IN_PAGE, N_CAMERAS-N_CAMERAS_IN_PAGE)):
-        #         print(f"{(i + 1) * N_CAMERAS_IN_PAGE + j} is visible")
-        #         window[f"-VIDEO{(i + 1) * N_CAMERAS_IN_PAGE + j}-"].Update(visible=True)
-        #     i += 1
-
-        # [
-        # sg.Button(button_text="<", key="-BUTTON-PREV-",
-        #             enable_events=True, size=(int(WIDTH_WEBCAM * 0.005), int(HEIGHT_WEBCAM * 0.005))),
-        # sg.Button(button_text=">", key="-BUTTON-NEXT-",
-        #             enable_events=True, size=(int(WIDTH_WEBCAM * 0.005), int(HEIGHT_WEBCAM * 0.005)))
-        # ]
-
-    window.close()
+    main()
