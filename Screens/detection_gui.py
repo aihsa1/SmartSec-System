@@ -40,15 +40,14 @@ def generate_detection_gui_client():
 def generate_detection_gui_server():
     global N_CAMERAS, N_IN_ROWS, N_CAMERAS_IN_PAGE
 
-    with open(os.path.join("Configs", "icons.json"), "r") as f:
-        MIC_IMAGE = json.loads(f.read())["mic"]
-
     cap = cv2.VideoCapture(0)
     WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     cap.release()
 
     w, h = int(WIDTH_WEBCAM * 1.2), int(HEIGHT_WEBCAM * 1.2)
+    with open(os.path.join("Configs", "icons.json"), "r") as f:
+        DB_IMAGE = json.loads(f.read())["db"]
 
     cameras_layout = []
     image_index = 0
@@ -73,13 +72,44 @@ def generate_detection_gui_server():
 
             sg.Column(
                 [
-                    [sg.Button(button_text="", key="-MIC-BUTTON-", image_data=MIC_IMAGE,
+                    [sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
                                tooltip="open/close mic", focus=False, enable_events=True)]
                 ]
         )
         ]
     ]
     return layout, w, h
+
+def generate_db_gui_server():
+    cap = cv2.VideoCapture(0)
+    WIDTH_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    HEIGHT_WEBCAM = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    cap.release()
+
+    layout = [
+        [
+            sg.Column(
+                [sg.Table(
+                    values=data,
+                    headings=headings,
+                    auto_size_columns=True,
+                    expand_x=True,
+                    display_row_numbers=True,
+                    justification='center',
+                    key="-TABLE-",
+                    enable_events=True
+                )]
+            )
+        ],
+        [
+            sg.Column(
+                [
+                    [sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
+                            tooltip="open/close mic", focus=False, enable_events=True)]
+                ]
+            )
+        ]
+    ]
 
 
 if __name__ == "__main__":

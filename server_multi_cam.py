@@ -10,14 +10,17 @@ window = None
 
 def gui(layout, w, h):
     global window
+    is_db_thread_alive = False
     window = sg.Window("SmartSec Server", layout, size=(w, h))
     while True:
         event, value = window.read(timeout=5)
         if event == sg.WIN_CLOSED:
             print("closing window")
             break
-        if event == "-MIC-BUTTON-":
-            pass
+        if event == "-DB-BUTTON-":
+            if not is_db_thread_alive:
+                is_db_thread_alive = True
+                pass
     window.close()
 
 
