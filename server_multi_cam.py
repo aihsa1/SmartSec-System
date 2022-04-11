@@ -14,7 +14,7 @@ def db_gui(values, headings):
 
     win = sg.Window("SmartSec DB", layout, size=(w, h))
     while True:
-        event, value = win.read(timeout=5)
+        event, value = win.read()
         if event in (sg.WIN_CLOSED, "-BACK-BUTTON-"):
             break
         if event == '-TABLE-':
@@ -23,10 +23,10 @@ def db_gui(values, headings):
                 zip(headings, values[selected_index])), "")  # TODO: ADD AN IMAGE
 
 
-def _load_data(db):
+def _load_data(db, limit=20):
     print("fetching data")
     data = list(db.find({}, {"img": False}, db_name="SmartSecDB",
-                col_name="Pistols", limit=2))
+                col_name="Pistols", limit=limit))
     headings = list(data[0].keys())
     values = [list(v.values()) for v in data]
 
