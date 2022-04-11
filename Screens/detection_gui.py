@@ -81,15 +81,25 @@ def generate_db_gui_server(data, headings):
     with open(os.path.join("Configs", "dimensions.json"), "r") as f:
         w, h = json.load(f).values()
     with open(os.path.join("Configs", "icons.json"), "r") as f:
-        DB_IMAGE = json.loads(f.read())["db"]
+        DB_IMAGE = json.loads(f.read())["back"]
 
     layout = [
         [
             sg.Column([
+                [
+                    sg.Text("DB Documents", justification="center",
+                            font=(*sg.DEFAULT_FONT, "bold underline"), key="-TITLE-")
+                ],
+                [
+                    sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
+                              tooltip="open/close mic", focus=False, enable_events=True)
+                ],
                 [sg.Table(
                     values=data,
                     headings=headings,
-                    auto_size_columns=True,
+                    def_col_width=20,
+                    num_rows=50,
+                    auto_size_columns=False,
                     expand_x=True,
                     expand_y=True,
                     vertical_scroll_only=True,
@@ -97,14 +107,9 @@ def generate_db_gui_server(data, headings):
                     justification='right',
                     key="-TABLE-",
                     enable_events=True
-                )]]
-            , element_justification="center", justification="c"),
-            sg.Column([
-
-                [sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
-                           tooltip="open/close mic", focus=False, enable_events=True)]
-            ]
-            , justification="center")
+                )
+                ]
+            ], element_justification="c", justification="c", pad=(0, 0, 0, 0))
         ],
     ]
     return layout, w, h
@@ -146,26 +151,27 @@ def main():
     import bson
     import datetime
 
-    # data = [
-    #     {'_id': bson.ObjectId('624089122f3170c6f1338089'),
-    #      'name': 'David', 'age': 3000},
-    #     {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'),
-    #      'name': 'David', 'age': 3000},
-    #     {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'),
-    #      'name': 'Davidov', 'age': 3000},
-    #     {'_id': bson.ObjectId('624089122f3170c6f133808a'),
-    #      'name': 'Jacob', 'age': 50},
-    #     {'_id': bson.ObjectId('624088f14d260b008081f374'),
-    #      'name': 'Ran Davidos', 'age': 3000}
-    # ]
     data = [
-        ['Bob', '24', 'Engineer'],
-        ['Sue', '40', 'Retired'],
-        ['Joe', '32', 'Programmer'],
-        ['Mary', '28', 'Teacher'],
+        {'_id': bson.ObjectId('624089122f3170c6f1338089'),
+         'name': 'David', 'age': 3000},
+        {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'),
+         'name': 'David', 'age': 3000},
+        {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'),
+         'name': 'Davidov', 'age': 3000},
+        {'_id': bson.ObjectId('624089122f3170c6f133808a'),
+         'name': 'Jacob', 'age': 50},
+        {'_id': bson.ObjectId('624088f14d260b008081f374'),
+         'name': 'Ran Davidos', 'age': 3000}
     ]
+    data = [list(v.values()) for v in data]
+    # data = [
+    #     ['Bob', '24', 'Engineer'],
+    #     ['Sue', '40', 'Retired'],
+    #     ['Joe', '32', 'Programmer'],
+    #     ['Mary', '28', 'Teacher'],
+    # ]
     layout, w, h = generate_db_gui_server(data, ["_id", "name", "age"])
-    w = sg.Window("SmartSec DB", layout, size=(w,h))
+    w = sg.Window("SmartSec DB", layout, size=(w, h), resizable=True)
     while True:
         event, values = w.read()
         if event in (sg.WIN_CLOSED, 'Exit'):
