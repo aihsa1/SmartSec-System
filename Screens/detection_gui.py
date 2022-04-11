@@ -77,11 +77,11 @@ def generate_detection_gui_server():
     return layout, w, h
 
 
-def generate_db_gui_server(data, headings):
+def generate_db_gui_server(data=[], headings=[]):
     with open(os.path.join("Configs", "dimensions.json"), "r") as f:
         w, h = json.load(f).values()
     with open(os.path.join("Configs", "icons.json"), "r") as f:
-        DB_IMAGE = json.loads(f.read())["back"]
+        BACK_IMAGE = json.loads(f.read())["back"]
 
     layout = [
         [
@@ -91,8 +91,8 @@ def generate_db_gui_server(data, headings):
                             font=(*sg.DEFAULT_FONT, "bold underline"), key="-TITLE-")
                 ],
                 [
-                    sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
-                              tooltip="open/close mic", focus=False, enable_events=True)
+                    sg.Button(button_text="", key="-BACK-BUTTON-", image_data=BACK_IMAGE,
+                              tooltip="go back", focus=False, enable_events=True)
                 ],
                 [sg.Table(
                     values=data,

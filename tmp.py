@@ -29,6 +29,7 @@ col = db["tmp-col"]
 for x in col.find({}, sort=[("name", pymongo.ASCENDING)]):
     print(x)
 
+
 # for x in col.find({"_id": bson.ObjectId('6252d3d02b03fb89f2b774ca')}, sort=[("name", pymongo.ASCENDING)]):
 #     print(np.frombuffer(x["arr"], dtype=np.uint8))
 #     print(type(np.frombuffer(x["arr"], dtype=np.uint8)))
