@@ -9,22 +9,9 @@ from Screens.detection_gui import generate_detection_gui_server, db_alert_gui_se
 window = None
 
 
-
-# def db_gui(layout, w, h):
-    
-#     win = sg.Window("SmartSec DB", layout, size=(w, h))
-#     while True:
-#         event, value = win.read(timeout=5)
-#         if event in (sg.WIN_CLOSED, "-BACK-BUTTON-"):
-#             break
-#         # if event == '-TABLE-':
-#         #     i = values["-TABLE-"][0]
-#         #     print(i)
-#         #     # db_alert_gui_server(zip(headings, data[i]))
-
 def db_gui(values, headings):
     layout, w, h = generate_db_gui_server(values, headings)
-    
+
     win = sg.Window("SmartSec DB", layout, size=(w, h))
     while True:
         event, value = win.read(timeout=5)
@@ -32,29 +19,28 @@ def db_gui(values, headings):
             break
         if event == '-TABLE-':
             selected_index = value["-TABLE-"][0]
-            db_alert_gui_server(selected_index, tuple(zip(headings, values[selected_index])), "")# TODO: ADD AN IMAGE
+            db_alert_gui_server(selected_index, tuple(
+                zip(headings, values[selected_index])), "")  # TODO: ADD AN IMAGE
+
 
 def _load_data(db):
-    # global values, headings
     print("fetching data")
-    data = list(db.find({}, {"img": False}, db_name="SmartSecDB", col_name="Pistols", limit=2))
+    data = list(db.find({}, {"img": False}, db_name="SmartSecDB",
+                col_name="Pistols", limit=2))
     headings = list(data[0].keys())
     values = [list(v.values()) for v in data]
-    
-    p = multiprocessing.Process(target=db_gui, args=(values, headings), daemon=True, name="db_gui_process")
-    # p = multiprocessing.Process(target=db_gui, args=generate_db_gui_server(headings, values), daemon=True, name="db_gui_process")
+
+    p = multiprocessing.Process(target=db_gui, args=(
+        values, headings), daemon=True, name="db_gui_process")
     p.start()
     p.join()
-    
-    # t = threading.Thread(target=db_gui, args=generate_db_gui_server(headings, values), daemon=True, name="db_gui_thread")
-    # t.start()
-    # t.join()
+    print("db ui is closed")
 
 
 def server_gui(layout, w, h, db):
     global window
-    # db_proecss = multiprocessing.Process(target=db_gui, args=(db,), daemon=True)
-    db_thread = threading.Thread(target=_load_data, args=(db,), daemon=True, name="db_load_and_gui_thread")
+    db_thread = threading.Thread(target=_load_data, args=(
+        db,), daemon=True, name="db_load_and_gui_thread")
     is_db_thread_obsolete = False
     window = sg.Window("SmartSec Server", layout, size=(w, h))
     while True:
@@ -64,17 +50,20 @@ def server_gui(layout, w, h, db):
             break
         if event == "-DB-BUTTON-":
             if not db_thread.is_alive():
+                if is_db_thread_obsolete:
+                    db_thread = threading.Thread(target=_load_data, args=(
+                        db,), daemon=True, name="db_load_and_gui_thread")
+                else:
+                    is_db_thread_obsolete = True
                 db_thread.start()
-            
-            # if not db_proecss.is_alive():
-            #     db_proecss.start()
     window.close()
 
 
 def main():
     global window
     m = MultiplexedServer(window)
-    gui_thread = threading.Thread(target=server_gui, args=(*generate_detection_gui_server(), m.db), daemon=True)
+    gui_thread = threading.Thread(target=server_gui, args=(
+        *generate_detection_gui_server(), m.db), daemon=True)
     gui_thread.start()
     t = m.insert_queue_checker()
     while True:
