@@ -76,34 +76,43 @@ def generate_detection_gui_server():
     ]
     return layout, w, h
 
-def generate_db_gui_server():
+
+def generate_db_gui_server(data, headings):
     with open(os.path.join("Configs", "dimensions.json"), "r") as f:
-        WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
+        w, h = json.load(f).values()
+    with open(os.path.join("Configs", "icons.json"), "r") as f:
+        DB_IMAGE = json.loads(f.read())["db"]
 
     layout = [
         [
-            sg.Column(
+            sg.Column([
                 [sg.Table(
                     values=data,
                     headings=headings,
                     auto_size_columns=True,
                     expand_x=True,
+                    expand_y=True,
+                    vertical_scroll_only=True,
                     display_row_numbers=True,
-                    justification='center',
+                    justification='right',
                     key="-TABLE-",
                     enable_events=True
-                )]
-            )
+                )]]
+            , element_justification="center", justification="c"),
+            sg.Column([
+
+                [sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
+                           tooltip="open/close mic", focus=False, enable_events=True)]
+            ]
+            , justification="center")
         ],
-        [
-            sg.Column(
-                [
-                    [sg.Button(button_text="", key="-DB-BUTTON-", image_data=DB_IMAGE,
-                            tooltip="open/close mic", focus=False, enable_events=True)]
-                ]
-            )
-        ]
     ]
+    return layout, w, h
+
+
+def db_alert_gui_server(output, image):
+    sg.popup_no_buttons(output.__str__(), title=f"info",
+                        image=sg.EMOJI_BASE64_HAPPY_BIG_SMILE)
 
 
 def main():
@@ -131,16 +140,40 @@ def main():
     #     # ]
 
     # window.close()
-    import bson, datetime
 
+    # --------------------------------------------------------------------------------------------------------------------
+
+    import bson
+    import datetime
+
+    # data = [
+    #     {'_id': bson.ObjectId('624089122f3170c6f1338089'),
+    #      'name': 'David', 'age': 3000},
+    #     {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'),
+    #      'name': 'David', 'age': 3000},
+    #     {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'),
+    #      'name': 'Davidov', 'age': 3000},
+    #     {'_id': bson.ObjectId('624089122f3170c6f133808a'),
+    #      'name': 'Jacob', 'age': 50},
+    #     {'_id': bson.ObjectId('624088f14d260b008081f374'),
+    #      'name': 'Ran Davidos', 'age': 3000}
+    # ]
     data = [
-        {'_id': bson.ObjectId('6252d3d02b03fb89f2b774ca'), 'arr': b'\x01\x02\x03'},
-        {'_id': bson.ObjectId('624089122f3170c6f1338089'), 'name': 'David', 'age': 3000},
-        {'_id': bson.ObjectId('62414e87c1438f8812a2d5fd'), 'name': 'David', 'age': 3000, 'ref': bson.ObjectId('624088f14d260b008081f374')},
-        {'_id': bson.ObjectId('6243e3bd19115361e3eb1422'), 'name': 'Davidov', 'age': 3000, 'date': datetime.datetime(2022, 3, 30, 7, 59, 41, 59000)},
-        {'_id': bson.ObjectId('624089122f3170c6f133808a'), 'name': 'Jacob', 'age': 50},
-        {'_id': bson.ObjectId('624088f14d260b008081f374'), 'name': 'Ran Davidos', 'age': 3000}
+        ['Bob', '24', 'Engineer'],
+        ['Sue', '40', 'Retired'],
+        ['Joe', '32', 'Programmer'],
+        ['Mary', '28', 'Teacher'],
     ]
+    layout, w, h = generate_db_gui_server(data, ["_id", "name", "age"])
+    w = sg.Window("SmartSec DB", layout, size=(w,h))
+    while True:
+        event, values = w.read()
+        if event in (sg.WIN_CLOSED, 'Exit'):
+            break
+        if event == '-TABLE-':
+            i = values["-TABLE-"][0]
+            print(i)
+    w.close()
 
 
 if __name__ == "__main__":

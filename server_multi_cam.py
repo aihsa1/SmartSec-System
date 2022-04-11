@@ -3,7 +3,7 @@ from Classes.MultiplexedServer import MultiplexedServer
 import threading
 import PySimpleGUI as sg
 from time import sleep
-from Screens.detection_gui import generate_detection_gui_server
+from Screens.detection_gui import generate_detection_gui_server, db_alert_gui_server
 
 window = None
 
