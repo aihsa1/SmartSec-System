@@ -108,6 +108,10 @@ def communication(uname, passwd):
     client_socket.send_buffered(
         Message(passwd, code=CommunicationCode.CREDENTIALS), e=client_aes
     )
+    m = client_socket.recv(e=client_aes)
+    if m.get_plain_msg().decode() != "OK":
+        print("wrong credentials")
+        return
     
     client_socket.send(
         Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM,
@@ -360,10 +364,11 @@ def main() -> None:
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
     event, values = show_welcome_client()
-    detection_mode = values["-DETECTION-CHECKBOX-"]
-    uname, passwd = values["-USERNAME-"], values["-PASSWORD-"]
+    
     # import necassary module if doing detection
     if event is not None:
+        detection_mode = values["-DETECTION-CHECKBOX-"]
+        uname, passwd = values["-USERNAME-"], values["-PASSWORD-"]
         if detection_mode:
             # tells the loading screen to close itself since the tf loading is complete. this flag is passed by reference in a list
             done_loading_flag = [False, ]

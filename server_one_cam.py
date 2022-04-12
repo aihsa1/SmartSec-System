@@ -69,6 +69,8 @@ def comm():
     passwd = client.recv(e=server_aes).get_plain_msg()
     print(uname, passwd)
 
+    client.send(Message("OK", code=CommunicationCode.INFO), e=server_aes)
+
     m = client.recv(e=server_aes)
     h, w = pickle.loads(m.get_plain_msg())
 
