@@ -36,9 +36,9 @@ def show_welcome_client() -> Tuple[str, bool]:
                                   tooltip="Detect locally using a webcam, without reporting to the server", focus=False, enable_events=True),
                         sg.Checkbox("Detection", default=True, enable_events=True,
                                     key="-DETECTION-CHECKBOX-", tooltip="use ML pistol detection or not"),
-                        sg.VerticalSeparator(),
-                        sg.Button(button_text="Detect Locally from a Video", key="-DETECT-LOCALLY-VIDEO-BUTTON-",
-                                  tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
+                        # sg.VerticalSeparator(),
+                        # sg.Button(button_text="Detect Locally from a Video", key="-DETECT-LOCALLY-VIDEO-BUTTON-",
+                        #           tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
                     ],
                     [sg.HorizontalSeparator()],
                     [sg.Text("Please enter credentials to continue:", font=("Helvetica", 13))],
