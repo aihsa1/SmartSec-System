@@ -66,9 +66,9 @@ def communication(uname, passwd):
     # m, _ = s.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(
+    # print(f"client pubkey: {hashlib.sha512(client_encryption.export_my_pubkey()).hexdigest()}", type(
     #     client_encryption.export_my_pubkey()))
-    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
+    # print(f"server pubkey: {hashlib.sha512(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(
     #     client_encryption.other_pubkey.save_pkcs1()))
     # ############################
     # while frame is None:
@@ -94,14 +94,14 @@ def communication(uname, passwd):
     client_rsa.load_others_pubkey(m.get_plain_msg())
 
     print(
-        f"client pubkey: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}")
+        f"client pubkey: {hashlib.sha512(client_rsa.export_my_pubkey()).hexdigest()}")
     print(
-        f"server pubkey: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}")
+        f"server pubkey: {hashlib.sha512(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}")
 
     client_aes = AESEncryption()
     client_socket.send_buffered(
         Message(client_aes.key, code=CommunicationCode.KEY), e=client_rsa)
-    print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+    print(f"AES key: {hashlib.sha512(client_aes.key).hexdigest()}")
 
     client_socket.send_buffered(
         Message(uname, code=CommunicationCode.CREDENTIALS), e=client_aes

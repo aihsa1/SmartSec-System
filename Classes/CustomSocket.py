@@ -243,8 +243,8 @@ def main():
     # s.send_buffered(Message(client_encryption.export_my_pubkey()), SERVER_ADDRESS)
     # m, _ = s.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
-    # print(f"client pukey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}")
-    # print(f"server pukey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
+    # print(f"client pukey: {hashlib.sha512(client_encryption.export_my_pubkey()).hexdigest()}")
+    # print(f"server pukey: {hashlib.sha512(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}")
     # ############################
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
@@ -269,8 +269,8 @@ def main():
     # m = s.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    # # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
-    # # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    # # print(f"client pubkey: {hashlib.sha512(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    # # print(f"server pubkey: {hashlib.sha512(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
     # #############################
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img30.jpg", "rb") as f:
@@ -295,8 +295,8 @@ def main():
     # m = client_socket.recv()
     # client_encryption.load_others_pubkey(m.get_plain_msg())
 
-    # print(f"client pubkey: {hashlib.sha256(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
-    # print(f"server pubkey: {hashlib.sha256(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
+    # print(f"client pubkey: {hashlib.sha512(client_encryption.export_my_pubkey()).hexdigest()}", type(client_encryption.export_my_pubkey()))
+    # print(f"server pubkey: {hashlib.sha512(client_encryption.other_pubkey.save_pkcs1()).hexdigest()}", type(client_encryption.other_pubkey.save_pkcs1()))
     # ##############################
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\img107.jpg", "rb") as f:
@@ -319,21 +319,21 @@ def main():
     m = client_socket.recv()
     client_rsa.load_others_pubkey(m.get_plain_msg())
 
-    print(f"client pubkey RSA: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}", type(
+    print(f"client pubkey RSA: {hashlib.sha512(client_rsa.export_my_pubkey()).hexdigest()}", type(
         client_rsa.export_my_pubkey()))
-    print(f"server pubkey RSA: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
+    print(f"server pubkey RSA: {hashlib.sha512(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}", type(
         client_rsa.other_pubkey.save_pkcs1()))
 
     client_aes = AESEncryption()
     client_socket.send_buffered(Message(client_aes.key), e=client_rsa)
-    print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+    print(f"AES key: {hashlib.sha512(client_aes.key).hexdigest()}")
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
     #     m = Message(f.read())
     m = Message(b"hello!"*100000)
     client_socket.send_buffered(m, e=client_aes)
     # client_socket.send_buffered(m)
-    print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+    print(hashlib.sha512(m.get_plain_msg()).hexdigest())
 
     ############UDP AES#############################
     # s = ClientSocket()
@@ -344,17 +344,17 @@ def main():
     # s.send_buffered(Message(client_rsa.export_my_pubkey()), SERVER_ADDRESS)
     # m, _ = s.recv()
     # client_rsa.load_others_pubkey(m.get_plain_msg())
-    # print(f"client pukey: {hashlib.sha256(client_rsa.export_my_pubkey()).hexdigest()}")
-    # print(f"server pukey: {hashlib.sha256(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}")
+    # print(f"client pukey: {hashlib.sha512(client_rsa.export_my_pubkey()).hexdigest()}")
+    # print(f"server pukey: {hashlib.sha512(client_rsa.other_pubkey.save_pkcs1()).hexdigest()}")
 
     # client_aes = AESEncryption()
     # s.send_buffered(Message(client_aes.key), SERVER_ADDRESS, e=client_rsa)
-    # print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
+    # print(f"AES key: {hashlib.sha512(client_aes.key).hexdigest()}")
 
     # with open(r"C:\Users\USER\Desktop\Cyber\PRJ\publications_2017_nohagim_aheret_nohagim_nachon.pdf", "rb") as f:
     #     m = Message(f.read())
     # s.send_buffered(m, SERVER_ADDRESS, e=client_aes)
-    # print(hashlib.sha256(m.get_plain_msg()).hexdigest())
+    # print(hashlib.sha512(m.get_plain_msg()).hexdigest())
 
 
 if __name__ == "__main__":

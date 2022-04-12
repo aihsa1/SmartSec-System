@@ -162,7 +162,7 @@ class MultiplexedServer:
         self.final_dump_flag = True
 
     def _check_user(self, uname: bytes, passwd: bytes):
-        return len(tuple(self.db.find({"uname": uname.decode(), "passwd": hashlib.sha256(passwd).hexdigest()}, db_name="SmartSecDB", col_name="Users"))) == 1
+        return len(tuple(self.db.find({"uname": uname.decode(), "passwd": hashlib.sha512(passwd).hexdigest()}, db_name="SmartSecDB", col_name="Users"))) == 1
 
     def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
@@ -296,11 +296,11 @@ class MultiplexedServer:
                 print("===================================================")
                 print("New client connected: ", new_client_addr)
                 print(
-                    f"client pubkey: {hashlib.sha256(self.clients[new_client_addr][ClientProperties.rsa].other_pubkey.save_pkcs1()).hexdigest()}")
+                    f"client pubkey: {hashlib.sha512(self.clients[new_client_addr][ClientProperties.rsa].other_pubkey.save_pkcs1()).hexdigest()}")
                 print(
-                    f"server pubkey: {hashlib.sha256(self.clients[new_client_addr][ClientProperties.rsa].export_my_pubkey()).hexdigest()}")
+                    f"server pubkey: {hashlib.sha512(self.clients[new_client_addr][ClientProperties.rsa].export_my_pubkey()).hexdigest()}")
                 print(
-                    f"AES key: {hashlib.sha256(self.clients[new_client_addr][ClientProperties.aes].key).hexdigest()}")
+                    f"AES key: {hashlib.sha512(self.clients[new_client_addr][ClientProperties.aes].key).hexdigest()}")
                 print("===================================================")
             else:
                 addr = s.getpeername()
