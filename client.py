@@ -8,7 +8,6 @@ import numpy as np
 from time import sleep
 import PySimpleGUI as sg
 from Scripts import add_folders_to_path
-from Classes.CommunicationCode import CommunicationCode
 from Classes.Timer import Timer
 from Classes.Message import Message
 from Classes.CustomSocket import ClientSocket
@@ -16,6 +15,8 @@ from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
+from Screens.error_popup import show_error_popup
+from Classes.CommunicationCode import CommunicationCode
 from Screens.detection_gui import generate_detection_gui_client
 
 
@@ -111,6 +112,7 @@ def communication(uname, passwd):
     m = client_socket.recv(e=client_aes)
     if m.get_plain_msg().decode() != "OK":
         print("wrong credentials")
+        show_error_popup("Wrong credentials.\n Continuing without connection the the server")
         return
     
     client_socket.send(

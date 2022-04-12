@@ -72,7 +72,10 @@ class MultiplexedServer:
         """
         self.window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
             data=MultiplexedServer.BLACK_SCREEN)
-        del self.client_threads[addr]
+        try:
+            del self.client_threads[addr]
+        except KeyError:
+            pass
         del self.client_sockets[addr]
         del self.clients[addr]
 
@@ -157,6 +160,9 @@ class MultiplexedServer:
         This method is used to indicate to the insert_queue_checker_thread to dump the insert queue to the database.
         """
         self.final_dump_flag = True
+
+    def _check_user(self, uname: bytes, passwd: bytes):
+        return len(tuple(self.db.find({"uname": uname.decode(), "passwd": hashlib.sha256(passwd).hexdigest()}, db_name="SmartSecDB", col_name="Users"))) == 1
 
     def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
@@ -265,11 +271,20 @@ class MultiplexedServer:
                     e=self.clients[new_client_addr][ClientProperties.aes]
                 ).get_plain_msg()
                 print(uname, passwd)
-
-                self.clients[new_client_addr][ClientProperties.clientsocket].send(
+                
+                if self._check_user(uname, passwd):
+                    self.clients[new_client_addr][ClientProperties.clientsocket].send(
                     Message(
                         "OK", code=CommunicationCode.INFO
                     ), e=self.clients[new_client_addr][ClientProperties.aes])
+
+                else:
+                    self.clients[new_client_addr][ClientProperties.clientsocket].send(
+                    Message(
+                        "E", code=CommunicationCode.INFO
+                    ), e=self.clients[new_client_addr][ClientProperties.aes])
+                    self._remove_user_from_lists(new_client_addr)
+                    continue
 
                 # get the dimensions of the webcam of the new client
                 h, w = pickle.loads(self.clients[new_client_addr][ClientProperties.clientsocket].recv(

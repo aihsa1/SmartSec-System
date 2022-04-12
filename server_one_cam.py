@@ -5,8 +5,8 @@ import pickle
 import threading
 import PySimpleGUI as sg
 from Scripts import add_folders_to_path
-from Classes.CommunicationCode import CommunicationCode
 from Classes.Message import Message
+from Classes.CommunicationCode import CommunicationCode
 from Screens.detection_gui import generate_detection_gui_server
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
