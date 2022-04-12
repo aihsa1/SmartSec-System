@@ -70,7 +70,7 @@ class Message:
     def create_accumulator_from_plain_data(cls, plain_data: bytes, header_size: int = DEFAULT_HEADER_SIZE) -> 'Message':
         """
         This function is used to create a message from the plain data.
-        :param plain_data: The plain data to be sent
+        :param plain_data: The plain data to initialize the accumulator with
         :type plain_data: str
         :param header_size: The size of the header of the communication protocol
         :type header_size: int
@@ -87,7 +87,7 @@ class Message:
         """
         This function is used to accumulate the message ON RECIEVEING ONLY
         :param string: The string to be added to the message
-        :type string: str/bytes
+        :type string: Union[str, bytes]
         :return: The message object with the added data
         :rtype: Message
         """
@@ -109,6 +109,8 @@ class Message:
         This function is used to generate the splitted data indicies from the message
         :param batch_size: The size of the batch
         :type batch_size: int
+        :param separete_header: If True, index set of the header will be separated from the data indcies
+        :type separete_header: bool
         :return: yields the splitted data indicies
         :rtype: generator
         """

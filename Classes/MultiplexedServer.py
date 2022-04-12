@@ -23,10 +23,10 @@ from CommunicationCode import CommunicationCode
 class MultiplexedServer:
     DB_INSERT_TIMER_DELAY = 20
     MAX_QUEUED_INCIDENTS = 3
-    
+
     with open(os.path.join("Configs", "dimensions.json"), "r") as f:
         WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
-    
+
     BLACK_SCREEN = cv2.imencode(".png", np.zeros(
         (HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
     FRAME_PRECENT = 2
@@ -42,14 +42,15 @@ class MultiplexedServer:
         :type window: sg.Window
         """
         self.server_socket = ServerSocket("TCP")
-        self.client_sockets = {}  # {addr: s}
-        # self.client_names = {}# {addr, name}
-        self.clients = {}  # {addr: {'plainsocket':ps, 'clientsocket': cs, 'clientname':n}}
-        self.client_threads = {}
+        self.client_sockets = {}  # {addr: s} - a dict contains the plain sockets
+        self.clients = {}  # {addr: {'plainsocket':ps, 'clientsocket': cs, 'clientname':n}} - a dict contains the clients and all of their conponents
+        self.client_threads = {}  # {addr: t} - a dict contains the threads of the clients
         self.server_socket.bind_and_listen(("0.0.0.0", 14_000))
-        self.window = window
-        self.db = PyMongoInterface()
+        self.window = window  # the video GUI of the server
+        self.db = PyMongoInterface()  # the database of the server
+        # the insert queue to the database
         self.insert_queue = Queue(MultiplexedServer.MAX_QUEUED_INCIDENTS)
+        # indicates that the server is shutting down and the insert queue should be dumped to the DB
         self.final_dump_flag = False
 
     def _select(self) -> Tuple[List[socket.socket], List[socket.socket]]:
@@ -76,6 +77,13 @@ class MultiplexedServer:
         del self.clients[addr]
 
     def _draw_indicator_frame(self, img: np.ndarray, frame_color: tuple) -> None:
+        """
+        This method is used to draw the indicator frame around the image.
+        :param img: the image to draw the indicator frame on (by reference)
+        :type img: np.ndarray
+        :param frame_color: the color of the indicator frame in BGR
+        :type frame_color: tuple
+        """
         w, h = img.shape[1], img.shape[0]
         top_bottom_frame_width = int(w * MultiplexedServer.FRAME_PRECENT / 100)
         left_right_frame_width = int(h * MultiplexedServer.FRAME_PRECENT / 100)
@@ -86,6 +94,11 @@ class MultiplexedServer:
         img[:, left_right_frame_width * (-1):, :] = frame_color
 
     def _dump_insert_queue(self):
+        """
+        This method is used to dump the insert queue to the database intermittently.
+        Dumping occurs every 20 seconds. or every time the insert queue is full (3 by default).
+        DO NOT USE THIS METHOD BY ITSELF.
+        """
         t = Timer()
         while True:
             sleep(0.2)
@@ -112,6 +125,13 @@ class MultiplexedServer:
         mutex.release()
 
     def _report_incident(self, addr: Tuple[str, int], img: np.ndarray) -> None:
+        """
+        This method is used to report an incident to the database. This is done by adding the incident to the insert queue
+        :param addr: the addr of the client - Tuple[ip, port]
+        :type addr: Tuple[str, int]
+        :param img: the image of the incident
+        :type img: np.ndarray
+        """
         dtype = np.dtype(img.dtype).__str__()
         img_bytes = cv2.imencode(".png", img)[1].tobytes()
         date = datetime.datetime.now()
@@ -123,14 +143,25 @@ class MultiplexedServer:
         mutex.release()
 
     def insert_queue_checker(self) -> threading.Thread:
+        """
+        This method is used to create a thread that checks the insert queue periodically. The thread is started automatically
+        :return: a reference to the thread (so it can be join in other places)
+        :rtype: threading.Thread
+        """
         t = threading.Thread(target=self._dump_insert_queue, daemon=True)
         t.start()
         return t
 
+    def final_insert_queue_dump(self):
+        """
+        This method is used to indicate to the insert_queue_checker_thread to dump the insert queue to the database.
+        """
+        self.final_dump_flag = True
+
     def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
         """
 
-        This auxilary method is used to receive video and to display it.
+        This auxilary method is used to receive video and to display it. DO NOT USE THIS METHOD BY ITSELF.
         :param addr: the addr of the client
         :type addr: Tuple[str, int]
         :param window: the window to display on
@@ -174,7 +205,8 @@ class MultiplexedServer:
                 if found_indicator:
                     color = MultiplexedServer.GREEN
                     if not reported_indicator:
-                        self._report_incident(addr, cv2.resize(frame, dsize=MultiplexedServer.SAVED_IMG_SIZE))
+                        self._report_incident(addr, cv2.resize(
+                            frame, dsize=MultiplexedServer.SAVED_IMG_SIZE))
                         reported_indicator = True
                 else:
                     color = MultiplexedServer.RED

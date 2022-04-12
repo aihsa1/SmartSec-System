@@ -51,6 +51,9 @@ INDICAOR_MESSAGES = json.loads(
 
 
 def communication():
+    """
+    This function is responsible for communicating with the server.
+    """
     global frame_bytes, frame, is_cap_open, SERVER_ADDRESS, confident
     # s = ClientSocket()
     # client_encryption = RSAEncyption()

@@ -50,7 +50,7 @@ class PyMongoInterface:
 
     def find(self, *objs, db_name: str, col_name: str, limit: int = 0, sort: List[Tuple[str, int]] = []) -> pymongo.cursor.Cursor:
         """
-        This function returns a cursor to the documents that match the given query.
+        This function returns a cursor contains the documents that match the given query.
         :param objs: The query as would be specified to PyMongo.
         :type objs: List[dict]
         :param db_name: The name of the database. THIS IS A KWARG

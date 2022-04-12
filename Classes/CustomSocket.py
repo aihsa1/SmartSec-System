@@ -29,6 +29,8 @@ class ClientSocket:
         :type protocol: str("TCP", "UDP")
         :param existing_socket: The socket to use. USE THE create_client_socket CLASS METHOD INSTEAD.
         :type existing_socket: socket.socket
+        :param message_header_size: The size of the message header. The default value is Message.DEFAULT_HEADER_SIZE
+        :type message_header_size: int
         """
         if existing_socket is None:
             self.socket = socket.socket(
@@ -54,7 +56,7 @@ class ClientSocket:
     def connect(self, addr: Tuple[str, int]) -> None:
         """
         This function is responsible for connecting to the server. USE ONLY FOR TCP
-        :param addr: The address of the server to connect.
+        :param addr: The address + port of the destination socket (addr, port)
         :type addr: Tuple[str, int]
         """
         if self.protocol == "UDP":
@@ -69,8 +71,10 @@ class ClientSocket:
         :type m: Message
         :param addr: The address of the server to connect.
         :type addr: Tuple[str, int]
-        :param e: The encryption object. This param will be used to encrypt messages (AESEncrytion | RSAEncryption). if None is provided, no encryption will be used.
+        :param e: The encryption object. This param will be used to encrypt messages (AESEncrytion | RSAEncryption). if None is provided, no encryption will be used. THIS IS A KWARG
         :type e: Union[RSAEncyption, AESEncryption]
+        :param code: The type of the message (according the the CommunucationCode enum). THIS IS A KWARG
+        :type code: CommunicationCode
         """
         if self.protocol == "UDP":
             def send_cmd(x): return self.socket.sendto(x, addr)
@@ -100,9 +104,9 @@ class ClientSocket:
         :type addr: Tuple[str, int]
         :param batch_size: The size of the batch. It should be less than rsa.common.byte_size(publickey.n)
         :type batch_size: int
-        :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used.
+        :param e: The encryption object. This param will be used to encrypt messages. if None, no encryption will be used. THIS IS A KWARG
         :type e: Union[RSAEncyption, AESEncryption]
-        :param code: The code of the message. If nothing is provided, the code will be assumed to be CommunicationCode.VIDEO.
+        :param code: The code of the message. If nothing is provided, the code will be assumed to be CommunicationCode.VIDEO. THIS IS A KWARG
         :type code: CommunicationCode
         """
         if isinstance(e, RSAEncyption):
@@ -140,6 +144,8 @@ class ClientSocket:
         This function is responsible for receiving a message from the server. This function takes buffered data into account. The recieved data is returned as a Message object.
         :param buffer_size: The size of the buffer. It should be exactly the same as rsa.common.byte_size(publickey.n)
         :type buffer_size: int
+        :param e: The encryption object. This param will be used to decrypt messages. if None, no decryption will be used. THIS IS A KWARG
+        :type e: Union[RSAEncyption, AESEncryption]
         :return: The message received and the origin - Tuple(Message, Tuple(ip, port)).
         :rtype: Tuple[Message, Tuple[str, int]]
         """
