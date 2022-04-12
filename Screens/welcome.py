@@ -40,6 +40,10 @@ def show_welcome_client() -> Tuple[str, bool]:
                         sg.Button(button_text="Detect Locally from a Video", key="-DETECT-LOCALLY-VIDEO-BUTTON-",
                                   tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
                     ],
+                    [sg.HorizontalSeparator()],
+                    [sg.Text("Please enter credentials to continue:", font=("Helvetica", 13))],
+                    [sg.Text("Username"), sg.InputText(key="-USERNAME-")],
+                    [sg.Text("Password"), sg.InputText(key="-PASSWORD-", password_char="*")]
                 ], element_justification="center"
             )
         ]
@@ -53,7 +57,7 @@ def show_welcome_client() -> Tuple[str, bool]:
         if event == sg.WIN_CLOSED:
             break
         if event in ["-CONNECT-SERVER-BUTTON-", "-DETECT-LOCALLY-WEBCAM-BUTTON-", "-DETECT-LOCALLY-VIDEO-BUTTON-"]:
-            ret = (event, window["-DETECTION-CHECKBOX-"].Get())
+            ret = (event, values)
             break
     window.close()
     return ret

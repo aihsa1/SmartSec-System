@@ -50,7 +50,7 @@ INDICAOR_MESSAGES = json.loads(
 #   \_____\____/|_|  |_|_|  |_|
 
 
-def communication():
+def communication(uname, passwd):
     """
     This function is responsible for communicating with the server.
     """
@@ -102,11 +102,19 @@ def communication():
         Message(client_aes.key, code=CommunicationCode.KEY), e=client_rsa)
     print(f"AES key: {hashlib.sha256(client_aes.key).hexdigest()}")
 
+    client_socket.send_buffered(
+        Message(uname, code=CommunicationCode.CREDENTIALS), e=client_aes
+    )
+    client_socket.send_buffered(
+        Message(passwd, code=CommunicationCode.CREDENTIALS), e=client_aes
+    )
+    
     client_socket.send(
         Message(pickle.dumps((ClientSocket.WIDTH_WEBCAM,
                 ClientSocket.HEIGHT_WEBCAM)), code=CommunicationCode.INFO),
         e=client_aes
     )
+
     sent_alert_confident = False  # sent a message indicating that a weapon has been found
     sent_alert_not_confident = True
     while frame is None:
@@ -351,7 +359,9 @@ def main() -> None:
     """
     this function is responsible for the main execution of the program - integrating between all of the necassary functions.
     """
-    event, detection_mode = show_welcome_client()
+    event, values = show_welcome_client()
+    detection_mode = values["-DETECTION-CHECKBOX-"]
+    uname, passwd = values["-USERNAME-"], values["-PASSWORD-"]
     # import necassary module if doing detection
     if event is not None:
         if detection_mode:
@@ -364,7 +374,7 @@ def main() -> None:
             loading_thread.join()
 
         if event == "-CONNECT-SERVER-BUTTON-":
-            comm_thread = threading.Thread(target=communication, daemon=True)
+            comm_thread = threading.Thread(target=communication, args=(uname, passwd), daemon=True)
             comm_thread.start()
         gui(detection_mode)
         comm_thread.join() if "comm_thread" in locals() else None

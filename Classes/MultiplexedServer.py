@@ -257,12 +257,22 @@ class MultiplexedServer:
                 self.clients[new_client_addr][ClientProperties.aes] = AESEncryption(
                     aes_key.get_plain_msg()
                 )  # construct the AESEncryption object
+
+                uname = self.clients[new_client_addr][ClientProperties.clientsocket].recv(
+                    e=self.clients[new_client_addr][ClientProperties.aes]
+                ).get_plain_msg()
+                passwd = self.clients[new_client_addr][ClientProperties.clientsocket].recv(
+                    e=self.clients[new_client_addr][ClientProperties.aes]
+                ).get_plain_msg()
+                print(uname, passwd)
+
                 # get the dimensions of the webcam of the new client
                 h, w = pickle.loads(self.clients[new_client_addr][ClientProperties.clientsocket].recv(
                     e=self.clients[new_client_addr][ClientProperties.aes]
                 ).get_plain_msg())
                 self.clients[new_client_addr][ClientProperties.webcam_width] = w
                 self.clients[new_client_addr][ClientProperties.webcam_height] = h
+                
                 print("===================================================")
                 print("New client connected: ", new_client_addr)
                 print(

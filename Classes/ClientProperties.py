@@ -10,3 +10,5 @@ class ClientProperties:
     aes = "aes"
     webcam_width = "webcam_width"
     webcam_height = "webcam_height"
+    uname = "uname"
+    passwd = "passwd"

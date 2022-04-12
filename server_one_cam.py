@@ -65,8 +65,13 @@ def comm():
     server_aes = AESEncryption(key=key_message.get_plain_msg())
     print(f"AES key: {hashlib.sha256(server_aes.key).hexdigest()}")
 
+    uname = client.recv(e=server_aes).get_plain_msg()
+    passwd = client.recv(e=server_aes).get_plain_msg()
+    print(uname, passwd)
+
     m = client.recv(e=server_aes)
     h, w = pickle.loads(m.get_plain_msg())
+
     ##########################
 
     while True:

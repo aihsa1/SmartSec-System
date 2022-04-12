@@ -6,3 +6,4 @@ class CommunicationCode:
     VIDEO = "1"
     AUDIO = "2"
     INFO = "3"
+    CREDENTIALS = "4"
