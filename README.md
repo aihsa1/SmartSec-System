@@ -15,7 +15,7 @@ This is a smart security application to detect pistols and manage incidents from
 * Reading and viewing past incidents from the DB
 
 ------------------------------------
-# Demo GIFs and Images
+# Demo Images
 
 ### client:
 ![client](https://github.com/aihsa1/SmartSec/blob/master/RepoImages/client.png)
