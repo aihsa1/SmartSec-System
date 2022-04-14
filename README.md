@@ -11,7 +11,7 @@ This is a smart security application to detect pistols and manage incidents from
 * Detecting pistols using a custom-trained ML model
 * Grouping detections in a central server and logging incidents in database
 * Live video feed + positive detection visualizations in the central server
-* AES and RSA encrypted data transmission
+* AES and RSA E2E encrypted data transmission
 * Reading and viewing past incidents from the DB
 
 ------------------------------------
