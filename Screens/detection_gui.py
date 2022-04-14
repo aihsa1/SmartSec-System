@@ -10,7 +10,7 @@ N_IN_ROWS = 2
 N_CAMERAS_IN_PAGE = 4
 
 
-def generate_detection_gui_client():
+def generate_video_detection_gui_client():
     """
     This function generates the GUI for the detection client.
     :return: layout, w, h
@@ -142,7 +142,7 @@ def db_alert_gui_server(i, output, image):
 def main():
     # i = 0
     # layout, w, h = generate_detection_gui_server()
-    # # layout, w, h = generate_detection_gui_client()
+    # # layout, w, h = generate_video_detection_gui_client()
     # window = sg.Window('SmartSec Server', layout, size=(w, h))
     # while True:
     #     event, value = window.read(timeout=10)

@@ -17,7 +17,7 @@ from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
 from Screens.error_popup import show_error_popup
 from Classes.CommunicationCode import CommunicationCode
-from Screens.detection_gui import generate_detection_gui_client
+from Screens.detection_gui import generate_video_detection_gui_client
 
 
 model = None
@@ -308,7 +308,7 @@ def gui(detection_mode=True) -> None:
     """
     global WIDTH_WEBCAM, HEIGHT_WEBCAM, MIN_SCORE_THRESH, MIN_TEST_TIME, frame_bytes, frame, is_cap_open, confident
 
-    layout, w, h = generate_detection_gui_client()
+    layout, w, h = generate_video_detection_gui_client()
 
     cap = cv2.VideoCapture(0)
     window = sg.Window('SmartSec Client', layout, size=(w, h))
