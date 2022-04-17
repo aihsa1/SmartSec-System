@@ -3,11 +3,11 @@ import pymongo
 import bson
 import re
 
-
+    
 class PyMongoInterface:
-    DEFAULT_USERNAME = "KyHSAVsQnqTw1HC0"
-    DEFAULT_PASSWORD = "XnHZPdap8941pypr"
-    DEFAULT_CONN_STRING = F"mongodb+srv://{DEFAULT_USERNAME}:{DEFAULT_PASSWORD}@smartsec1.pueke.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    DEFAULT_USERNAME = "2s98Uiwr1L2NrtKB"
+    DEFAULT_PASSWORD = "HpwLgw5rDyIKq0S7"
+    DEFAULT_CONN_STRING = F"mongodb+srv://{DEFAULT_USERNAME}:{DEFAULT_PASSWORD}@smartseccluster.pueke.mongodb.net/test"
 
     ASCENDING = pymongo.ASCENDING
     DESCENDING = pymongo.DESCENDING
