@@ -11,11 +11,11 @@ This is a smart security application to detect pistols and manage incidents from
 * Detecting pistols using a custom-trained ML model
 * Grouping detections in a central server and logging incidents in database
 * Live video feed + positive detection visualizations in the central server
-* AES and RSA encrypted data transmission
+* AES and RSA E2E encrypted data transmission
 * Reading and viewing past incidents from the DB
 
 ------------------------------------
-# Demo GIFs and Images
+# Demo Images
 
 ### client:
 ![client](https://github.com/aihsa1/SmartSec/blob/master/RepoImages/client.png)
@@ -50,5 +50,6 @@ This is a smart security application to detect pistols and manage incidents from
 
 # Notes
 * This system was not developed for production use, nor to be user-friendly. I'm sharing this code to publish a POC of what it would be to create a autonomous system that uses ML to complete a tedious instead of humans
-* I'm not a CS professor, not a Data Scientis - The ML model I developed is the best I could achieve regarding my limited knowledge in ML, but it functions at a reasonable level. I used this project as an opportinuty to learn about ML and to further improve my skills (and also for fun :))
+* I'm not a CS professor, not a Data Scientist - The ML model I developed is the best I could achieve regarding my limited knowledge in ML, but it functions at a reasonable level. I used this project as an opportinuty to learn about ML and to further improve my skills (and also for fun :))
 * This system may still have minor changes. No more functional changes will be made
+* Feel free to use the different classes for other uses (such as encryption and MongoDB querying)
