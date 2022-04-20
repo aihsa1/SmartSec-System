@@ -21,7 +21,7 @@ class PyMongoInterface:
         try:
             print("Trying to connect to MongoDB...")
             self.client = pymongo.MongoClient(conn_string)
-        except (pymongo.errors.OperationFaliure, pymongo.errors.ConnectionFailure, pymongo.errors.ConfigurationError) as e:
+        except (pymongo.errors.OperationFailure, pymongo.errors.ConnectionFailure, pymongo.errors.ConfigurationError) as e:
             raise e
         else:
             print("Connected to MongoDB.")
