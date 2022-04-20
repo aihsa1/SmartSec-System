@@ -5,9 +5,9 @@ import re
 
     
 class PyMongoInterface:
-    DEFAULT_USERNAME = "2s98Uiwr1L2NrtKB"
-    DEFAULT_PASSWORD = "HpwLgw5rDyIKq0S7"
-    DEFAULT_CONN_STRING = F"mongodb+srv://{DEFAULT_USERNAME}:{DEFAULT_PASSWORD}@smartseccluster.pueke.mongodb.net/test"
+    DEFAULT_USERNAME = "kHfvYNgyfFJdbX32"
+    DEFAULT_PASSWORD = "kRouB5fPBHfYxPEY"
+    DEFAULT_CONN_STRING = F"mongodb+srv://{DEFAULT_USERNAME}:{DEFAULT_PASSWORD}@smartseccluster.pueke.mongodb.net/SmartSecDB?retryWrites=true&w=majority"
 
     ASCENDING = pymongo.ASCENDING
     DESCENDING = pymongo.DESCENDING

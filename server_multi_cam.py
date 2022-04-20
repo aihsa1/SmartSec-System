@@ -11,7 +11,6 @@ from Classes.MultiplexedServer import MultiplexedServer
 from Screens.detection_gui import generate_detection_gui_server, db_alert_gui_server, generate_db_gui_server
 
 window = None
-# TODO: ADD ANNOTATIONS AND DOCS
 
 
 def db_gui(values: List[List[Any]], headings: List[str], images: List[np.ndarray]):
