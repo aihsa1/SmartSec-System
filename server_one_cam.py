@@ -11,6 +11,7 @@ from Screens.detection_gui import generate_detection_gui_server
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Classes.CustomSocket import ClientSocket, ServerSocket
+from Classes.CommunicationProtocols import CommunicationProtocols
 import numpy as np
 
 frame = None
@@ -43,7 +44,7 @@ def comm():
     # sig, _ = s.recv(e=server_encryption)
     # print(server_encryption.verify_signature(m.message, sig.get_plain_msg()))
 
-    s = ServerSocket("TCP")
+    s = ServerSocket(CommunicationProtocols.TCP)
     s.bind_and_listen(("0.0.0.0", 14_000))
     client, addr = s.accept()
     client = ClientSocket.create_client_socket(client)

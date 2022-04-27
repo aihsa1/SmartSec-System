@@ -7,6 +7,8 @@ from Classes.Message import Message
 from Classes.RSAEncryption import RSAEncyption
 from Classes.AESEncryption import AESEncryption
 from Classes.CustomSocket import ServerSocket, ClientSocket
+from Classes.CommunicationProtocols import CommunicationProtocols
+
 
 ###############################UDP#####################################################
 # s = ServerSocket()
@@ -30,7 +32,7 @@ from Classes.CustomSocket import ServerSocket, ClientSocket
 # new_m = Message("Hi")
 # s.send(new_m, addr, e=server_encryption)
 ############################TCP###################################
-# server_socket = ServerSocket("TCP")
+# server_socket = ServerSocket(CommunicationProtocols.TCP)
 # server_socket.bind_and_listen(("127.0.0.1", 14_000))
 # client, client_addr = server_socket.accept()
 # client = ClientSocket.create_client_socket(client)
@@ -61,7 +63,7 @@ from Classes.CustomSocket import ServerSocket, ClientSocket
 
 ###################TCP2###############################
 
-# server_socket = ServerSocket("TCP")
+# server_socket = ServerSocket(CommunicationProtocols.TCP)
 # server_socket.bind_and_listen(("0.0.0.0", 14_000))
 # client_socket, addr = server_socket.accept()
 # client_socket = ClientSocket.create_client_socket(client_socket)
@@ -93,7 +95,7 @@ from Classes.CustomSocket import ServerSocket, ClientSocket
 
 # ############TCP AES##################
 
-server_socket = ServerSocket("TCP")
+server_socket = ServerSocket(CommunicationProtocols.TCP)
 server_socket.bind_and_listen(("0.0.0.0", 14_000))
 client_socket, addr = server_socket.accept()
 client_socket = ClientSocket.create_client_socket(client_socket)

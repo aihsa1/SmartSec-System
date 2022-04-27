@@ -18,6 +18,7 @@ from AESEncryption import AESEncryption
 from PyMongoInterface import PyMongoInterface
 from ClientProperties import ClientProperties
 from CommunicationCode import CommunicationCode
+from CommunicationProtocols import CommunicationProtocols
 
 
 class MultiplexedServer:
@@ -41,7 +42,7 @@ class MultiplexedServer:
         :param window: the window to display on
         :type window: sg.Window
         """
-        self.server_socket = ServerSocket("TCP")
+        self.server_socket = ServerSocket(CommunicationProtocols.TCP)
         self.client_sockets = {}  # {addr: s} - a dict contains the plain sockets
         self.clients = {}  # {addr: {'plainsocket':ps, 'clientsocket': cs, 'clientname':n}} - a dict contains the clients and all of their conponents
         self.client_threads = {}  # {addr: t} - a dict contains the threads of the clients

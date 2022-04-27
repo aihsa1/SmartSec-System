@@ -17,6 +17,7 @@ from Screens.welcome import show_welcome_client
 from Screens.loading import show_loading_screen
 from Screens.error_popup import show_error_popup
 from Classes.CommunicationCode import CommunicationCode
+from Classes.CommunicationProtocols import CommunicationProtocols
 from Screens.detection_gui import generate_video_detection_gui_client
 
 
@@ -81,7 +82,7 @@ def communication(uname, passwd):
     # # s.send_buffered(Message(cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY).tobytes()), SERVER_ADDRESS)
     # print("done")
 
-    client_socket = ClientSocket("TCP")
+    client_socket = ClientSocket(CommunicationProtocols.TCP)
     client_socket.connect(SERVER_ADDRESS)
     print("connected to server")
 

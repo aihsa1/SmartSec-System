@@ -6,6 +6,7 @@ import os
 import json
 from Message import Message
 from CommunicationCode import CommunicationCode
+from CommunicationProtocols import CommunicationProtocols
 from RSAEncryption import RSAEncyption
 from AESEncryption import AESEncryption
 RECV_BUFFER_SIZE = RSAEncyption.RECV_BUFFER_SIZE
@@ -22,11 +23,11 @@ class ClientSocket:
     with open(os.path.join("Configs", "dimensions.json"), "r") as f:
         WIDTH_WEBCAM, HEIGHT_WEBCAM = json.load(f).values()
 
-    def __init__(self, protocol: str = "UDP", existing_socket: socket.socket = None, message_header_size: int = Message.DEFAULT_HEADER_SIZE) -> None:
+    def __init__(self, protocol: str = CommunicationProtocols.UDP, existing_socket: socket.socket = None, message_header_size: int = Message.DEFAULT_HEADER_SIZE) -> None:
         """
         This function is responsible for creating a client socket.
         :param protocol: The protocol to use.
-        :type protocol: str("TCP", "UDP")
+        :type protocol: str(CommunicationProtocols.TCP, CommunicationProtocols.UDP)
         :param existing_socket: The socket to use. USE THE create_client_socket CLASS METHOD INSTEAD.
         :type existing_socket: socket.socket
         :param message_header_size: The size of the message header. The default value is Message.DEFAULT_HEADER_SIZE
@@ -35,7 +36,7 @@ class ClientSocket:
         if existing_socket is None:
             self.socket = socket.socket(
                 socket.AF_INET,
-                socket.SOCK_DGRAM if protocol == "UDP" else socket.SOCK_STREAM
+                socket.SOCK_DGRAM if protocol == CommunicationProtocols.UDP else socket.SOCK_STREAM
             )
         else:
             self.socket = existing_socket
@@ -51,7 +52,7 @@ class ClientSocket:
         :return: The client socket object.
         :rtype: ClientSocket
         """
-        return cls("TCP", client_socket)
+        return cls(CommunicationProtocols.TCP, client_socket)
 
     def connect(self, addr: Tuple[str, int]) -> None:
         """
@@ -59,7 +60,7 @@ class ClientSocket:
         :param addr: The address + port of the destination socket (addr, port)
         :type addr: Tuple[str, int]
         """
-        if self.protocol == "UDP":
+        if self.protocol == CommunicationProtocols.UDP:
             raise ValueError("UDP communication does not require connection.")
         else:
             self.socket.connect(addr)
@@ -76,7 +77,7 @@ class ClientSocket:
         :param code: The type of the message (according the the CommunucationCode enum). THIS IS A KWARG
         :type code: CommunicationCode
         """
-        if self.protocol == "UDP":
+        if self.protocol == CommunicationProtocols.UDP:
             def send_cmd(x): return self.socket.sendto(x, addr)
         else:
             if addr is None:
@@ -114,7 +115,7 @@ class ClientSocket:
         else:
             batch_size -= AESEncryption.KEY_SIZE
 
-        if self.protocol == "UDP":
+        if self.protocol == CommunicationProtocols.UDP:
             def send_cmd(x): return self.socket.sendto(x, addr)
         else:
             if addr is None:
@@ -156,7 +157,7 @@ class ClientSocket:
             def decrypt_cmd(x): return x
             offset = 0
 
-        if self.protocol == "UDP":
+        if self.protocol == CommunicationProtocols.UDP:
             recv_cmd = self.socket.recvfrom
             data, addr = recv_cmd(self.message_header_size)
             m = Message.create_accumulator_from_plain_data(data)
@@ -187,7 +188,7 @@ class ClientSocket:
         """
         This function is responsible for closing the socket. USE ONLY WITH TCP.
         """
-        self.socket.close() if self.protocol == "TCP" else None
+        self.socket.close() if self.protocol == CommunicationProtocols.TCP else None
 
 
 class ServerSocket(ClientSocket):
@@ -197,11 +198,11 @@ class ServerSocket(ClientSocket):
     NOTE: this class inherits from ClientSocket class and therefore all of the functions and properties are available with some small modifications (polymorphism). This Class consists additional methods for server-use only.
     """
 
-    def __init__(self, protocol: str = "UDP") -> None:
+    def __init__(self, protocol: str = CommunicationProtocols.UDP) -> None:
         """
         This function is responsible for creating a server socket. It should be NOTED that this function is not responsible for binding the socket, only for creating the socket object -  use the bind_and_listen method should be used in order to do the binding.
         :param protocol: The protocol to use.
-        :type protocol: str("TCP", "UDP")
+        :type protocol: str(CommunicationProtocols.TCP, CommunicationProtocols.UDP)
         """
         super().__init__(protocol=protocol)
 
@@ -212,13 +213,13 @@ class ServerSocket(ClientSocket):
         :type addr: tuple(ip, port)
         """
         self.socket.bind(addr)
-        self.socket.listen() if self.protocol == "TCP" else None
+        self.socket.listen() if self.protocol == CommunicationProtocols.TCP else None
 
     def accept(self):
         """
         This function is responsible for accepting a connection from a client. USE ONLY WITH TCP.
         """
-        if self.protocol == "UDP":
+        if self.protocol == CommunicationProtocols.UDP:
             raise ValueError("UDP communication does not require connection.")
         else:
             return self.socket.accept()
@@ -229,7 +230,7 @@ class ServerSocket(ClientSocket):
         :return: The address of the client that is connected to the server.
         :rtype: tuple(ip, port)
         """
-        return self.socket.getpeername() if self.protocol == "TCP" else None
+        return self.socket.getpeername() if self.protocol == CommunicationProtocols.TCP else None
 
 
 def main():
@@ -258,7 +259,7 @@ def main():
 
     ####################TCP##############################
     # SERVER_ADDRESS = ("127.0.0.1", 14_000)
-    # s = ClientSocket("TCP")
+    # s = ClientSocket(CommunicationProtocols.TCP)
     # s.connect(SERVER_ADDRESS)
 
     # ##########key exchange#############
@@ -284,7 +285,7 @@ def main():
     # print(m)
 
     #############################TCP2##############################
-    # client_socket = ClientSocket("TCP")
+    # client_socket = ClientSocket(CommunicationProtocols.TCP)
     # client_socket.connect(SERVER_ADDRESS)
     # print("connected to server")
 
@@ -308,7 +309,7 @@ def main():
     # client_socket.send_buffered(sig, e=client_encryption)
 
     #################TCP AES#######################
-    client_socket = ClientSocket("TCP")
+    client_socket = ClientSocket(CommunicationProtocols.TCP)
     client_socket.connect(SERVER_ADDRESS)
     print("connected to server")
 
