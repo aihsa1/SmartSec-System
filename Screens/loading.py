@@ -8,6 +8,8 @@
 
 import PySimpleGUI as sg
 import threading
+import os
+import json
 
 
 def show_loading_screen(message, done_loading_flag):
@@ -28,7 +30,12 @@ def show_loading_screen(message, done_loading_flag):
             )
         ]
     ]
-    window = sg.Window("Loading", layout, size=(w, h))
+
+    WINDOW_ICON = json.loads(
+    open(os.path.join("Configs", "icons.json")).read()
+    )["smartsec"].encode()
+
+    window = sg.Window("Loading", layout, size=(w, h), icon=WINDOW_ICON)
 
     # EVENT LOOP
     while True:

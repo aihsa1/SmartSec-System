@@ -42,6 +42,10 @@ MIN_TEST_TIME = 2  # the time take to detect the weapon in seconds
 INDICAOR_MESSAGES = json.loads(
     open(os.path.join("Configs", "INDICATOR_MESSAGES.json")).read()
 )
+WINDOW_ICON = json.loads(
+    open(os.path.join("Configs", "icons.json")).read()
+)["smartsec"].encode()
+
 
 
 #    _____ ____  __  __ __  __
@@ -312,7 +316,7 @@ def gui(detection_mode=True) -> None:
     layout, w, h = generate_video_detection_gui_client()
 
     cap = cv2.VideoCapture(0)
-    window = sg.Window('SmartSec Client', layout, size=(w, h))
+    window = sg.Window('SmartSec Client', layout, size=(w, h), icon=WINDOW_ICON)
 
     t0_exists = False
     confident = False

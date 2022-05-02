@@ -9,6 +9,10 @@ N_CAMERAS = 10
 N_IN_ROWS = 2
 N_CAMERAS_IN_PAGE = 4
 
+WINDOW_ICON = json.loads(
+    open(os.path.join("Configs", "icons.json")).read()
+)["smartsec"].encode()
+
 
 def generate_video_detection_gui_client():
     """
@@ -135,7 +139,8 @@ def db_alert_gui_server(i, output, image):
         "\n".join([f"{k}: {v}" for k, v in output]),
         title=f"incident {i}",
         image=image,
-        non_blocking=True
+        non_blocking=True,
+        icon=WINDOW_ICON
     )
 
 

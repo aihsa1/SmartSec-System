@@ -7,6 +7,8 @@
 
 import PySimpleGUI as sg
 from typing import Tuple
+import json
+import os
 
 
 def show_welcome_client() -> Tuple[str, bool]:
@@ -41,14 +43,21 @@ def show_welcome_client() -> Tuple[str, bool]:
                         #           tooltip="Detect pistols locally from a video, without reporting to the server", focus=False, enable_events=True)
                     ],
                     [sg.HorizontalSeparator()],
-                    [sg.Text("Please enter credentials to continue:", font=("Helvetica", 13))],
+                    [sg.Text("Please enter credentials to continue:",
+                             font=("Helvetica", 13))],
                     [sg.Text("Username"), sg.InputText(key="-USERNAME-")],
-                    [sg.Text("Password"), sg.InputText(key="-PASSWORD-", password_char="*")]
+                    [sg.Text("Password"), sg.InputText(
+                        key="-PASSWORD-", password_char="*")]
                 ], element_justification="center"
             )
         ]
     ]
-    window = sg.Window("Welcome to SmartSec", layout, size=(w, h))
+
+    WINDOW_ICON = json.loads(
+        open(os.path.join("Configs", "icons.json")).read()
+    )["smartsec"].encode()
+
+    window = sg.Window("Welcome to SmartSec", layout, size=(w, h), icon=WINDOW_ICON)
 
     # EVENT LOOP
     ret = (None, False)

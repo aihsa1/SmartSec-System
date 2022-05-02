@@ -4,6 +4,8 @@ import numpy as np
 from time import sleep
 import multiprocessing
 import PySimpleGUI as sg
+import json
+import os
 from typing import List, Tuple, Any
 from Scripts import add_folders_to_path
 from Classes.PyMongoInterface import PyMongoInterface
@@ -11,6 +13,9 @@ from Classes.MultiplexedServer import MultiplexedServer
 from Screens.detection_gui import generate_detection_gui_server, db_alert_gui_server, generate_db_gui_server
 
 window = None
+WINDOW_ICON = json.loads(
+    open(os.path.join("Configs", "icons.json")).read()
+)["smartsec"].encode()
 
 
 def db_gui(values: List[List[Any]], headings: List[str], images: List[np.ndarray]):
@@ -26,7 +31,7 @@ def db_gui(values: List[List[Any]], headings: List[str], images: List[np.ndarray
     layout, w, h = generate_db_gui_server(
         values, headings)  # generate the necessary layout
 
-    win = sg.Window("SmartSec DB", layout, size=(w, h))
+    win = sg.Window("SmartSec DB", layout, size=(w, h), icon=WINDOW_ICON)
     while True:
         event, value = win.read()
         if event in (sg.WIN_CLOSED, "-BACK-BUTTON-"):
@@ -84,7 +89,7 @@ def server_gui(layout, w: int, h: int, db: PyMongoInterface):
 
     mutex = threading.Lock()
     mutex.acquire()
-    window = sg.Window("SmartSec Server", layout, size=(w, h))
+    window = sg.Window("SmartSec Server", layout, size=(w, h), icon=WINDOW_ICON)
     mutex.release()
     while True:
         event, value = window.read(timeout=5)

@@ -1,5 +1,14 @@
 import PySimpleGUI as sg
 import multiprocessing
+import os
+import json
+
+
+
+WINDOW_ICON = json.loads(
+    open(os.path.join("Configs", "icons.json")).read()
+)["smartsec"].encode()
+
 
 def _popup(msg):
     """
@@ -7,7 +16,7 @@ def _popup(msg):
     :param msg: the message to be displayed
     :type msg: str
     """
-    sg.Popup(msg, title="Error", keep_on_top=True)
+    sg.Popup(msg, title="Error", keep_on_top=True, icon=WINDOW_ICON)
 
 def show_error_popup(msg: str):
     """
