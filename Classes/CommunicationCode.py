@@ -4,6 +4,5 @@ class CommunicationCode:
     """
     KEY = "0"
     VIDEO = "1"
-    AUDIO = "2"
-    INFO = "3"
-    CREDENTIALS = "4"
+    INFO = "2"
+    CREDENTIALS = "3"

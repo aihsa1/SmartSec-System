@@ -4,8 +4,10 @@ import json
 import pickle
 import hashlib
 import threading
+import collections
 import numpy as np
 from time import sleep
+from typing import List, Tuple
 import PySimpleGUI as sg
 from Scripts import add_folders_to_path
 from Classes.Timer import Timer
@@ -31,12 +33,12 @@ labels = None
 frame_bytes = None
 frame = None
 is_cap_open = False
-confident = None
+confident = None# a weapon has found found
 
 SERVER_ADDRESS = ("127.0.0.1", 14_000)
 
-MIN_SCORE_THRESH = 0.5
-MAX_BOXES_TO_DRAW = 5
+MIN_SCORE_THRESH = 0.5# minimun score threshold
+MAX_BOXES_TO_DRAW = 5# maximum amount of boxes to draw
 MIN_TEST_TIME = 2  # the time take to detect the weapon in seconds
 
 INDICAOR_MESSAGES = json.loads(
@@ -56,9 +58,13 @@ WINDOW_ICON = json.loads(
 #   \_____\____/|_|  |_|_|  |_|
 
 
-def communication(uname, passwd):
+def communication(uname: str, passwd: str) -> None:
     """
     This function is responsible for communicating with the server.
+    :param uname: the username to connect the server with
+    :type uname: str
+    :param passwd: the passwd to connect the server with
+    :type passwd: str
     """
     global frame_bytes, frame, is_cap_open, SERVER_ADDRESS, confident
     # s = ClientSocket()
@@ -176,9 +182,11 @@ def communication(uname, passwd):
 #  |_____|_| \_|_____|  |_/_/    \_\______|_____/_____|______| |_|  |_|\____/|_____/|______|______|
 
 
-def initialize_model(done_loading_flag) -> None:
+def initialize_model(done_loading_flag: List[bool]) -> None:
     """
     this function initializes the model and necassary paths
+    :param done_loading_flag: a flag that indicates if the model is loaded
+    :type done_loading_flag: List[bool]
     """
     global model, category_index, detect_fn, paths, files, labels
     global tf, label_map_util, viz_utils
@@ -199,7 +207,6 @@ def initialize_model(done_loading_flag) -> None:
         'LABEL_MAP': os.path.join(paths['ANNOTATION_PATH'], "label_map.pbtxt"),
         "EXPORTED_MODEL_PIPELINE": os.path.join(paths["EXPORTED_MODEL_PATH"], "pipeline.config")
     }
-    # labels = ["phone", "pistol", "hand"]
     labels = ["pistol"]
 
     model = tf.saved_model.load(os.path.join(
@@ -223,14 +230,14 @@ def initialize_model(done_loading_flag) -> None:
 #  |_____/|______|  |_|  |______\_____|  |_|  |_____\____/|_| \_|
 
 
-def detection_interface(frame) -> tuple:
+def detection_interface(frame) -> Tuple[collections.OrderedDict, np.ndarray]:
     """
     This function is responsible for detecting the weapon on the screen - the interface for the deep learning model.
     :param frame: the frame captured from the camera
     :type frame: numpy.ndarray
 
     :return: the detections dictionary-like object and the frame with the detections drawn on it (detections, frame)
-    :rtype: tuple(OrderedDict, numpy.ndarray)
+    :rtype: Tuple[collections.OrderedDict, np.ndarray]
     """
     global model, category_index, detect_fn
 
@@ -272,7 +279,7 @@ def detection_interface(frame) -> tuple:
 #   \_____|\____/|_| \_| |_____|_| \_|_____/_____\_____/_/    \_\_|  \____/|_|  \_\
 
 
-def gui_weapon_indicator(window, detections, confident=False) -> None:
+def gui_weapon_indicator(window: sg.Window, detections: collections.OrderedDict, confident: bool=False) -> bool:
     """
     This function is responsible for displaying the weapon indicator on the screen.
     :param window: the window object
@@ -305,7 +312,7 @@ def gui_weapon_indicator(window, detections, confident=False) -> None:
 #   \_____|\____/|_____|     |_|  |_/_/    \_\_____|_| \_|
 
 
-def gui(detection_mode=True) -> None:
+def gui(detection_mode: bool=True) -> None:
     """
     this function is responsible for the GUI of the program.
     :param detection_mode: True if the detection mode is enabled, False otherwise.

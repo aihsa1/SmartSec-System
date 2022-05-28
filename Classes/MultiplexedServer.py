@@ -30,7 +30,7 @@ class MultiplexedServer:
 
     BLACK_SCREEN = cv2.imencode(".png", np.zeros(
         (HEIGHT_WEBCAM // 2, WIDTH_WEBCAM // 2), dtype=np.uint8))[1].tobytes()
-    FRAME_PRECENT = 2
+    FRAME_PRECENT = 2# indicator frame precent
     GREEN = (0, 255, 0)  # green in BGR format (4 CV2)
     RED = (0, 0, 255)  # green in BGR format (4 CV2)
 
@@ -97,7 +97,7 @@ class MultiplexedServer:
         img[:, 0: left_right_frame_width, :] = frame_color
         img[:, left_right_frame_width * (-1):, :] = frame_color
 
-    def _dump_insert_queue(self):
+    def _dump_insert_queue(self) -> None:
         """
         This method is used to dump the insert queue to the database intermittently.
         Dumping occurs every 20 seconds. or every time the insert queue is full (3 by default).
@@ -156,23 +156,25 @@ class MultiplexedServer:
         t.start()
         return t
 
-    def final_insert_queue_dump(self):
+    def final_insert_queue_dump(self) -> None:
         """
         This method is used to indicate to the insert_queue_checker_thread to dump the insert queue to the database.
         """
         self.final_dump_flag = True
 
-    def _check_user(self, uname: bytes, passwd: bytes):
+    def _check_user(self, uname: bytes, passwd: bytes) -> bool:
+        """
+        Authenticate a client
+        :return: returns True if the user is authorized. Else, returns false
+        """
         return len(tuple(self.db.find({"uname": uname.decode(), "passwd": hashlib.sha512(passwd).hexdigest()}, db_name="SmartSecDB", col_name="Users"))) == 1
 
-    def _recv_video(self, addr: Tuple[str, int], window: sg.Window) -> None:
+    def _recv_video(self, addr: Tuple[str, int]) -> None:
         """
 
         This auxilary method is used to receive video and to display it. DO NOT USE THIS METHOD BY ITSELF.
         :param addr: the addr of the client
         :type addr: Tuple[str, int]
-        :param window: the window to display on
-        :type window: sg.Window
         """
         client = self.clients[addr][ClientProperties.clientsocket]
         client_aes = self.clients[addr][ClientProperties.aes]
@@ -222,7 +224,7 @@ class MultiplexedServer:
                 frame_bytes = cv2.imencode(".png", frame)[1].tobytes()
 
                 try:
-                    window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
+                    self.window[f"-VIDEO{tuple(self.client_sockets.keys()).index(addr)}-"].update(
                         data=frame_bytes)
                 except Exception as e:
                     mutex.release()
@@ -307,7 +309,7 @@ class MultiplexedServer:
                 addr = s.getpeername()
                 if addr not in self.client_threads.keys():
                     self.client_threads[addr] = threading.Thread(
-                        target=self._recv_video, args=(addr, self.window), daemon=True)
+                        target=self._recv_video, args=(addr,), daemon=True)
                     self.client_threads[addr].start()
                 # try:
                 #     m = client_socket.recv(e=client_aes)

@@ -18,7 +18,7 @@ WINDOW_ICON = json.loads(
 )["smartsec"].encode()
 
 
-def db_gui(values: List[List[Any]], headings: List[str], images: List[np.ndarray]):
+def db_gui(values: List[List[Any]], headings: List[str], images: List[np.ndarray]) -> None:
     """
     This function is used to generate and run the gui for viewing the database.
     :param values: The values to be viewed
@@ -45,9 +45,9 @@ def db_gui(values: List[List[Any]], headings: List[str], images: List[np.ndarray
                 img_bytes)
 
 
-def _load_data(db: PyMongoInterface, limit: int = 20):
+def _load_data(db: PyMongoInterface, limit: int = 20) -> None:
     """
-    This function is used to load the data from the database.
+    This function is used to load the data from the database and run the db gui.
     :param db: The database to load the data from
     :type db: PyMongoInterface
     :param limit: The limit of the data to be loaded

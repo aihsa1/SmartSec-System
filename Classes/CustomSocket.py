@@ -206,7 +206,7 @@ class ServerSocket(ClientSocket):
         """
         super().__init__(protocol=protocol)
 
-    def bind_and_listen(self, addr: tuple):
+    def bind_and_listen(self, addr: tuple) -> None:
         """
         This function is responsible for binding the server socket to a certain address and port and listen (if this is a TCP socket).
         :param addr: The address to bind to.
@@ -215,7 +215,7 @@ class ServerSocket(ClientSocket):
         self.socket.bind(addr)
         self.socket.listen() if self.protocol == CommunicationProtocols.TCP else None
 
-    def accept(self):
+    def accept(self) -> Tuple[socket.socket, Tuple[str, int]]:
         """
         This function is responsible for accepting a connection from a client. USE ONLY WITH TCP.
         """
@@ -224,7 +224,7 @@ class ServerSocket(ClientSocket):
         else:
             return self.socket.accept()
 
-    def getpeername(self):
+    def getpeername(self) -> Tuple[str, int]:
         """
         This function is responsible for getting the address of the client that is connected to the server (ONLY ON TCP).
         :return: The address of the client that is connected to the server.

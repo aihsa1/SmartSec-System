@@ -24,19 +24,19 @@ class RSAEncyption:
         self.my_privkey = None
         self.other_pubkey = None
 
-    def generate_keys(self):
+    def generate_keys(self) -> None:
         """
         This method generates a public and private key pair.
         """
         self.my_pubkey, self.my_privkey = rsa.newkeys(RSAEncyption.KEY_SIZE)
 
-    def export_my_pubkey(self):
+    def export_my_pubkey(self) -> bytes:
         return self.my_pubkey.save_pkcs1()
 
-    def load_others_pubkey(self, pubkey_pkcs1):
+    def load_others_pubkey(self, pubkey_pkcs1: bytes) -> None:
         self.other_pubkey = rsa.PublicKey.load_pkcs1(pubkey_pkcs1)
 
-    def encrypt(self, msg) -> bytes:
+    def encrypt(self, msg: Union[str, bytes]) -> bytes:
         """
         Encrypts a message using the senders public key
         :param msg: The message to decrypt
@@ -44,11 +44,11 @@ class RSAEncyption:
         :return: The decrypted message
         :rtype: bytes
         """
-        if isinstance(msg, str):
-            return rsa.encrypt(msg, self.other_pubkey)
+        # if isinstance(msg, str):
+        #     return rsa.encrypt(msg, self.other_pubkey)
         return rsa.encrypt(msg, self.other_pubkey)
 
-    def decrypt(self, ciphertext) -> bytes:
+    def decrypt(self, ciphertext: bytes) -> bytes:
         """
         Decrypt the incoming ciphertext using our private key. This ciphertext is encrypted by the sender using our public key.
         :param ciphertext: The encrypted message
